@@ -114,14 +114,14 @@ theunionhub-saas/
 │   ├── live.js                      ← refactor of js/live.js, tenant-aware    · planned
 │   └── qrcode.js                    ← migrated from js/qrcode.js              · planned
 │
-├── supabase/                        ← schema as code                       · planned
+├── supabase/                        ← schema as code
 │   ├── migrations/
-│   │   ├── 0001_init_tenants.sql           ← tenants table + slug uniqueness
-│   │   ├── 0002_members_add_tenant_id.sql  ← evolve existing members table
-│   │   ├── 0003_rls_policies.sql           ← strict tenant_id isolation
-│   │   └── 0004_audit_log.sql
-│   ├── seed.sql                            ← demo tenant + 3 demo members
-│   └── config.toml
+│   │   ├── 0001_init_tenants.sql           ← tenants table + slug uniqueness ✓ live
+│   │   ├── 0002_members_add_tenant_id.sql  ← evolve existing members table   · planned
+│   │   ├── 0003_rls_policies.sql           ← strict tenant_id isolation      · planned
+│   │   └── 0004_audit_log.sql                                                · planned
+│   ├── seed.sql                            ← demo tenant + 3 demo members    · planned
+│   └── config.toml                                                           · planned
 │
 ├── Brand/                           ← canonical brand book (read-only reference) ✓ live
 │   └── brandbook.html               ← public-facing at /brandbook (middleware rewrite)
