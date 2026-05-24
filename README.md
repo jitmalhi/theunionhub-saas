@@ -126,9 +126,9 @@ theunionhub-saas/
 ├── Brand/                           ← canonical brand book (read-only reference) ✓ live
 │   └── brandbook.html               ← public-facing at /brandbook (middleware rewrite)
 │
-└── scripts/                                                               · planned
-    ├── new-tenant.mjs               ← provisions a tenant: row + DNS check + welcome
-    └── dev.mjs                      ← local static server with host header rewriting
+└── scripts/
+    ├── new-tenant.mjs               ← provisions a tenant: row + DNS check + welcome ✓ live
+    └── dev.mjs                      ← local static server with host header rewriting · planned
 ```
 
 > **Why static assets stay at root:** browsers resolve `<link href="logo.svg">` against
