@@ -25,6 +25,19 @@
 <meta name="twitter:description" content="Real-time, verifiable, no app. See what a member sees.">
 <meta name="twitter:image" content="https://theunionhub.com/og-image.png">
 
+<!-- Runtime config (public). Read by /lib/supabase.js and /lib/tenant.js.
+     The anon key is intentionally client-visible — RLS is the boundary,
+     not secrecy. Replace by env-driven injection once the build pipeline
+     supports it; for now the duplicate with the body <script> below is
+     a known cleanup item. -->
+<script>
+  window.__UH_CONFIG__ = {
+    SUPABASE_URL:       'https://frdvhmzbsmczknqtexvx.supabase.co',
+    SUPABASE_ANON_KEY:  'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P',
+    PUBLIC_BASE_DOMAIN: 'theunionhub.com'
+  };
+</script>
+
 <!-- Hide live member URLs (?id=...) from search engines for privacy. -->
 <script>
   if (new URLSearchParams(location.search).get('id')) {
@@ -36,6 +49,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Brand tokens first (defines --forest, --off-white, etc. used as fallbacks
+     by the inline :root below). Tenant overrides last (defines --accent-tenant
+     and the [data-tenant-accent="true"] selector surface). -->
+<link rel="stylesheet" href="/css/tokens.css">
 <style>
   /* ──────────────────────────────────────────────────────────────
      /card/[id] — Member card page (demo)
@@ -175,7 +193,9 @@
     font-family: 'DM Sans', sans-serif;
     font-weight: 500;
     font-size: 14.5px;
-    color: var(--ink);
+    /* Falls back to --ink when no tenant theme is applied (apex preview,
+       unresolved subdomain). Set by lib/tenant.js → applyTenantTheme(). */
+    color: var(--accent-tenant, var(--ink));
     margin: 0 0 4px;
   }
   .local {
@@ -389,6 +409,11 @@
     .card, .notfound, .qr-frame { animation: none !important; opacity: 1 !important; transform: none !important; }
   }
 </style>
+
+<!-- Per-tenant override surface. Loaded last so its [data-tenant-accent="true"]
+     selectors win against the inline rules above. The actual --accent-tenant
+     value is set on :root by lib/tenant.js after the row resolves. -->
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
 </head>
 <body>
 
@@ -603,21 +628,50 @@
   // Boot.
   // Live mode:  ?id=<uuid>  → fetch the row and render based on its status.
   // Demo mode:  ?state=<x>  → switcher / hardcoded fallback (preserves homepage CTAs).
+  //
+  // Before either path renders, we resolve the tenant from the hostname
+  // (demo.theunionhub.com → 'demo' → public.tenants row) and patch the
+  // union_name / local_number on `member` so the card paints the tenant's
+  // identity, not the hardcoded prototype default. The CSS accent var is
+  // applied by tenant.applyTenantTheme() — see lib/tenant.js.
   (async () => {
     const params = new URLSearchParams(location.search);
     const liveId = params.get('id');
+
+    // Resolve the tenant in parallel with anything else. Fail-safe: any
+    // error inside lib/tenant.js returns null and the page renders with
+    // its hardcoded prototype defaults.
+    let tenant = null;
+    try {
+      const tenantMod = await import('/lib/tenant.js');
+      tenant = await tenantMod.getTenant();
+      if (tenant) tenantMod.applyTenantTheme(tenant);
+    } catch (e) {
+      console.warn('[uh/card] tenant module failed to load:', e && e.message ? e.message : e);
+    }
+
+    // Patch member identity fields from the tenant. The member row in
+    // public.members carries denormalised copies post-0002, but the
+    // tenant is the authoritative source — if it exists, it wins.
+    function applyTenantToMember(m) {
+      if (!tenant) return m;
+      m.union_name   = tenant.display_name   || m.union_name;
+      m.local_number = tenant.local_number   || m.local_number;
+      return m;
+    }
 
     if (liveId) {
       document.querySelector('.demo-bar')?.remove();
       setState('loading');
       const row = await fetchMemberById(liveId);
       if (!row) { setState('notfound'); return; }
-      member = row;
+      member = applyTenantToMember(row);
       const valid = ['active','inactive','suspended'].includes(row.status) ? row.status : 'notfound';
       setState(valid);
       return;
     }
 
+    member = applyTenantToMember(member);
     const initial = params.get('state') || 'active';
     setState(['active','inactive','suspended','loading','notfound'].includes(initial) ? initial : 'active');
   })();

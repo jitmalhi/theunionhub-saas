@@ -110,7 +110,7 @@ theunionhub-saas/
 │
 ├── lib/                             ← shared ES modules (browser + edge)
 │   ├── supabase.js                  ← fetch-thin client factory, env-driven ✓ live
-│   ├── tenant.js                    ← hostname → slug → tenant_id resolution · planned
+│   ├── tenant.js                    ← hostname → slug → tenant row + theming ✓ live
 │   ├── live.js                      ← refactor of js/live.js, tenant-aware    · planned
 │   └── qrcode.js                    ← migrated from js/qrcode.js              · planned
 │
