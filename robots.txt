@@ -1,0 +1,15 @@
+# The Union Hub — robots.txt
+# Public marketing pages are indexable. Live member URLs (?id=) are not.
+
+User-agent: *
+Allow: /
+
+# Block private member-specific URLs from being crawled.
+Disallow: /card.html?id=
+Disallow: /verify.html?id=
+Disallow: /*?id=*
+
+# Legacy brand book — superseded by /brandbook.html, kept only as the print-version download.
+Disallow: /TheUnionHub_BrandBook.html
+
+Sitemap: https://theunionhub.com/sitemap.xml

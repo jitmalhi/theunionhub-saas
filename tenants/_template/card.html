@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Digital Membership Card · The Union Hub</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Digital membership card — The Union Hub. Real-time, verifiable, no app.">
+<meta name="theme-color" content="#F5F4F1">
+<link rel="canonical" href="https://theunionhub.com/card.html">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="alternate icon" href="favicon.ico">
+
+<!-- Open Graph / social -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="The Union Hub">
+<meta property="og:title" content="Digital Membership Card — The Union Hub">
+<meta property="og:description" content="Real-time, verifiable, no app. See what a member sees.">
+<meta property="og:url" content="https://theunionhub.com/card.html">
+<meta property="og:image" content="https://theunionhub.com/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Digital Membership Card — The Union Hub">
+<meta name="twitter:description" content="Real-time, verifiable, no app. See what a member sees.">
+<meta name="twitter:image" content="https://theunionhub.com/og-image.png">
+
+<!-- Hide live member URLs (?id=...) from search engines for privacy. -->
+<script>
+  if (new URLSearchParams(location.search).get('id')) {
+    var m = document.createElement('meta');
+    m.name = 'robots'; m.content = 'noindex,nofollow';
+    document.head.appendChild(m);
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ──────────────────────────────────────────────────────────────
+     /card/[id] — Member card page (demo)
+     Spec: white card, 1px border rgba(0,0,0,0.1), 16px radius,
+     max-width 380px, centered on #F5F4F1.
+     Playfair for name; DM Sans elsewhere. No shadows. No gradients.
+     ────────────────────────────────────────────────────────────── */
+  :root {
+    --forest:        #0F6E56;
+    --active:        #1D9E75;
+    --mint:          #E1F5EE;
+    --mint-text:     #085041;
+    --deep-forest:   #0D1F1A;
+    --off-white:     #F5F4F1;
+    --paper:         #FFFFFF;
+    --alert:         #E24B4A;
+    --alert-soft:    #FCEBEB;
+    --alert-text:    #791F1F;
+    --gray-soft:     #ECEBE7;
+    --gray-text:     #5C5B57;
+    --ink:           #111111;
+    --ink-soft:      #2A2A2A;
+    --muted:         #888780;
+    --hair:          rgba(0,0,0,0.1);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  body {
+    margin: 0;
+    background: var(--off-white);
+    color: var(--ink);
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+  ::selection { background: var(--forest); color: var(--off-white); }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; cursor: pointer; }
+
+  /* ════════════ DEMO TOOLBAR ════════════ */
+  .demo-bar {
+    background: var(--deep-forest);
+    color: rgba(245,244,241,0.85);
+    padding: 10px clamp(14px, 4vw, 28px);
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .demo-bar .demo-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: var(--mint);
+  }
+  .demo-bar .demo-label::before {
+    content: ''; width: 7px; height: 7px; border-radius: 999px;
+    background: var(--active);
+  }
+  .demo-bar .home {
+    color: rgba(245,244,241,0.7);
+    transition: color .15s;
+  }
+  .demo-bar .home:hover { color: var(--mint); }
+  .demo-bar .spacer { flex: 1; }
+  .demo-bar .switcher {
+    display: inline-flex; gap: 4px;
+    background: rgba(245,244,241,0.06);
+    border: 0.5px solid rgba(245,244,241,0.18);
+    padding: 3px;
+    border-radius: 999px;
+  }
+  .demo-bar .switcher button {
+    background: transparent;
+    color: rgba(245,244,241,0.7);
+    border: 0;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: background .15s, color .15s;
+  }
+  .demo-bar .switcher button:hover { color: var(--off-white); }
+  .demo-bar .switcher button.is-active {
+    background: var(--off-white);
+    color: var(--deep-forest);
+  }
+
+  /* ════════════ STAGE ════════════ */
+  .stage {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    padding: clamp(28px, 6vw, 64px) 18px;
+  }
+
+  /* ════════════ THE CARD ════════════ */
+  .card {
+    width: 100%;
+    max-width: 380px;
+    background: var(--paper);
+    border: 1px solid var(--hair);
+    border-radius: 16px;
+    padding: 26px 26px 22px;
+    overflow: hidden;
+  }
+  .card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 26px;
+  }
+  .card-head .mark { width: 24px; height: 24px; flex: none; }
+  .card-head .label {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .name {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 30px;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--deep-forest);
+    margin: 0 0 10px;
+  }
+  .union {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 14.5px;
+    color: var(--ink);
+    margin: 0 0 4px;
+  }
+  .local {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0 0 14px;
+  }
+  .since {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 6px;
+  }
+  .since b {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 13.5px;
+    color: var(--deep-forest);
+    text-transform: none;
+    letter-spacing: 0;
+    margin-left: 8px;
+  }
+
+  /* Status badge */
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 13px;
+    border-radius: 999px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 12.5px;
+    margin-top: 12px;
+  }
+  .badge .dot { width: 7px; height: 7px; border-radius: 999px; background: currentColor; }
+  .badge.active    { background: var(--mint);       color: var(--mint-text); }
+  .badge.inactive  { background: var(--gray-soft);  color: var(--gray-text); }
+  .badge.suspended { background: var(--alert-soft); color: var(--alert-text); }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--hair);
+    margin: 22px 0 22px;
+  }
+
+  /* QR section */
+  .qr-section { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .qr-frame {
+    width: 200px; height: 200px;
+    padding: 10px;
+    background: #ffffff;
+    border-radius: 10px;
+    display: grid; place-items: center;
+  }
+  .qr-frame canvas, .qr-frame svg { width: 180px !important; height: 180px !important; }
+  .qr-label {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Suspended panel (no QR) */
+  .suspend-panel {
+    margin-top: 4px;
+    padding: 18px;
+    border: 1px solid var(--alert-soft);
+    border-radius: 12px;
+    background: var(--alert-soft);
+    color: var(--alert-text);
+    font-size: 13.5px;
+    line-height: 1.55;
+    text-align: center;
+  }
+  .suspend-panel strong {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--alert-text);
+    display: block;
+    margin-bottom: 6px;
+    letter-spacing: -0.005em;
+  }
+
+  .card-foot {
+    margin-top: 22px;
+    padding-top: 14px;
+    border-top: 1px solid var(--hair);
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ════════════ NOT FOUND ════════════ */
+  .notfound {
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+  }
+  .notfound h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 28px;
+    line-height: 1.15;
+    color: var(--deep-forest);
+    margin: 0 0 12px;
+    letter-spacing: -0.01em;
+  }
+  .notfound p {
+    color: var(--ink-soft);
+    margin: 0 0 22px;
+    font-size: 14.5px;
+  }
+  .notfound .home-link {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--forest);
+  }
+  .notfound .home-link:hover { color: var(--deep-forest); }
+
+  /* ════════════ SKELETON ════════════ */
+  /* Brand-safe: solid placeholder with opacity pulse — no gradient. */
+  .skeleton-bar {
+    background: #ECEBE7;
+    border-radius: 6px;
+    animation: skel-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes skel-pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.55; }
+  }
+  .skeleton .name-skel  { height: 28px; width: 70%; margin-bottom: 12px; }
+  .skeleton .union-skel { height: 14px; width: 55%; margin-bottom: 8px; }
+  .skeleton .local-skel { height: 12px; width: 40%; margin-bottom: 16px; }
+  .skeleton .badge-skel { height: 28px; width: 110px; border-radius: 999px; margin-bottom: 22px; }
+  .skeleton .qr-skel    { height: 200px; width: 200px; border-radius: 10px; margin: 0 auto 14px; }
+  .skeleton .qr-label-skel { height: 10px; width: 160px; margin: 0 auto; }
+
+  /* Powered by */
+  .powered {
+    text-align: center;
+    padding: 18px 0 28px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 9.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  :focus-visible { outline: 2px solid var(--active); outline-offset: 3px; border-radius: 6px; }
+
+  /* ════════════ MOTION & FEEDBACK ════════════ */
+  /* Brand-safe: no shadows, no gradients, no blur. */
+
+  /* Card / not-found enter: gentle rise + fade. Re-runs on every state swap. */
+  .card, .notfound {
+    animation: rise-in .42s cubic-bezier(.2,.7,.2,1) both;
+  }
+  @keyframes rise-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* QR appears just after the card settles. */
+  .qr-frame { animation: qr-in .55s cubic-bezier(.2,.7,.2,1) both .12s; }
+  @keyframes qr-in {
+    from { opacity: 0; transform: scale(0.94); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  /* Active member pulse — quiet status of life. */
+  .badge.active .dot { animation: dot-pulse 2.4s ease-in-out infinite; }
+  @keyframes dot-pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.4; }
+  }
+
+  /* Switcher buttons — press feedback. */
+  .demo-bar .switcher button {
+    transition: background .15s ease, color .15s ease, transform .12s ease;
+  }
+  .demo-bar .switcher button:active {
+    transform: translateY(1px);
+    transition-duration: .05s;
+  }
+
+  /* Reduced-motion: hard-stop. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+    .skeleton-bar, .badge.active .dot { animation: none !important; }
+    .card, .notfound, .qr-frame { animation: none !important; opacity: 1 !important; transform: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════ DEMO TOOLBAR ════════════ -->
+<div class="demo-bar" role="region" aria-label="Demo controls">
+  <span class="demo-label">Demo · /card/[id]</span>
+  <a class="home" href="index.html">← Back to site</a>
+  <span class="spacer"></span>
+  <div class="switcher" role="tablist" aria-label="Card state">
+    <button data-state="active"    class="is-active">Active</button>
+    <button data-state="inactive">Inactive</button>
+    <button data-state="suspended">Suspended</button>
+    <button data-state="loading">Loading</button>
+    <button data-state="notfound">Not found</button>
+  </div>
+</div>
+
+<!-- ════════════ STAGE ════════════ -->
+<main class="stage">
+  <div id="root"></div>
+</main>
+
+<!-- ════════════ POWERED BY ════════════ -->
+<div class="powered">Powered by The Union Hub</div>
+
+<!-- QR generator (Kazuhiko Arase, qrcode-generator@1.4.4) — vendored locally -->
+<script src="js/qrcode.js"></script>
+
+<script>
+  // ─── Supabase ───────────────────────────────────────────
+  const SUPABASE_URL = 'https://frdvhmzbsmczknqtexvx.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P';
+
+  async function fetchMemberById(id) {
+    const url = `${SUPABASE_URL}/rest/v1/members?id=eq.${encodeURIComponent(id)}&select=*`;
+    try {
+      const res = await fetch(url, {
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+      });
+      if (!res.ok) return null;
+      const rows = await res.json();
+      return rows[0] || null;
+    } catch { return null; }
+  }
+
+  // Real seeded IDs so demo QR codes resolve to matching states via verify.html.
+  const DEMO_IDS = {
+    active:    '550bc413-53db-4f83-98e4-7c5c44d721d0',
+    inactive:  '21e63983-9b15-4cd6-99e4-179e28cd001e',
+    suspended: 'fd1be966-ca25-4e64-8a6a-d3402f1fdb58',
+    notfound:  '00000000-0000-0000-0000-000000000000'
+  };
+
+  // Demo fallback — used when no ?id= is provided. Overwritten on live fetch.
+  let member = {
+    id: DEMO_IDS.active,
+    full_name: 'Maya Okonkwo',
+    union_name: 'Canadian Union of Public Employees',
+    local_number: '79',
+    member_since: '2019-04-12',
+    status: 'active'
+  };
+
+  // The QR encodes a real verify URL. In demo mode we substitute one of the
+  // seeded DEMO_IDS so a scanned demo QR resolves to the matching real state.
+  function verifyUrl(state) {
+    const isLive = !!new URLSearchParams(location.search).get('id');
+    const id = isLive ? member.id : (DEMO_IDS[state] || member.id);
+    return `${location.origin}${location.pathname.replace(/card\.html$/, '')}verify.html?id=${id}`;
+  }
+
+  function memberSinceYear(d) {
+    return new Date(d).getFullYear();
+  }
+
+  // Local placeholder mark (used on member cards — represents the local, not Union Hub)
+  function markSvg(size = 24) {
+    return `
+      <svg class="mark" width="${size}" height="${size}" viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="32" r="28" fill="#0F6E56"/>
+        <path d="M19 33.5 L28 42 L46 23" fill="none" stroke="#F5F4F1" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter"/>
+      </svg>`;
+  }
+
+  // The Union Hub brand mark (used in not-found / footer / lockups)
+  function markUnionHub(size = 40, color = '#0F6E56') {
+    return `
+      <svg class="mark" width="${size}" height="${size}" viewBox="0 0 552.18 532.22" fill="${color}" aria-hidden="true">
+        <path d="M294.51,82.88c-8.68-4.36-16.87-8.05-24.61-12.53-4.49-2.6-7.94-2.22-12.39.04-44.73,22.63-89.64,44.91-134.36,67.56-28.42,14.39-49.35,35.84-59.05,66.69-2.82,8.97-4.65,18.66-4.71,28.04-.41,63.23-.22,126.47-.22,189.7,0,1.1,0,2.2,0,3.54,0,2.11-2.3,3.43-4.12,2.35-6.56-3.88-12.45-7.12-17.77-11.11C13,398.94.06,374.78.08,344.07c.04-53.51.27-107.01-.08-160.52-.26-39.82,18.24-68.14,52.77-85.82,57.38-29.39,115.19-57.95,172.99-86.53C248.92-.24,273.54-2.17,298.87,2.05c19.59,3.26,36.38,13.21,53.72,21.86,64.71,32.29,129.36,64.68,194.02,97.06h0c2,1.01,1.99,3.86-.01,4.86-17.57,8.78-34.26,17.09-50.91,25.46-51.26,25.78-102.49,51.63-153.77,77.38-14.73,7.4-29.69,14.35-41.88,25.86-20.9,19.75-33,43.64-33.1,72.67-.24,66.71-.08,133.42-.11,200.12,0,.77-.05,1.54-.12,2.38-.16,1.92-2.21,3.08-3.94,2.23-4.9-2.41-9.36-4.6-13.81-6.83-18.15-9.09-36.26-18.26-54.46-27.24-3.39-1.67-4.62-3.71-4.62-7.59.12-71.75-.09-143.49.15-215.24.11-31.39,16.62-53.26,43.45-67.08,49.28-25.38,99.07-49.77,148.64-74.59.62-.31,1.22-.64,1.88-1.01,1.82-1.03,1.86-3.63.07-4.72-.4-.24-.79-.46-1.18-.66-6.97-3.52-14.03-6.84-20.92-10.5"/>
+        <path d="M295.15,529.05c-.22-2.62-.5-4.44-.5-6.27-.02-64.62-.21-129.25.09-193.87.14-29.23,14.47-50.34,39.77-64.2,9.73-5.33,19.8-10.05,29.73-15.02,1.49-.74,3.08-1.28,5.47-2.25.23,2.55.53,4.34.54,6.13.03,24.84.01,49.68,0,74.52,0,6.51.49,6.81,6.38,3.85,32.07-16.1,64.11-32.29,96.26-48.23,4.62-2.29,6.58-4.94,6.51-10.32-.29-25.71-.05-51.42-.21-77.13-.02-3.99,1.18-6.27,4.86-8.07,20.72-10.14,41.31-20.54,61.96-30.83,1.66-.83,3.39-1.53,5.8-2.62.14,2.42.32,4.24.33,6.06.01,78.17,0,156.35.02,234.52,0,3,.06,5.46-3.49,7.2-22.27,10.89-44.39,22.08-66.57,33.15-.88.44-1.85.7-3.63,1.36v-92.95c-4.07,1.88-7.18,3.18-10.18,4.71-31.18,15.97-62.3,32.05-93.54,47.88-3.84,1.94-4.53,4.54-4.52,8.29.09,26.93-.07,53.85.15,80.78.04,4.9-1.63,7.35-6.03,9.45-21.41,10.26-42.64,20.91-63.94,31.42-1.39.69-2.82,1.29-5.29,2.42Z"/>
+      </svg>`;
+  }
+
+  // QR rendering (qrcode-generator). Level H, fg #111111, bg #ffffff, 180×180.
+  function buildQr(value) {
+    // Type 0 = auto pick the smallest version that fits at the given EC level.
+    const qr = qrcode(0, 'H');
+    qr.addData(value);
+    qr.make();
+    // 4-pixel cell, 4-cell quiet zone (matches level H best practice)
+    return qr.createSvgTag({ cellSize: 4, margin: 4, scalable: true });
+  }
+
+  // Renderers — each returns the inner HTML for #root
+  function renderCard(state) {
+    const yr = memberSinceYear(member.member_since);
+    const badgeMap = {
+      active:    { cls: 'active',    label: 'Active Member' },
+      inactive:  { cls: 'inactive',  label: 'Inactive' },
+      suspended: { cls: 'suspended', label: 'Suspended' }
+    };
+    const b = badgeMap[state] || badgeMap.active;
+
+    const qrSection = state === 'suspended'
+      ? `<div class="suspend-panel" role="alert">
+           <strong>Suspended.</strong>
+           This membership has been suspended. Contact your union administrator.
+         </div>`
+      : `<div class="qr-section">
+           <div class="qr-frame" id="qr"></div>
+           <span class="qr-label">Scan to verify membership</span>
+         </div>`;
+
+    return `
+      <article class="card" aria-label="Digital membership card">
+        <header class="card-head">
+          ${markSvg(26)}
+          <span class="label">Digital Membership Card</span>
+        </header>
+
+        <h1 class="name">${member.full_name}</h1>
+        <p class="union">${member.union_name}</p>
+        <p class="local">Local ${member.local_number}</p>
+        <span class="since">Member since <b>${yr}</b></span>
+
+        <div class="badge ${b.cls}" role="status">
+          <span class="dot"></span>${b.label}
+        </div>
+
+        <div class="divider"></div>
+
+        ${qrSection}
+
+        <footer class="card-foot">
+          <span>The Union Hub</span>
+          <span>UH–2026–104873</span>
+        </footer>
+      </article>`;
+  }
+
+  function renderSkeleton() {
+    return `
+      <article class="card skeleton" aria-busy="true" aria-label="Loading membership card">
+        <header class="card-head">
+          ${markSvg(26)}
+          <span class="label">Digital Membership Card</span>
+        </header>
+        <div class="skeleton-bar name-skel"></div>
+        <div class="skeleton-bar union-skel"></div>
+        <div class="skeleton-bar local-skel"></div>
+        <div class="skeleton-bar badge-skel"></div>
+        <div class="divider"></div>
+        <div class="skeleton-bar qr-skel"></div>
+        <div class="skeleton-bar qr-label-skel"></div>
+      </article>`;
+  }
+
+  function renderNotFound() {
+    return `
+      <div class="notfound" role="alert">
+        ${markUnionHub(40)}
+        <h1 style="margin-top:18px;">This membership card does <em style="color:var(--forest);font-style:italic;">not exist.</em></h1>
+        <p>The link is invalid, expired, or was never issued. Ask your local for a new one.</p>
+        <a class="home-link" href="index.html">← Back to The Union Hub</a>
+      </div>`;
+  }
+
+  // State management
+  const root = document.getElementById('root');
+
+  function setState(state) {
+    // Update toolbar active button
+    document.querySelectorAll('.switcher button').forEach(btn => {
+      btn.classList.toggle('is-active', btn.dataset.state === state);
+    });
+    // Update URL (without reload)
+    const url = new URL(location.href);
+    url.searchParams.set('state', state);
+    history.replaceState(null, '', url);
+
+    if (state === 'loading') {
+      root.innerHTML = renderSkeleton();
+      return;
+    }
+    if (state === 'notfound') {
+      root.innerHTML = renderNotFound();
+      return;
+    }
+    root.innerHTML = renderCard(state);
+    // Render QR if applicable
+    if (state !== 'suspended') {
+      const target = document.getElementById('qr');
+      if (target) target.innerHTML = buildQr(verifyUrl(state));
+    }
+  }
+
+  // Bind switcher
+  document.querySelectorAll('.switcher button').forEach(btn => {
+    btn.addEventListener('click', () => setState(btn.dataset.state));
+  });
+
+  // Boot.
+  // Live mode:  ?id=<uuid>  → fetch the row and render based on its status.
+  // Demo mode:  ?state=<x>  → switcher / hardcoded fallback (preserves homepage CTAs).
+  (async () => {
+    const params = new URLSearchParams(location.search);
+    const liveId = params.get('id');
+
+    if (liveId) {
+      document.querySelector('.demo-bar')?.remove();
+      setState('loading');
+      const row = await fetchMemberById(liveId);
+      if (!row) { setState('notfound'); return; }
+      member = row;
+      const valid = ['active','inactive','suspended'].includes(row.status) ? row.status : 'notfound';
+      setState(valid);
+      return;
+    }
+
+    const initial = params.get('state') || 'active';
+    setState(['active','inactive','suspended','loading','notfound'].includes(initial) ? initial : 'active');
+  })();
+</script>
+
+<script defer src="js/live.js"></script>
+
+</body>
+</html>

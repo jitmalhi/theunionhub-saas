@@ -1,0 +1,92 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   tenants/_template/tenant.css
+   The ONLY stylesheet allowed to override brand tokens for a tenant.
+
+   What a union can change:
+     1. --accent-tenant   one accent hex, validated for WCAG AA against --off-white
+     2. logo / wordmark   stored in Supabase Storage, injected by the template
+     3. display name      stored in the tenants row, rendered by the template
+
+   What a union cannot change:
+     · typography (Playfair Display / DM Sans / DM Mono)
+     · layout (12-col grid, --pad-x, --wrap-max)
+     · motion (--dur-*, uhpulse, prefers-reduced-motion contract)
+     · hairlines (--bw-hair, --hair, --hair-on-dark)
+     · radius (--rad, --rad-sm, --rad-pill)
+
+   This file:
+     - Defaults --accent-tenant to the brand --forest so an un-themed tenant
+       renders correctly.
+     - Wires the tenant accent into pill/CTA hover and dot fills.
+     - Refuses to touch any other token.
+
+   Import order on every tenant page:
+     1. /css/tokens.css          (brand, locked)
+     2. /css/base.css            (typography, links, defaults)
+     3. /css/components.css      (.btn, .pill, .card, …)
+     4. /tenants/_template/tenant.css   (this file, last)
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Default to brand primary. Middleware/page overrides this from the
+     tenants row via an inline <style>:root{--accent-tenant: …}</style>. */
+  --accent-tenant: var(--forest);
+}
+
+/* ─── Per-tenant accent surfaces ─────────────────────────────────────── */
+/* CTAs, links, focus rings, and the active-dot all swap to the tenant
+   accent. Everything else stays canonical brand. */
+
+.btn-primary[data-tenant-accent="true"],
+[data-tenant-accent="true"] .btn-primary {
+  background: var(--accent-tenant);
+}
+.btn-primary[data-tenant-accent="true"]:hover,
+[data-tenant-accent="true"] .btn-primary:hover {
+  /* Hover stays a touch brighter; tenant has no say over this curve. */
+  filter: brightness(1.08);
+}
+
+[data-tenant-accent="true"] a:not(.btn) {
+  color: var(--accent-tenant);
+}
+
+[data-tenant-accent="true"] .pill.verified {
+  /* Background tint always stays --mint; only the dot accents. */
+  color: var(--accent-tenant);
+}
+[data-tenant-accent="true"] .pill.verified .dot {
+  background: var(--accent-tenant);
+}
+
+/* ─── Per-tenant identity slots ──────────────────────────────────────── */
+/* The template renders the tenant's logo into [data-tenant-logo] and the
+   display name into [data-tenant-name]. tenant.css provides only the
+   constraint surface — sizing, alignment, hairlines. No colour overrides. */
+
+[data-tenant-logo] svg,
+[data-tenant-logo] img {
+  height: 28px;
+  width: auto;
+  display: block;
+}
+
+[data-tenant-name] {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: 18px;
+  color: var(--deep-forest);
+  letter-spacing: var(--ls-headline);
+}
+
+/* ─── Validation hook ────────────────────────────────────────────────── */
+/* During provisioning (scripts/new-tenant.mjs), the chosen accent is
+   contrast-tested against --off-white. If it fails WCAG AA on body text,
+   the script rejects it. The CSS below renders a debug outline ONLY when
+   the page sets data-tenant-accent-invalid="true" (set by the page if
+   live-fetched tenants row has a flagged accent — a safety net for
+   manually edited rows). */
+[data-tenant-accent-invalid="true"] {
+  outline: 1px dashed var(--alert);
+  outline-offset: 4px;
+}

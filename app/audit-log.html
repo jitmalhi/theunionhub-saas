@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The audit log — The Union Hub</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="A tamper-evident record of every read, write, and administrative action on member data. What we log, what we do not, and how members and unions can use it.">
+<meta name="theme-color" content="#0F6E56">
+<link rel="canonical" href="https://theunionhub.com/audit-log.html">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="alternate icon" href="favicon.ico">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The audit log — The Union Hub">
+<meta property="og:description" content="If we can't tell a member who looked at their record, we don't deserve to hold the record.">
+<meta property="og:url" content="https://theunionhub.com/audit-log.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+
+<div class="util">
+  <div class="wrap">
+    <span class="util-left">Live · Roster sync</span>
+    <div class="util-right">
+      <a href="contact.html">Talk to a human</a>
+      <a href="brandbook.html">Brand book</a>
+      <a href="mailto:hello@theunionhub.com">hello@theunionhub.com</a>
+    </div>
+  </div>
+</div>
+
+<div class="nav-shell">
+  <div class="wrap">
+    <nav class="nav" aria-label="Primary">
+      <a class="nav-brand" href="index.html" aria-label="The Union Hub home">
+        <svg viewBox="0 0 552.18 532.22" fill="#0F6E56" aria-hidden="true"><path d="M294.51,82.88c-8.68-4.36-16.87-8.05-24.61-12.53-4.49-2.6-7.94-2.22-12.39.04-44.73,22.63-89.64,44.91-134.36,67.56-28.42,14.39-49.35,35.84-59.05,66.69-2.82,8.97-4.65,18.66-4.71,28.04-.41,63.23-.22,126.47-.22,189.7,0,1.1,0,2.2,0,3.54,0,2.11-2.3,3.43-4.12,2.35-6.56-3.88-12.45-7.12-17.77-11.11C13,398.94.06,374.78.08,344.07c.04-53.51.27-107.01-.08-160.52-.26-39.82,18.24-68.14,52.77-85.82,57.38-29.39,115.19-57.95,172.99-86.53C248.92-.24,273.54-2.17,298.87,2.05c19.59,3.26,36.38,13.21,53.72,21.86,64.71,32.29,129.36,64.68,194.02,97.06h0c2,1.01,1.99,3.86-.01,4.86-17.57,8.78-34.26,17.09-50.91,25.46-51.26,25.78-102.49,51.63-153.77,77.38-14.73,7.4-29.69,14.35-41.88,25.86-20.9,19.75-33,43.64-33.1,72.67-.24,66.71-.08,133.42-.11,200.12,0,.77-.05,1.54-.12,2.38-.16,1.92-2.21,3.08-3.94,2.23-4.9-2.41-9.36-4.6-13.81-6.83-18.15-9.09-36.26-18.26-54.46-27.24-3.39-1.67-4.62-3.71-4.62-7.59.12-71.75-.09-143.49.15-215.24.11-31.39,16.62-53.26,43.45-67.08,49.28-25.38,99.07-49.77,148.64-74.59.62-.31,1.22-.64,1.88-1.01,1.82-1.03,1.86-3.63.07-4.72-.4-.24-.79-.46-1.18-.66-6.97-3.52-14.03-6.84-20.92-10.5"/><path d="M295.15,529.05c-.22-2.62-.5-4.44-.5-6.27-.02-64.62-.21-129.25.09-193.87.14-29.23,14.47-50.34,39.77-64.2,9.73-5.33,19.8-10.05,29.73-15.02,1.49-.74,3.08-1.28,5.47-2.25.23,2.55.53,4.34.54,6.13.03,24.84.01,49.68,0,74.52,0,6.51.49,6.81,6.38,3.85,32.07-16.1,64.11-32.29,96.26-48.23,4.62-2.29,6.58-4.94,6.51-10.32-.29-25.71-.05-51.42-.21-77.13-.02-3.99,1.18-6.27,4.86-8.07,20.72-10.14,41.31-20.54,61.96-30.83,1.66-.83,3.39-1.53,5.8-2.62.14,2.42.32,4.24.33,6.06.01,78.17,0,156.35.02,234.52,0,3,.06,5.46-3.49,7.2-22.27,10.89-44.39,22.08-66.57,33.15-.88.44-1.85.7-3.63,1.36v-92.95c-4.07,1.88-7.18,3.18-10.18,4.71-31.18,15.97-62.3,32.05-93.54,47.88-3.84,1.94-4.53,4.54-4.52,8.29.09,26.93-.07,53.85.15,80.78.04,4.9-1.63,7.35-6.03,9.45-21.41,10.26-42.64,20.91-63.94,31.42-1.39.69-2.82,1.29-5.29,2.42Z"/></svg>
+        <span class="nav-brand-stack">
+          <span class="nav-brand-name">The Union Hub</span>
+          <span class="nav-brand-tag">Powering the future of union membership.</span>
+        </span>
+      </a>
+      <div class="nav-links">
+        <a href="#products">Product</a>
+        <a href="#why">For unions</a>
+        <a href="about.html">About</a>
+        <a href="security.html">Security</a>
+        <a href="card.html">Live demo</a>
+      </div>
+      <div class="nav-cta">
+        <a class="nav-signin" href="contact.html">Sign in</a>
+        <a href="contact.html" class="btn btn-primary">Start the pilot <span class="arrow">→</span></a>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<header class="page-head">
+  <div class="wrap">
+    <div class="eyebrow"><span class="dash"></span>The audit log</div>
+    <h1>If we can't tell a member who looked at their record, <em>we don't deserve to hold the record.</em></h1>
+    <p class="dek">An append-only ledger of every read, every write, and every administrative action on member data. Designed for member trust first and compliance second — though it does that too.</p>
+    <div class="meta">
+      <span>Retention<strong>Seven (7) years</strong></span>
+      <span>Storage<strong>Append-only · checkpointed</strong></span>
+      <span>Access<strong>Customer admin · member on request</strong></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap prose">
+  <aside class="prose-toc" aria-label="On this page">
+    <h4>On this page</h4>
+    <ol>
+      <li><a href="#why">Why an audit log</a></li>
+      <li><a href="#what">What we log</a></li>
+      <li><a href="#shape">The shape of an entry</a></li>
+      <li><a href="#nott">What we do not log</a></li>
+      <li><a href="#tamper">Tamper evidence</a></li>
+      <li><a href="#access">Who sees the log</a></li>
+      <li><a href="#export">Exports &amp; APIs</a></li>
+      <li><a href="#retention">Retention &amp; deletion</a></li>
+      <li><a href="#vs">vs. system logs</a></li>
+    </ol>
+  </aside>
+
+  <div class="prose-body">
+
+    <section id="why">
+      <h2>Why an audit log</h2>
+      <p>A union local that uses our platform is asking us to hold one of the more politically and economically sensitive facts about each of its members: are you, right now, in good standing. Members deserve to know who has consulted that fact, when, and why.</p>
+      <p>We log because:</p>
+      <ul>
+        <li><strong>Members can ask.</strong> A member with concerns about retaliation or surveillance can ask the union — or us, through the union — for the verification history of their own card. They will get a clean record, not a "let me check with IT."</li>
+        <li><strong>Disputes need evidence.</strong> When a contractor claims a worker's card said "inactive" on Tuesday at 14:32, the audit log either confirms or refutes that. Most disputes evaporate when the log is on the table.</li>
+        <li><strong>Operators must be accountable.</strong> Including us. The audit log catches our own mistakes and our own misuse the same way it catches anyone else's.</li>
+      </ul>
+    </section>
+
+    <section id="what">
+      <h2>What we log</h2>
+      <p>Three categories of event are recorded.</p>
+
+      <h3>Reads</h3>
+      <p>Every time the digital card or the verifier is opened for a particular member ID:</p>
+      <ul>
+        <li>Timestamp (UTC, millisecond precision)</li>
+        <li>Member ID (the UUID on the URL)</li>
+        <li>Surface (<code>card</code> or <code>verify</code>)</li>
+        <li>Result returned (<code>active</code>, <code>inactive</code>, <code>suspended</code>, or <code>not_found</code>)</li>
+        <li>Coarse network indicator: city/region inferred from IP. Raw IPs are kept for thirty (30) days only and not exposed in the customer-facing log.</li>
+        <li>User agent string</li>
+      </ul>
+
+      <h3>Writes</h3>
+      <p>Every change to a member record:</p>
+      <ul>
+        <li>Timestamp</li>
+        <li>Actor (the union admin's identifier; the operator's identifier when we make a change on the customer's instruction)</li>
+        <li>Member ID affected</li>
+        <li>Field changed, with previous value and new value</li>
+        <li>Reason text the actor entered (free-form, optional but encouraged)</li>
+      </ul>
+
+      <h3>Administrative actions</h3>
+      <ul>
+        <li>Sign-ins and sign-outs of customer administrators</li>
+        <li>Invite, remove, or change-role of an admin</li>
+        <li>Bulk roster imports and exports</li>
+        <li>Audit-log exports themselves (yes — we log the log access)</li>
+      </ul>
+    </section>
+
+    <section id="shape">
+      <h2>The shape of an entry</h2>
+      <p>For the developers and curious admins, here's what one entry looks like in our schema:</p>
+      <pre style="font-family:'DM Mono',monospace;font-size:12px;background:var(--paper);padding:18px 20px;border:0.5px solid var(--hair);border-radius:8px;overflow:auto;line-height:1.55;">{
+  "id":          "log_01HKQ…",         // ulid, sortable, unique
+  "ts":          "2026-05-09T18:22:11.412Z",
+  "kind":        "read",                // read · write · admin
+  "surface":     "verify",               // card · verify · admin · system
+  "actor_kind":  "anonymous",            // anonymous · admin · operator
+  "actor_id":    null,                   // null when anonymous
+  "subject_id":  "550bc413-53db-…",      // member UUID
+  "result":      "active",
+  "geo":         "Toronto, ON · CA",
+  "ua":          "Mozilla/5.0 …",
+  "prev_hash":   "sha256:…",             // hash of previous row
+  "row_hash":    "sha256:…"              // hash of this row's canonical form
+}</pre>
+      <p><code>prev_hash</code> and <code>row_hash</code> form an unbroken chain. Any tampering with a past row breaks every later row.</p>
+    </section>
+
+    <section id="nott">
+      <h2>What we do not log</h2>
+      <ul>
+        <li><strong>Free-text data about members beyond what is in their record.</strong> The audit log is structured. We do not write narrative notes about members anywhere.</li>
+        <li><strong>Raw IP addresses</strong> in the customer-visible log. They exist in technical logs for thirty days for abuse response and are then deleted.</li>
+        <li><strong>The contents of administrator emails</strong> or anything outside the platform.</li>
+        <li><strong>Behavioural profiles.</strong> We do not derive interests, employer affiliations, geography histories, or any other inferred attribute from the log. We have no business doing that.</li>
+      </ul>
+    </section>
+
+    <section id="tamper">
+      <h2>Tamper evidence</h2>
+      <p>The audit log is append-only at the database level — no <code>UPDATE</code> or <code>DELETE</code> grant exists for any role, including the operator's. Every entry includes a hash of the previous entry, forming a chain. The chain head is checkpointed daily into write-once cloud storage; the day's checkpoint is signed and stored separately from the database.</p>
+      <p>If a row is altered or deleted in defiance of the schema, the chain breaks and any subsequent verification of the day's checkpoint will fail. The integrity of past audit logs does not depend on trusting the current operator.</p>
+    </section>
+
+    <section id="access">
+      <h2>Who sees the log</h2>
+      <ul>
+        <li><strong>Customer administrators</strong> see the full log scoped to their union. They can filter, search, and export at any time.</li>
+        <li><strong>Members</strong> can request the read history of their own record from their union. Customers can fulfill the request directly from the admin console; they can also delegate it to us by writing to <a href="mailto:privacy@theunionhub.com">privacy@theunionhub.com</a>.</li>
+        <li><strong>The operator</strong> has read-only access for security, support, and incident response, and cannot delete entries.</li>
+        <li><strong>Third parties</strong> — including verifiers who hit the public verify URL — have no access to the log itself.</li>
+      </ul>
+    </section>
+
+    <section id="export">
+      <h2>Exports &amp; APIs</h2>
+      <p>From the admin console, customers can export the log as CSV or NDJSON, filtered by date range, surface, member, or actor. Exports include the row and previous-row hashes so an external party can verify the chain offline.</p>
+      <p>An authenticated REST endpoint is available for customers building their own dashboards. Rate limits and pagination are documented in the developer guide; ask <a href="mailto:support@theunionhub.com">support@theunionhub.com</a> for access.</p>
+    </section>
+
+    <section id="retention">
+      <h2>Retention &amp; deletion</h2>
+      <p>Audit log entries are retained for seven (7) years from creation, aligning with Ontario labour-relations record-keeping practice. After seven years, entries are moved to write-once cold storage and eventually destroyed in line with the customer's instructions.</p>
+      <p>If a customer terminates service, the schedule in the <a href="data-processing.html#return">DPA</a> applies: a complete export within thirty days, deletion from production within sixty, deletion from backups within ninety.</p>
+    </section>
+
+    <section id="vs">
+      <h2>vs. system logs</h2>
+      <p>This page describes the <strong>audit log</strong>: the record of who did what to which member's data. It is distinct from <strong>system logs</strong> — the technical web-server, database, and network logs the operator keeps for thirty days for security and abuse response.</p>
+      <p>The two have different retention, different access, and different audiences. The audit log is for members and customers; system logs are for the operator. Neither is sold, shared, or used for purposes other than running the platform.</p>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <svg viewBox="0 0 552.18 532.22" fill="#1D9E75" aria-hidden="true"><path d="M294.51,82.88c-8.68-4.36-16.87-8.05-24.61-12.53-4.49-2.6-7.94-2.22-12.39.04-44.73,22.63-89.64,44.91-134.36,67.56-28.42,14.39-49.35,35.84-59.05,66.69-2.82,8.97-4.65,18.66-4.71,28.04-.41,63.23-.22,126.47-.22,189.7,0,1.1,0,2.2,0,3.54,0,2.11-2.3,3.43-4.12,2.35-6.56-3.88-12.45-7.12-17.77-11.11C13,398.94.06,374.78.08,344.07c.04-53.51.27-107.01-.08-160.52-.26-39.82,18.24-68.14,52.77-85.82,57.38-29.39,115.19-57.95,172.99-86.53C248.92-.24,273.54-2.17,298.87,2.05c19.59,3.26,36.38,13.21,53.72,21.86,64.71,32.29,129.36,64.68,194.02,97.06h0c2,1.01,1.99,3.86-.01,4.86-17.57,8.78-34.26,17.09-50.91,25.46-51.26,25.78-102.49,51.63-153.77,77.38-14.73,7.4-29.69,14.35-41.88,25.86-20.9,19.75-33,43.64-33.1,72.67-.24,66.71-.08,133.42-.11,200.12,0,.77-.05,1.54-.12,2.38-.16,1.92-2.21,3.08-3.94,2.23-4.9-2.41-9.36-4.6-13.81-6.83-18.15-9.09-36.26-18.26-54.46-27.24-3.39-1.67-4.62-3.71-4.62-7.59.12-71.75-.09-143.49.15-215.24.11-31.39,16.62-53.26,43.45-67.08,49.28-25.38,99.07-49.77,148.64-74.59.62-.31,1.22-.64,1.88-1.01,1.82-1.03,1.86-3.63.07-4.72-.4-.24-.79-.46-1.18-.66-6.97-3.52-14.03-6.84-20.92-10.5"/><path d="M295.15,529.05c-.22-2.62-.5-4.44-.5-6.27-.02-64.62-.21-129.25.09-193.87.14-29.23,14.47-50.34,39.77-64.2,9.73-5.33,19.8-10.05,29.73-15.02,1.49-.74,3.08-1.28,5.47-2.25.23,2.55.53,4.34.54,6.13.03,24.84.01,49.68,0,74.52,0,6.51.49,6.81,6.38,3.85,32.07-16.1,64.11-32.29,96.26-48.23,4.62-2.29,6.58-4.94,6.51-10.32-.29-25.71-.05-51.42-.21-77.13-.02-3.99,1.18-6.27,4.86-8.07,20.72-10.14,41.31-20.54,61.96-30.83,1.66-.83,3.39-1.53,5.8-2.62.14,2.42.32,4.24.33,6.06.01,78.17,0,156.35.02,234.52,0,3,.06,5.46-3.49,7.2-22.27,10.89-44.39,22.08-66.57,33.15-.88.44-1.85.7-3.63,1.36v-92.95c-4.07,1.88-7.18,3.18-10.18,4.71-31.18,15.97-62.3,32.05-93.54,47.88-3.84,1.94-4.53,4.54-4.52,8.29.09,26.93-.07,53.85.15,80.78.04,4.9-1.63,7.35-6.03,9.45-21.41,10.26-42.64,20.91-63.94,31.42-1.39.69-2.82,1.29-5.29,2.42Z"/></svg>
+          The Union Hub
+        </div>
+        <span class="foot-tag">Powering the future of union membership.</span>
+        <p class="foot-line">Real-time digital membership for unions. The system of record for who is a member, right now.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="card.html">The card</a></li>
+          <li><a href="verify.html">The verify screen</a></li>
+          <li><a href="audit-log.html" aria-current="page">The audit log</a></li>
+          <li><a href="status.html">Status</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="brandbook.html">Brand book</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="privacy.html">Privacy</a></li>
+          <li><a href="terms.html">Terms</a></li>
+          <li><a href="data-processing.html">Data processing</a></li>
+          <li><a href="security.html">Security</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Reach us</h4>
+        <ul>
+          <li><a href="mailto:hello@theunionhub.com">hello@</a></li>
+          <li><a href="mailto:privacy@theunionhub.com">privacy@</a></li>
+          <li><a href="mailto:security@theunionhub.com">security@</a></li>
+          <li><a href="mailto:support@theunionhub.com">support@</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bar">
+      <span>The Union Hub · v1.0 · 2026</span>
+      <span>Made for organized labour. Not the other way around.</span>
+    </div>
+  </div>
+</footer>
+
+<script defer src="js/live.js"></script>
+
+</body>
+</html>

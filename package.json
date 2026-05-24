@@ -1,0 +1,21 @@
+{
+  "name": "theunionhub-saas",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Multi-tenant SaaS rebuild of theunionhub.com on Vercel + Supabase.",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel deploy --prod",
+    "new-tenant": "node scripts/new-tenant.mjs"
+  },
+  "dependencies": {
+    "@vercel/edge": "^1.2.1"
+  },
+  "devDependencies": {
+    "vercel": "^41.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

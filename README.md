@@ -57,60 +57,64 @@ theunionhub-saas/
 ├── README.md                        ← you are here
 ├── .gitignore
 ├── .env.local.example               ← committed template; .env.local is gitignored
-├── package.json                     ← dev scripts only (vercel, supabase)
-├── vercel.json                      ← rewrites, edge middleware, headers
+├── package.json                     ← dev/deploy scripts; @vercel/edge dep for middleware
+├── vercel.json                      ← headers, cleanUrls, cache rules (routing lives in middleware)
+├── middleware.js                    ← thin shim — Vercel scans /middleware.js as the edge entry
 │
-├── public/                          ← served at root, cached aggressively
-│   ├── favicon.ico, favicon-16.png, favicon-32.png, apple-touch-icon.png
-│   ├── logo.svg
-│   ├── og-image.png
-│   ├── robots.txt
-│   └── sitemap.xml
+├── ── static assets (served at root, never moved) ──
+├── favicon.ico, favicon-16.png, favicon-32.png, apple-touch-icon.png
+├── logo.svg
+├── robots.txt
+├── sitemap.xml
+├── 404.html                         ← Vercel's auto-404 expects this at root
 │
 ├── css/                             ← single source of truth for all CSS
-│   ├── tokens.css                   ← design tokens (colour, type, spacing, motion)
-│   ├── reset.css                    ← minimal normalize
-│   ├── base.css                     ← body, headings, links
-│   ├── components.css               ← .btn, .pill, .card, .util, .nav, etc.
-│   └── site.css                     ← legacy shared shell (carried from prototype)
+│   ├── tokens.css                   ← design tokens (colour, type, spacing, motion) ✓ live
+│   ├── reset.css                    ← minimal normalize                  · planned
+│   ├── base.css                     ← body, headings, links               · planned
+│   ├── components.css               ← .btn, .pill, .card, .util, .nav    · planned
+│   └── site.css                     ← legacy shared shell (carried from prototype) ✓ live
 │
-├── app/                             ← public marketing site (root domain)
+├── js/                              ← LEGACY prototype scripts (referenced by current HTML)
+│   ├── live.js                      ← carry-over; refactor target → lib/live.js
+│   └── qrcode.js                    ← carry-over; move to lib/ during refactor
+│
+├── app/                             ← public marketing site (apex domain) ✓ live
 │   ├── index.html
 │   ├── about.html
-│   ├── contact.html
-│   ├── status.html
 │   ├── audit-log.html
-│   ├── privacy.html
-│   ├── terms.html
+│   ├── contact.html
 │   ├── data-processing.html
+│   ├── privacy.html
 │   ├── security.html
-│   └── 404.html
+│   ├── status.html
+│   └── terms.html
 │
 ├── tenants/                         ← tenant-scoped application surfaces
-│   ├── _template/                   ← reference layout — NEVER deployed as a tenant
-│   │   ├── card.html                ← member digital card
-│   │   ├── verify.html              ← public verification page
-│   │   └── tenant.css               ← per-tenant overrides (logo, accent shift only)
-│   └── README.md                    ← provisioning checklist
+│   ├── README.md                    ← provisioning checklist ✓ live
+│   └── _template/                   ← reference layout — NEVER deployed as a tenant
+│       ├── card.html                ← /card  (member digital card) ✓ live
+│       ├── verify.html              ← /verify (public verification page) ✓ live
+│       └── tenant.css               ← per-tenant accent / logo overrides ✓ live
 │
 ├── api/                             ← Vercel serverless / edge functions
-│   ├── _middleware.js               ← edge: resolve subdomain → tenant_id, set header
-│   ├── tenants/
+│   ├── _middleware.js               ← edge routing logic (re-exported by /middleware.js) ✓ live
+│   ├── tenants/                                                           · planned
 │   │   ├── resolve.js               ← GET /api/tenants/resolve?host=…
 │   │   └── [slug]/
 │   │       ├── members.js           ← GET /api/tenants/:slug/members
 │   │       └── verify.js            ← GET /api/tenants/:slug/verify/:id
-│   ├── webhooks/
+│   ├── webhooks/                                                          · planned
 │   │   └── supabase.js              ← auth, audit-log mirrors
-│   └── health.js
+│   └── health.js                                                          · planned
 │
 ├── lib/                             ← shared ES modules (browser + edge)
-│   ├── supabase.js                  ← client factory; reads NEXT_PUBLIC_SUPABASE_URL/KEY
-│   ├── tenant.js                    ← hostname → slug → tenant_id resolution
-│   ├── live.js                      ← refactored from js/live.js, tenant-aware
-│   └── qrcode.js                    ← QR generation (existing)
+│   ├── supabase.js                  ← fetch-thin client factory, env-driven ✓ live
+│   ├── tenant.js                    ← hostname → slug → tenant_id resolution · planned
+│   ├── live.js                      ← refactor of js/live.js, tenant-aware    · planned
+│   └── qrcode.js                    ← migrated from js/qrcode.js              · planned
 │
-├── supabase/                        ← schema as code
+├── supabase/                        ← schema as code                       · planned
 │   ├── migrations/
 │   │   ├── 0001_init_tenants.sql           ← tenants table + slug uniqueness
 │   │   ├── 0002_members_add_tenant_id.sql  ← evolve existing members table
@@ -119,13 +123,26 @@ theunionhub-saas/
 │   ├── seed.sql                            ← demo tenant + 3 demo members
 │   └── config.toml
 │
-├── Brand/                           ← canonical brand book (read-only reference)
-│   └── brandbook.html
+├── Brand/                           ← canonical brand book (read-only reference) ✓ live
+│   └── brandbook.html               ← public-facing at /brandbook (middleware rewrite)
 │
-└── scripts/
+└── scripts/                                                               · planned
     ├── new-tenant.mjs               ← provisions a tenant: row + DNS check + welcome
     └── dev.mjs                      ← local static server with host header rewriting
 ```
+
+> **Why static assets stay at root:** browsers resolve `<link href="logo.svg">` against
+> the user-visible URL, not the file location on disk. Moving asset files into `public/`
+> would force every HTML file to use absolute paths (`/public/logo.svg`) or require an
+> extra rewrite layer. Keeping them at root means the middleware can rewrite
+> `/about` → `/app/about.html` internally and the existing relative `<link>`s in the
+> prototype HTML continue to resolve correctly. Zero migration churn.
+>
+> **Why two middleware files:** Vercel scans `/middleware.js` at the project root for
+> edge middleware on non-framework projects — that path is non-negotiable on the
+> Vercel side. To keep the architectural map honest, the real logic lives in
+> `api/_middleware.js` and `/middleware.js` is a one-line `export { default, config }`
+> re-export. Edit `api/_middleware.js`; never edit `/middleware.js`.
 
 **Tenancy contract:** every database row that belongs to a union has a `tenant_id uuid not null` column; every API route resolves the tenant from the host header in `api/_middleware.js` and stamps it on the request; every Supabase query runs under RLS that compares `auth.jwt() ->> 'tenant_id'` to the row's `tenant_id`. There is no application-level filtering — the database is the boundary.
 
