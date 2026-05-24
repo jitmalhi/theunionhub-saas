@@ -119,7 +119,7 @@ theunionhub-saas/
 │   │   ├── 0001_init_tenants.sql           ← tenants table + slug uniqueness ✓ live
 │   │   ├── 0002_members_add_tenant_id.sql  ← evolve existing members table   ✓ live
 │   │   ├── 0003_public_stats.sql           ← SECURITY DEFINER global counts  ✓ live
-│   │   └── 0004_audit_log.sql                                                · planned
+│   │   └── 0004_audit_log.sql              ← verifications + dues + audit + RPCs ✓ live
 │   ├── seed.sql                            ← demo tenant + 3 demo members    ✓ live
 │   └── config.toml                                                           · planned
 │
