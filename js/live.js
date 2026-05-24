@@ -151,12 +151,14 @@
 
   /* =====================================================
    * 2. LIVE STATS
-   *    Until a `public_stats` Supabase view exists, we use a
-   *    deterministic, time-based drift so the numbers visibly
-   *    move. Replace fetchStats() with a real GET when ready.
+   *    Calls public.public_stats() (SECURITY DEFINER, migration 0003)
+   *    so the apex marketing page sees real global counts even though
+   *    it carries no x-tenant-id — without that function, the post-
+   *    0002 RLS on members would return 0 rows here.
+   *    The function returns aggregate counts only; never row data.
    * ===================================================*/
   function fetchStats() {
-    return fetch(SUPABASE_URL + '/rest/v1/public_stats?select=*', {
+    return fetch(SUPABASE_URL + '/rest/v1/rpc/public_stats', {
       headers: SB_HEADERS,
       cache: 'no-store'
     })
