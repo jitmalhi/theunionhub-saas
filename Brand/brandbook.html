@@ -1,0 +1,1827 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The Union Hub — Brand Identity Guidelines</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="The Union Hub Brand Identity Guidelines, Volume 01. Real-time digital membership for unions. The system of record for what The Union Hub looks like, sounds like, and refuses to be.">
+<meta name="theme-color" content="#0F6E56">
+<link rel="canonical" href="https://theunionhub.com/brandbook.html">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="alternate icon" href="favicon.ico">
+
+<!-- Open Graph / social -->
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="The Union Hub">
+<meta property="og:title" content="Brand Identity Guidelines — The Union Hub">
+<meta property="og:description" content="Volume 01. The system of record for what The Union Hub looks like, sounds like, and refuses to be.">
+<meta property="og:url" content="https://theunionhub.com/brandbook.html">
+<meta property="og:image" content="https://theunionhub.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Brand Identity Guidelines — The Union Hub">
+<meta name="twitter:description" content="Volume 01. The system of record for what The Union Hub looks like, sounds like, and refuses to be.">
+<meta name="twitter:image" content="https://theunionhub.com/og-image.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700;1,900&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ────────────────────────────────────────────────────────────────
+     The Union Hub · Brand Book · Web edition
+     Long-scroll, editorial, "Massive"-style.
+     Brand tokens locked. No shadows. No gradients. 0.5px borders only.
+     ──────────────────────────────────────────────────────────────── */
+  :root {
+    --forest:        #0F6E56;
+    --active:        #1D9E75;
+    --mint:          #E1F5EE;
+    --deep-forest:   #0D1F1A;
+    --near-black:    #111111;
+    --off-white:     #F5F4F1;
+    --alert:         #E24B4A;
+    --mid-gray:      #888780;
+
+    --ink:           #111111;
+    --ink-soft:      #2A2A2A;
+    --muted:         #888780;
+    --hair:          rgba(0,0,0,0.15);
+    --hair-on-dark:  rgba(245,244,241,0.18);
+
+    --pad-x:         clamp(24px, 5vw, 96px);
+    --grid:          12;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  body {
+    margin: 0;
+    background: var(--off-white);
+    color: var(--ink);
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 1.65;
+  }
+  ::selection { background: var(--forest); color: var(--off-white); }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* ════════════ NAV ════════════ */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px var(--pad-x);
+    background: rgba(245,244,241,0.92);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-bottom: 0.5px solid var(--hair);
+  }
+  .nav.dark {
+    background: rgba(13,31,26,0.85);
+    border-bottom-color: var(--hair-on-dark);
+    color: var(--off-white);
+  }
+  .nav-brand {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700; font-size: 16px;
+    color: var(--deep-forest);
+    letter-spacing: -0.005em;
+  }
+  .nav.dark .nav-brand { color: var(--off-white); }
+  .nav-mark { width: 22px; height: 22px; flex: none; }
+  .nav-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted); font-weight: 500;
+    display: flex; align-items: center; gap: 18px;
+  }
+  .nav-meta .live-dot {
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .nav-meta .live-dot::before {
+    content: ''; width: 7px; height: 7px; border-radius: 999px;
+    background: var(--active); display: inline-block;
+  }
+  .nav-meta .pipe { color: var(--hair); }
+  .nav-chapters {
+    display: none;
+  }
+  @media (min-width: 1100px) {
+    .nav-chapters { display: flex; gap: 22px; }
+    .nav-chapters a {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); font-weight: 500;
+      transition: color .15s;
+    }
+    .nav-chapters a:hover { color: var(--forest); }
+    .nav.dark .nav-chapters a { color: rgba(245,244,241,0.6); }
+    .nav.dark .nav-chapters a:hover { color: var(--active); }
+  }
+
+  /* ════════════ TYPE SCALE ════════════ */
+  .display-1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: clamp(72px, 14vw, 240px);
+    line-height: 0.92;
+    letter-spacing: -0.025em;
+    margin: 0;
+    color: var(--deep-forest);
+  }
+  .display-1 em { font-style: italic; color: var(--forest); font-weight: 700; }
+
+  .display-2 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: clamp(56px, 10vw, 168px);
+    line-height: 0.94;
+    letter-spacing: -0.02em;
+    margin: 0;
+    color: var(--deep-forest);
+  }
+  .display-2 em { font-style: italic; color: var(--forest); font-weight: 700; }
+
+  .h2 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: clamp(36px, 5.4vw, 72px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: var(--deep-forest);
+    max-width: 18ch;
+  }
+  .h2 em { font-style: italic; color: var(--forest); }
+
+  .h3 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: clamp(20px, 2vw, 26px);
+    line-height: 1.2;
+    margin: 0 0 8px 0;
+    color: var(--deep-forest);
+  }
+
+  .lede {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    font-size: clamp(17px, 1.6vw, 22px);
+    line-height: 1.55;
+    color: var(--ink-soft);
+    max-width: 38ch;
+  }
+
+  p {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    font-size: 15.5px;
+    line-height: 1.72;
+    color: var(--ink-soft);
+    margin: 0 0 14px 0;
+    max-width: 56ch;
+  }
+  p strong { font-weight: 500; color: var(--ink); }
+  em { font-style: italic; }
+
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    font-weight: 500; color: var(--forest);
+    display: inline-flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::before {
+    content: ''; width: 24px; height: 0.5px; background: var(--forest);
+  }
+  .eyebrow.muted { color: var(--muted); }
+  .eyebrow.muted::before { background: var(--muted); }
+  .eyebrow.on-dark { color: var(--active); }
+  .eyebrow.on-dark::before { background: var(--active); }
+
+  /* ════════════ SECTION SHELL ════════════ */
+  section {
+    padding: clamp(96px, 14vh, 160px) var(--pad-x);
+    position: relative;
+  }
+  section.full {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  section.full-tall {
+    min-height: 110vh;
+  }
+  section.dark {
+    background: var(--deep-forest);
+    color: var(--off-white);
+  }
+  section.dark .h2, section.dark .h3, section.dark .display-1, section.dark .display-2 { color: var(--off-white); }
+  section.dark .h2 em, section.dark .display-1 em, section.dark .display-2 em { color: var(--active); }
+  section.dark p { color: rgba(245,244,241,0.8); }
+  section.dark p strong { color: var(--off-white); }
+  section.dark .eyebrow { color: var(--active); }
+  section.dark .eyebrow::before { background: var(--active); }
+
+  section.mint  { background: var(--mint); }
+  section.forest{ background: var(--forest); color: var(--off-white); }
+  section.forest .h2, section.forest .h3, section.forest .display-1, section.forest .display-2 { color: var(--off-white); }
+  section.forest .h2 em, section.forest .display-1 em { color: var(--mint); }
+  section.forest p { color: rgba(245,244,241,0.85); }
+  section.forest p strong { color: var(--off-white); }
+
+  /* Section header — number + title row at top of every body section */
+  .section-head {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    border-top: 0.5px solid var(--hair);
+    padding-top: 18px;
+    margin-bottom: clamp(36px, 6vh, 80px);
+  }
+  section.dark .section-head, section.forest .section-head { border-top-color: var(--hair-on-dark); }
+
+  @media (min-width: 900px) {
+    .section-head {
+      grid-template-columns: 1fr 2.5fr;
+      align-items: end;
+      gap: 32px;
+    }
+  }
+  .section-head .num {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500; font-size: 12px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  section.dark .section-head .num, section.forest .section-head .num { color: rgba(245,244,241,0.6); }
+
+  /* ════════════ HERO / COVER ════════════ */
+  .hero {
+    min-height: 100vh;
+    padding: 120px var(--pad-x) 60px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+  }
+  .hero-eyebrow-row {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .hero-title {
+    align-self: end;
+    margin-bottom: clamp(40px, 8vh, 96px);
+  }
+  .hero-title .row { display: block; }
+  .hero-check {
+    display: inline-block;
+    width: 0.78em; height: 0.78em;
+    vertical-align: -0.05em;
+    margin-left: 8px;
+  }
+  .hero-foot {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px 32px;
+    border-top: 0.5px solid var(--hair);
+    padding-top: 22px;
+    align-items: end;
+  }
+  @media (min-width: 900px) {
+    .hero-foot { grid-template-columns: repeat(4, 1fr) auto; }
+  }
+  .hero-foot dt {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 6px; font-weight: 500;
+  }
+  .hero-foot dd {
+    margin: 0;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400; font-size: 14px;
+    color: var(--deep-forest);
+  }
+  .hero-scroll {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--forest); font-weight: 500;
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .hero-scroll::after {
+    content: ''; display: inline-block;
+    width: 1px; height: 24px; background: var(--forest);
+  }
+
+  /* ════════════ CHAPTER OPENER ════════════ */
+  .opener {
+    min-height: 100vh;
+    padding: clamp(80px, 12vh, 140px) var(--pad-x) clamp(60px, 10vh, 120px);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    position: relative;
+    overflow: hidden;
+  }
+  .opener .num-massive {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 900;
+    font-size: clamp(220px, 38vw, 540px);
+    line-height: 0.82;
+    letter-spacing: -0.04em;
+    color: var(--deep-forest);
+    margin: 0;
+    align-self: end;
+    pointer-events: none;
+  }
+  .opener.mint .num-massive   { color: var(--forest); }
+  .opener.dark .num-massive   { color: var(--active); }
+  .opener.forest .num-massive { color: var(--mint); }
+
+  .opener-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .opener-title {
+    align-self: end;
+    margin-top: 18px;
+    display: grid; grid-template-columns: 1fr; gap: 18px;
+  }
+  @media (min-width: 900px) {
+    .opener-title { grid-template-columns: 1fr 1fr; align-items: end; }
+  }
+
+  /* ════════════ EDITORIAL GRID ════════════ */
+  .grid-12 {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 18px;
+  }
+  .col-3  { grid-column: span 12; }
+  .col-4  { grid-column: span 12; }
+  .col-5  { grid-column: span 12; }
+  .col-6  { grid-column: span 12; }
+  .col-7  { grid-column: span 12; }
+  .col-8  { grid-column: span 12; }
+  .col-9  { grid-column: span 12; }
+  @media (min-width: 800px) {
+    .col-3  { grid-column: span 3; }
+    .col-4  { grid-column: span 4; }
+    .col-5  { grid-column: span 5; }
+    .col-6  { grid-column: span 6; }
+    .col-7  { grid-column: span 7; }
+    .col-8  { grid-column: span 8; }
+    .col-9  { grid-column: span 9; }
+  }
+
+  .stack-lg > * + * { margin-top: clamp(72px, 10vh, 128px); }
+  .stack-md > * + * { margin-top: clamp(36px, 5vh, 56px); }
+  .stack-sm > * + * { margin-top: 16px; }
+
+  .row { display: flex; gap: 14px; flex-wrap: wrap; }
+
+  /* ════════════ CARDS ════════════ */
+  .card {
+    border: 0.5px solid var(--hair);
+    border-radius: 12px;
+    padding: clamp(20px, 2vw, 28px);
+    background: var(--off-white);
+  }
+  .card.mint   { background: var(--mint); border-color: rgba(15,110,86,0.25); }
+  .card.dark   { background: var(--deep-forest); color: var(--off-white); border-color: var(--hair-on-dark); }
+  .card.dark .h3 { color: var(--off-white); }
+  .card.dark p { color: rgba(245,244,241,0.8); }
+  .card.tall { min-height: 220px; display: flex; flex-direction: column; }
+
+  /* Y/N rule list */
+  .ynlist { border-top: 0.5px solid var(--hair); }
+  .ynlist .row-i {
+    display: grid; grid-template-columns: 90px 1fr;
+    gap: 18px;
+    padding: 16px 0;
+    border-bottom: 0.5px solid var(--hair);
+    align-items: start;
+  }
+  section.dark .ynlist, section.dark .ynlist .row-i { border-color: var(--hair-on-dark); }
+  .ynlist .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    font-weight: 500; padding-top: 4px;
+  }
+  .ynlist .tag.yes { color: var(--forest); }
+  .ynlist .tag.no  { color: var(--alert); }
+  .ynlist .text {
+    font-family: 'DM Sans', sans-serif; font-weight: 300;
+    font-size: 16px; line-height: 1.65;
+    color: var(--ink-soft);
+  }
+  section.dark .ynlist .text { color: rgba(245,244,241,0.85); }
+  .ynlist .text strong { font-weight: 500; color: var(--ink); }
+  section.dark .ynlist .text strong { color: var(--off-white); }
+
+  /* Definition lists */
+  dl.def {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    border-top: 0.5px solid var(--hair);
+    margin: 0;
+  }
+  @media (min-width: 720px) {
+    dl.def { grid-template-columns: 1fr 2.5fr; column-gap: 32px; }
+  }
+  section.dark dl.def, section.dark dl.def > * { border-color: var(--hair-on-dark); }
+  dl.def dt, dl.def dd {
+    border-bottom: 0.5px solid var(--hair);
+    padding: 18px 0;
+    margin: 0;
+  }
+  section.dark dl.def dt, section.dark dl.def dd { border-color: var(--hair-on-dark); }
+  dl.def dt {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    font-weight: 500; color: var(--forest);
+  }
+  section.dark dl.def dt { color: var(--active); }
+  dl.def dd {
+    font-family: 'DM Sans', sans-serif; font-weight: 300;
+    font-size: 16px; line-height: 1.65; color: var(--ink-soft);
+  }
+  section.dark dl.def dd { color: rgba(245,244,241,0.85); }
+  dl.def dd strong { font-weight: 500; color: var(--ink); }
+  section.dark dl.def dd strong { color: var(--off-white); }
+  /* On narrow screens, give DTs less padding */
+  @media (max-width: 720px) {
+    dl.def dt { padding-bottom: 6px; border-bottom: 0; font-size: 10px; }
+    dl.def dd { padding-top: 6px; }
+  }
+
+  /* ════════════ COLOUR — full bleed swatch panels ════════════ */
+  .palette-wall {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    border-top: 0.5px solid var(--hair);
+    border-left: 0.5px solid var(--hair);
+  }
+  @media (min-width: 800px) { .palette-wall { grid-template-columns: repeat(4, 1fr); } }
+  .swatch {
+    aspect-ratio: 4 / 5;
+    border-right: 0.5px solid var(--hair);
+    border-bottom: 0.5px solid var(--hair);
+    padding: clamp(14px, 1.6vw, 22px);
+    display: flex; flex-direction: column; justify-content: space-between;
+    position: relative;
+    color: var(--off-white);
+  }
+  .swatch.on-dark { color: var(--off-white); }
+  .swatch.on-light { color: var(--deep-forest); }
+  .swatch .sw-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    font-weight: 500; opacity: 0.85;
+  }
+  .swatch .sw-name {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: clamp(22px, 2.4vw, 36px);
+    line-height: 1.0;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .swatch .sw-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px; line-height: 1.6;
+    letter-spacing: 0.04em;
+    opacity: 0.85;
+  }
+
+  /* Ratio bar */
+  .ratio-bar {
+    display: flex; height: 56px;
+    border: 0.5px solid var(--hair);
+    border-radius: 8px; overflow: hidden;
+  }
+  section.dark .ratio-bar { border-color: var(--hair-on-dark); }
+  .ratio-bar > div {
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    color: var(--off-white); letter-spacing: 0.06em; font-weight: 500;
+  }
+
+  /* ════════════ TYPOGRAPHY — viewport specimens ════════════ */
+  .specimen-massive {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: clamp(180px, 36vw, 540px);
+    line-height: 0.84;
+    letter-spacing: -0.04em;
+    color: var(--deep-forest);
+    margin: 0;
+  }
+  section.dark .specimen-massive { color: var(--off-white); }
+  .specimen-massive em { font-style: italic; color: var(--forest); font-weight: 900; }
+  section.dark .specimen-massive em { color: var(--active); }
+
+  .specimen-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 24px;
+    padding: 20px 0;
+    border-bottom: 0.5px solid var(--hair);
+    align-items: baseline;
+  }
+  section.dark .specimen-row { border-color: var(--hair-on-dark); }
+  .specimen-row .label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--muted); font-weight: 500;
+    min-width: 130px;
+  }
+  section.dark .specimen-row .label { color: rgba(245,244,241,0.55); }
+  .specimen-row .sample {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: var(--deep-forest);
+    line-height: 1.0;
+    letter-spacing: -0.015em;
+  }
+  section.dark .specimen-row .sample { color: var(--off-white); }
+  .specimen-row.body .sample {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    letter-spacing: -0.005em;
+  }
+  .specimen-row.mono .sample {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  /* ════════════ LOGO TILES ════════════ */
+  .logo-wall {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  @media (min-width: 800px) { .logo-wall { grid-template-columns: 2fr 1fr 1fr; } }
+
+  .logo-tile {
+    border: 0.5px solid var(--hair);
+    border-radius: 12px;
+    padding: clamp(28px, 3vw, 56px);
+    display: flex; align-items: center; justify-content: center;
+    min-height: 240px;
+    position: relative;
+  }
+  .logo-tile.dark   { background: var(--deep-forest); border-color: var(--hair-on-dark); }
+  .logo-tile.forest { background: var(--forest); border-color: rgba(0,0,0,0.10); }
+  .logo-tile.mint   { background: var(--mint); border-color: rgba(15,110,86,0.25); }
+  .logo-tile .label {
+    position: absolute; top: 14px; left: 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--muted); font-weight: 500;
+  }
+  .logo-tile.dark .label   { color: rgba(245,244,241,0.55); }
+  .logo-tile.forest .label { color: rgba(245,244,241,0.7); }
+
+  .dont .label { color: var(--alert); }
+
+  /* ════════════ COMPONENT DEMOS ════════════ */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 13px 22px;
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 14.5px;
+    line-height: 1;
+    text-decoration: none;
+    border: 0.5px solid transparent;
+    cursor: pointer;
+  }
+  .btn-primary { background: var(--forest); color: var(--off-white); }
+  .btn-ghost { background: transparent; color: var(--forest); border-color: var(--forest); }
+  section.dark .btn-ghost, section.forest .btn-ghost { color: var(--off-white); border-color: var(--off-white); }
+
+  .input {
+    width: 100%;
+    padding: 13px 15px;
+    border-radius: 8px;
+    border: 0.5px solid var(--hair);
+    background: var(--off-white);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    font-size: 15px;
+    color: var(--ink);
+  }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 12.5px;
+  }
+  .pill.verified { background: var(--mint); color: var(--forest); }
+  .pill.invalid  { background: rgba(226,75,74,0.10); color: var(--alert); }
+  .pill .dot { width: 8px; height: 8px; border-radius: 999px; }
+  .pill.verified .dot { background: var(--active); }
+  .pill.invalid  .dot { background: var(--alert); }
+
+  /* Member card */
+  .member-card {
+    width: 100%;
+    max-width: 380px;
+    border: 0.5px solid var(--hair);
+    border-radius: 12px;
+    background: var(--off-white);
+    padding: 24px;
+  }
+  .member-card .mc-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
+  .member-card .mc-org {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .member-card .mc-name {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700; font-size: 28px;
+    color: var(--deep-forest); line-height: 1.05;
+    margin-bottom: 4px;
+  }
+  .member-card .mc-meta {
+    font-family: 'DM Sans', sans-serif; font-weight: 300;
+    font-size: 13px; color: var(--ink-soft);
+    margin-bottom: 18px;
+  }
+  .member-card .mc-foot {
+    border-top: 0.5px solid var(--hair); padding-top: 14px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 18px;
+  }
+
+  .verify-screen {
+    width: 100%; max-width: 320px;
+    border: 0.5px solid var(--hair);
+    border-radius: 12px;
+    background: var(--mint);
+    padding: 36px 26px;
+    text-align: center;
+  }
+  .verify-screen.invalid { background: rgba(226,75,74,0.10); }
+  .vs-icon {
+    width: 64px; height: 64px;
+    border-radius: 999px;
+    background: var(--active);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--off-white);
+    margin-bottom: 18px;
+  }
+  .verify-screen.invalid .vs-icon { background: var(--alert); }
+  .vs-state {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700; font-size: 28px;
+    color: var(--deep-forest);
+    margin-bottom: 6px;
+  }
+  .verify-screen.invalid .vs-state { color: var(--alert); }
+  .vs-meta {
+    font-family: 'DM Sans', sans-serif; font-weight: 300;
+    font-size: 14px; color: var(--ink-soft);
+  }
+
+  /* Banned word cloud */
+  .banned {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(13px, 1.4vw, 17px);
+    line-height: 2.3;
+    letter-spacing: 0.04em;
+    color: var(--alert);
+    text-decoration: line-through;
+    text-decoration-thickness: 0.5px;
+  }
+
+  /* Editorial pull quote */
+  .pull {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-style: italic;
+    font-size: clamp(28px, 3.5vw, 56px);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--deep-forest);
+    border-left: 0.5px solid var(--forest);
+    padding-left: clamp(18px, 2vw, 32px);
+    margin: 0;
+  }
+  section.dark .pull { color: var(--off-white); border-left-color: var(--active); }
+  .pull em { color: var(--forest); font-style: italic; }
+  section.dark .pull em { color: var(--active); }
+
+  /* Foot */
+  .colophon-grid {
+    display: grid; grid-template-columns: 1fr; gap: 24px;
+    border-top: 0.5px solid var(--hair-on-dark);
+    padding-top: 28px;
+    margin-top: clamp(56px, 8vh, 96px);
+  }
+  @media (min-width: 800px) { .colophon-grid { grid-template-columns: repeat(4, 1fr); } }
+  .colophon-grid b {
+    display: block; font-weight: 500;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(245,244,241,0.6);
+    margin-bottom: 8px;
+  }
+  .colophon-grid span {
+    font-family: 'DM Sans', sans-serif; font-weight: 400; font-size: 14px;
+    color: var(--off-white);
+  }
+
+  /* Marketing-hero demo frame */
+  .demo-frame {
+    border: 0.5px solid var(--hair);
+    border-radius: 12px;
+    padding: clamp(28px, 4vw, 56px);
+    background: var(--off-white);
+  }
+  .demo-frame.mint { background: var(--mint); border-color: rgba(15,110,86,0.25); }
+  .demo-frame.dark { background: var(--deep-forest); border-color: var(--hair-on-dark); color: var(--off-white); }
+  .demo-frame.dark .h2 { color: var(--off-white); }
+  .demo-frame.dark .h2 em { color: var(--active); }
+  .demo-frame.dark p { color: rgba(245,244,241,0.85); }
+
+  /* Scene block (12s) */
+  .scene {
+    border: 0.5px solid var(--hair);
+    border-radius: 12px;
+    background: var(--mint);
+    padding: clamp(28px, 3vw, 48px);
+    position: relative;
+  }
+  .scene .timer {
+    position: absolute;
+    top: clamp(20px, 2vw, 28px);
+    right: clamp(20px, 2vw, 28px);
+    font-family: 'DM Mono', monospace;
+    font-weight: 500; font-size: 13px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--forest);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .scene .timer .live-dot {
+    width: 8px; height: 8px; border-radius: 999px; background: var(--active);
+    display: inline-block;
+  }
+
+  /* Page progress bar */
+  .progress {
+    position: fixed; left: 0; top: 0;
+    height: 2px; background: var(--forest);
+    width: 0%; z-index: 60; transition: width .1s linear;
+  }
+
+  /* Skip-link */
+  .skip {
+    position: absolute; left: -9999px; top: 0;
+    background: var(--forest); color: var(--off-white);
+    padding: 10px 14px;
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    border-radius: 4px;
+  }
+  .skip:focus { left: 16px; top: 16px; z-index: 100; }
+
+  /* Utility */
+  .muted { color: var(--muted); }
+  .strike { text-decoration: line-through; color: var(--muted); }
+</style>
+</head>
+
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" id="progress"></div>
+
+<!-- ═══════════════════════════════════ NAV ═══════════════════════════════════ -->
+<nav class="nav" id="nav">
+  <a class="nav-brand" href="#top">
+    <svg class="nav-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <circle cx="32" cy="32" r="28" fill="#0F6E56"/>
+      <path d="M19 33.5 L28 42 L46 23" fill="none" stroke="#F5F4F1" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter"/>
+    </svg>
+    The Union Hub
+  </a>
+  <div class="nav-chapters">
+    <a href="#ch01">01 Foundation</a>
+    <a href="#ch02">02 Voice</a>
+    <a href="#ch03">03 Logo</a>
+    <a href="#ch04">04 Colour</a>
+    <a href="#ch05">05 Type</a>
+    <a href="#ch06">06 Layout</a>
+    <a href="#ch07">07 Verify</a>
+    <a href="#ch08">08 Voice in Use</a>
+    <a href="#ch09">09 In Use</a>
+    <a href="#ch10">10 Governance</a>
+  </div>
+  <div class="nav-meta">
+    <span class="live-dot">v1.0</span>
+    <span class="pipe">·</span>
+    <span>Brand · Live</span>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- ═══════════════════════════════════ HERO / COVER ═══════════════════════════════════ -->
+<section class="hero" id="top">
+  <div class="hero-eyebrow-row">
+    <span class="eyebrow">The Union Hub · Brand Identity Guidelines</span>
+    <span class="eyebrow muted">Volume 01 · 2026</span>
+  </div>
+
+  <div class="hero-title">
+    <h1 class="display-1">
+      <span class="row">Brand</span>
+      <span class="row">Identity</span>
+      <span class="row"><em>Guidelines</em><svg class="hero-check" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="14" fill="#0F6E56"/>
+        <path d="M9 16.5 L14 21.5 L23 12" fill="none" stroke="#F5F4F1" stroke-width="3" stroke-linecap="square"/>
+      </svg></span>
+    </h1>
+    <p class="lede" style="margin-top: clamp(28px, 3vh, 48px);">
+      How we look, how we sound, and what we refuse to be — a working document for the team building the system of record for what a union member actually is, right now, today, at the door.
+    </p>
+  </div>
+
+  <dl class="hero-foot">
+    <div><dt>Owner</dt><dd>The Union Hub</dd></div>
+    <div><dt>Volume</dt><dd>01 · v1.0</dd></div>
+    <div><dt>Status</dt><dd>Live, governed</dd></div>
+    <div><dt>Authority</dt><dd>Founding Team</dd></div>
+    <a class="hero-scroll" href="#quote">Read the brief</a>
+  </dl>
+</section>
+
+<!-- ═══════════════════════════════════ FOUNDING QUOTE ═══════════════════════════════════ -->
+<section class="full mint" id="quote" style="text-align: left;">
+  <div class="eyebrow">The Founding Premise</div>
+  <h2 class="display-1" style="margin-top: 32px; max-width: 18ch;">
+    Your union card is a piece of paper. <em>That ends now.</em>
+  </h2>
+  <p class="lede" style="margin-top: clamp(28px, 4vh, 56px);">
+    A printed card is accurate the day it leaves the printer. Then dues lapse. Members move locals. Members leave. The card says nothing about any of it. Every rule in this book exists to keep the answer to one question current — <strong style="font-weight:500; color: var(--deep-forest);">is this person a member in good standing today?</strong>
+  </p>
+</section>
+
+<!-- ═══════════════════════════════════ CHAPTER 01 ═══════════════════════════════════ -->
+<section class="opener" id="ch01">
+  <div class="opener-meta">
+    <span class="eyebrow">Chapter 01</span>
+    <span class="eyebrow muted">Brand Foundation</span>
+  </div>
+  <div class="num-massive">01</div>
+  <div class="opener-title">
+    <h2 class="display-2">Brand <em>Foundation.</em></h2>
+    <p class="lede">Who we are, what we replace, and what we will not be talked into becoming. Read this chapter before writing anything for the brand.</p>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">01.1 — Who we are</span>
+    <h2 class="h2">The system of record for who is a member, <em>right now.</em></h2>
+  </div>
+
+  <div class="grid-12 stack-md">
+    <div class="col-7">
+      <p>The Union Hub is digital membership infrastructure for organized labour. We replace the printed union card with a verifiable digital credential that updates in real time. A member's status is current. A rep's verification is fast. A union's roster is sovereign.</p>
+      <p>We are not an app. We are not a CRM. We are not a marketing platform. We are the layer that answers one question correctly: <strong>is this person a member in good standing today?</strong></p>
+    </div>
+    <div class="col-5">
+      <div class="scene">
+        <div class="timer"><span class="live-dot"></span>00:12</div>
+        <h3 class="h3">The 12-second story</h3>
+        <p style="color: var(--deep-forest);">A member walks up to vote. Rep opens phone camera. Scans the QR. Screen turns green. <strong style="color: var(--forest); font-weight: 500;">Verified — Active member since 2019.</strong> Total time: twelve seconds. That is the entire product. Everything in this book exists to protect those twelve seconds.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">01.2 — Mission, vision, values</span>
+    <h2 class="h2">One mission. <em>Four words for the values.</em></h2>
+  </div>
+
+  <div class="grid-12 stack-md">
+    <div class="col-4"><div class="card tall"><h3 class="h3">Mission</h3><p>Replace the paper union card with a real-time, verifiable digital credential.</p></div></div>
+    <div class="col-4"><div class="card tall"><h3 class="h3">Vision</h3><p>Every active union member in North America carries a credential they didn't have to download.</p></div></div>
+    <div class="col-4"><div class="card tall"><h3 class="h3">Values</h3><p>Verifiable. Member-first. Light-touch. Plain-language. Independent.</p></div></div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">01.3 — Anti-positioning</span>
+    <h2 class="h2">What we are <em>not.</em></h2>
+  </div>
+  <div class="ynlist" style="max-width: 70ch;">
+    <div class="row-i"><span class="tag no">Not</span><div class="text">A union management platform. We do not run your meetings, your dues, or your campaigns.</div></div>
+    <div class="row-i"><span class="tag no">Not</span><div class="text">A CRM. We do not segment your members for outreach. They are not leads.</div></div>
+    <div class="row-i"><span class="tag no">Not</span><div class="text">An app store. There is nothing to download.</div></div>
+    <div class="row-i"><span class="tag no">Not</span><div class="text">A fundraising tool. We do not move money from members.</div></div>
+    <div class="row-i"><span class="tag no">Not</span><div class="text">An advertising surface. We do not sell, license, or rent member data. <strong>Ever.</strong></div></div>
+  </div>
+</section>
+
+<section class="dark">
+  <div class="section-head">
+    <span class="num">01.4 — Audience</span>
+    <h2 class="h2">Three people. <em>One promise each.</em></h2>
+  </div>
+
+  <div class="grid-12 stack-md">
+    <div class="col-4"><div class="card dark tall"><h3 class="h3">To the member</h3><p>Your card is current. You don't have to think about it. One link, no app.</p></div></div>
+    <div class="col-4"><div class="card dark tall"><h3 class="h3">To the rep</h3><p>Your verification is fast. The answer is yes or no, in two seconds.</p></div></div>
+    <div class="col-4"><div class="card dark tall"><h3 class="h3">To the union</h3><p>Your roster is sovereign. The data is yours, exportable any time.</p></div></div>
+  </div>
+
+  <dl class="def" style="margin-top: clamp(56px, 8vh, 96px);">
+    <dt>Union Admin</dt>
+    <dd>Runs the local. Cares about the roster being clean and exportable. Will not tolerate friction with the member base. Uploads a CSV. Updates statuses. Done.</dd>
+
+    <dt>Member</dt>
+    <dd>Carries a phone. Doesn't want another app. Got a text once with a link. The card lives there. Works at a vote, a rally, a job site. That is the entire interaction.</dd>
+
+    <dt>Union Rep</dt>
+    <dd>Standing at a door. Has 90 seconds per person. Needs a yes or no. Opens the phone camera. Scans. Reads the screen. Moves on.</dd>
+
+    <dt>Executive Board</dt>
+    <dd>Won't use the product day-to-day. Will sign the contract. Reads in numbers and risk. Cares about data sovereignty, audit trails, and the answer to <em>where does the data live</em>.</dd>
+  </dl>
+</section>
+
+<!-- ═══════════════════════════════════ CHAPTER 02 ═══════════════════════════════════ -->
+<section class="opener" id="ch02">
+  <div class="opener-meta">
+    <span class="eyebrow">Chapter 02</span>
+    <span class="eyebrow muted">Voice &amp; Tone</span>
+  </div>
+  <div class="num-massive">02</div>
+  <div class="opener-title">
+    <h2 class="display-2">Voice <em>&amp; Tone.</em></h2>
+    <p class="lede">Short sentences. One idea at a time. The brand sounds like a person who has already picked up the phone.</p>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">02.1 — Always &amp; Never</span>
+    <h2 class="h2">How we always sound. <em>How we never sound.</em></h2>
+  </div>
+
+  <div class="grid-12 stack-md">
+    <div class="col-6">
+      <h3 class="h3" style="color: var(--forest); margin-bottom: 14px;">Always</h3>
+      <div class="ynlist">
+        <div class="row-i"><span class="tag yes">Yes</span><div class="text"><strong>Direct.</strong> Say the thing. Then stop.</div></div>
+        <div class="row-i"><span class="tag yes">Yes</span><div class="text"><strong>Plain.</strong> A rep on a job site reads it in three seconds and gets it.</div></div>
+        <div class="row-i"><span class="tag yes">Yes</span><div class="text"><strong>Present-tense.</strong> The product is about <em>now</em>.</div></div>
+        <div class="row-i"><span class="tag yes">Yes</span><div class="text"><strong>Specific.</strong> Numbers, names, time. Not adjectives.</div></div>
+        <div class="row-i"><span class="tag yes">Yes</span><div class="text"><strong>Member-respectful.</strong> Members are not users.</div></div>
+      </div>
+    </div>
+    <div class="col-6">
+      <h3 class="h3" style="color: var(--alert); margin-bottom: 14px;">Never</h3>
+      <div class="ynlist">
+        <div class="row-i"><span class="tag no">No</span><div class="text"><strong>Hyped.</strong> No revolutionary, game-changing, next-gen.</div></div>
+        <div class="row-i"><span class="tag no">No</span><div class="text"><strong>Performatively progressive.</strong> Solidarity is shown, not announced.</div></div>
+        <div class="row-i"><span class="tag no">No</span><div class="text"><strong>Corporate.</strong> No leverage, ecosystem, journey, solution, robust.</div></div>
+        <div class="row-i"><span class="tag no">No</span><div class="text"><strong>Vague.</strong> "Learn more" is not a CTA. It is a shrug.</div></div>
+        <div class="row-i"><span class="tag no">No</span><div class="text"><strong>Condescending.</strong> Members are served, not explained to.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="mint">
+  <div class="section-head">
+    <span class="num">02.2 — Words to avoid</span>
+    <h2 class="h2">If a word in this list shows up, <em>cut it.</em></h2>
+  </div>
+  <p class="banned">
+    revolutionize · leverage · empower · seamless · robust · cutting-edge · next-gen · ecosystem · solution · journey · unlock · synergy · disruption · transformative · world-class · best-in-class · holistic · enterprise-grade · turnkey · learn more · click here · sign up · submit · users
+  </p>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">02.3 — Worked example</span>
+    <h2 class="h2">Before. <em>After.</em></h2>
+  </div>
+  <div class="grid-12">
+    <div class="col-6">
+      <div class="card" style="border-color: rgba(226,75,74,0.45); height: 100%;">
+        <span class="eyebrow muted" style="color: var(--alert);">Before — word salad</span>
+        <p style="font-style: italic; margin-top: 14px;">"Empower your union with a revolutionary, next-gen verification ecosystem that leverages cutting-edge technology to seamlessly transform the member journey. Click here to learn more!"</p>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="card mint" style="height: 100%;">
+        <span class="eyebrow">After — the brand</span>
+        <p style="margin-top: 14px;">"Your union card is a piece of paper. <strong>That ends now.</strong> Real-time digital membership for unions. No app. No password. <strong>See how it works.</strong>"</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="dark">
+  <div class="section-head">
+    <span class="num">02.4 — Tone shifts</span>
+    <h2 class="h2">Same voice. <em>Five rooms.</em></h2>
+  </div>
+  <dl class="def">
+    <dt>Marketing site</dt>
+    <dd>Confident, plain, slightly opinionated. The brand has a position. State it once, clearly.</dd>
+    <dt>Member onboarding</dt>
+    <dd>Warm. Calm. Functional. "Here's your card. Save the link. That's it."</dd>
+    <dt>Verify UI (rep)</dt>
+    <dd>Almost wordless. A status word, a date, a member name. The interface does the speaking.</dd>
+    <dt>Errors</dt>
+    <dd>Specific and instructive. Tell the user what failed and what to do. Never apologise abstractly.</dd>
+    <dt>Executive / board</dt>
+    <dd>Sober and precise. Less voice, more substance. Use full sentences. Cite data sovereignty and audit trails.</dd>
+  </dl>
+</section>
+
+<!-- ═══════════════════════════════════ CHAPTER 03 — LOGO ═══════════════════════════════════ -->
+<section class="opener" id="ch03">
+  <div class="opener-meta">
+    <span class="eyebrow">Chapter 03</span>
+    <span class="eyebrow muted">Logo System · v2</span>
+  </div>
+  <div class="num-massive">03</div>
+  <div class="opener-title">
+    <h2 class="display-2">Logo <em>System.</em></h2>
+    <p class="lede">Two paths. One mark. Drawn once and asked to do everything.</p>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">03.1 — The Mark</span>
+    <h2 class="h2">The contour does the work. <em>That's the entire mark.</em></h2>
+  </div>
+  <p style="margin-bottom: clamp(36px, 5vh, 56px); max-width: 62ch;">A custom geometric form, drawn in solid Forest Green on Off White. Two paths, in one weight, with no outline, no inner detail, and no decoration. It is built to read at favicon size and on a black-and-white photocopy at the back of a union hall. The mark always appears as a single fill — never as a stroke, never split into separately coloured pieces, never with a gradient.</p>
+  <div class="logo-wall">
+    <div class="logo-tile">
+      <span class="label">Primary · Forest on Off White</span>
+      <svg width="200" height="200" viewBox="0 0 552.18 532.22" fill="#0F6E56" aria-hidden="true">
+        <path d="M294.51,82.88c-8.68-4.36-16.87-8.05-24.61-12.53-4.49-2.6-7.94-2.22-12.39.04-44.73,22.63-89.64,44.91-134.36,67.56-28.42,14.39-49.35,35.84-59.05,66.69-2.82,8.97-4.65,18.66-4.71,28.04-.41,63.23-.22,126.47-.22,189.7,0,1.1,0,2.2,0,3.54,0,2.11-2.3,3.43-4.12,2.35-6.56-3.88-12.45-7.12-17.77-11.11C13,398.94.06,374.78.08,344.07c.04-53.51.27-107.01-.08-160.52-.26-39.82,18.24-68.14,52.77-85.82,57.38-29.39,115.19-57.95,172.99-86.53C248.92-.24,273.54-2.17,298.87,2.05c19.59,3.26,36.38,13.21,53.72,21.86,64.71,32.29,129.36,64.68,194.02,97.06h0c2,1.01,1.99,3.86-.01,4.86-17.57,8.78-34.26,17.09-50.91,25.46-51.26,25.78-102.49,51.63-153.77,77.38-14.73,7.4-29.69,14.35-41.88,25.86-20.9,19.75-33,43.64-33.1,72.67-.24,66.71-.08,133.42-.11,200.12,0,.77-.05,1.54-.12,2.38-.16,1.92-2.21,3.08-3.94,2.23-4.9-2.41-9.36-4.6-13.81-6.83-18.15-9.09-36.26-18.26-54.46-27.24-3.39-1.67-4.62-3.71-4.62-7.59.12-71.75-.09-143.49.15-215.24.11-31.39,16.62-53.26,43.45-67.08,49.28-25.38,99.07-49.77,148.64-74.59.62-.31,1.22-.64,1.88-1.01,1.82-1.03,1.86-3.63.07-4.72-.4-.24-.79-.46-1.18-.66-6.97-3.52-14.03-6.84-20.92-10.5"/>
+        <path d="M295.15,529.05c-.22-2.62-.5-4.44-.5-6.27-.02-64.62-.21-129.25.09-193.87.14-29.23,14.47-50.34,39.77-64.2,9.73-5.33,19.8-10.05,29.73-15.02,1.49-.74,3.08-1.28,5.47-2.25.23,2.55.53,4.34.54,6.13.03,24.84.01,49.68,0,74.52,0,6.51.49,6.81,6.38,3.85,32.07-16.1,64.11-32.29,96.26-48.23,4.62-2.29,6.58-4.94,6.51-10.32-.29-25.71-.05-51.42-.21-77.13-.02-3.99,1.18-6.27,4.86-8.07,20.72-10.14,41.31-20.54,61.96-30.83,1.66-.83,3.39-1.53,5.8-2.62.14,2.42.32,4.24.33,6.06.01,78.17,0,156.35.02,234.52,0,3,.06,5.46-3.49,7.2-22.27,10.89-44.39,22.08-66.57,33.15-.88.44-1.85.7-3.63,1.36v-92.95c-4.07,1.88-7.18,3.18-10.18,4.71-31.18,15.97-62.3,32.05-93.54,47.88-3.84,1.94-4.53,4.54-4.52,8.29.09,26.93-.07,53.85.15,80.78.04,4.9-1.63,7.35-6.03,9.45-21.41,10.26-42.64,20.91-63.94,31.42-1.39.69-2.82,1.29-5.29,2.42Z"/>
+      </svg>
+    </div>
+    <div class="logo-tile" style="flex-direction: column; gap: 14px;">
+      <span class="label">Horizontal lockup · default</span>
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <svg width="56" height="56" viewBox="0 0 552.18 532.22" fill="#0F6E56" aria-hidden="true">
+          <path d="M294.51,82.88c-8.68-4.36-16.87-8.05-24.61-12.53-4.49-2.6-7.94-2.22-12.39.04-44.73,22.63-89.64,44.91-134.36,67.56-28.42,14.39-49.35,35.84-59.05,66.69-2.82,8.97-4.65,18.66-4.71,28.04-.41,63.23-.22,126.47-.22,189.7,0,1.1,0,2.2,0,3.54,0,2.11-2.3,3.43-4.12,2.35-6.56-3.88-12.45-7.12-17.77-11.11C13,398.94.06,374.78.08,344.07c.04-53.51.27-107.01-.08-160.52-.26-39.82,18.24-68.14,52.77-85.82,57.38-29.39,115.19-57.95,172.99-86.53C248.92-.24,273.54-2.17,298.87,2.05c19.59,3.26,36.38,13.21,53.72,21.86,64.71,32.29,129.36,64.68,194.02,97.06h0c2,1.01,1.99,3.86-.01,4.86-17.57,8.78-34.26,17.09-50.91,25.46-51.26,25.78-102.49,51.63-153.77,77.38-14.73,7.4-29.69,14.35-41.88,25.86-20.9,19.75-33,43.64-33.1,72.67-.24,66.71-.08,133.42-.11,200.12,0,.77-.05,1.54-.12,2.38-.16,1.92-2.21,3.08-3.94,2.23-4.9-2.41-9.36-4.6-13.81-6.83-18.15-9.09-36.26-18.26-54.46-27.24-3.39-1.67-4.62-3.71-4.62-7.59.12-71.75-.09-143.49.15-215.24.11-31.39,16.62-53.26,43.45-67.08,49.28-25.38,99.07-49.77,148.64-74.59.62-.31,1.22-.64,1.88-1.01,1.82-1.03,1.86-3.63.07-4.72-.4-.24-.79-.46-1.18-.66-6.97-3.52-14.03-6.84-20.92-10.5"/>
+          <path d="M295.15,529.05c-.22-2.62-.5-4.44-.5-6.27-.02-64.62-.21-129.25.09-193.87.14-29.23,14.47-50.34,39.77-64.2,9.73-5.33,19.8-10.05,29.73-15.02,1.49-.74,3.08-1.28,5.47-2.25.23,2.55.53,4.34.54,6.13.03,24.84.01,49.68,0,74.52,0,6.51.49,6.81,6.38,3.85,32.07-16.1,64.11-32.29,96.26-48.23,4.62-2.29,6.58-4.94,6.51-10.32-.29-25.71-.05-51.42-.21-77.13-.02-3.99,1.18-6.27,4.86-8.07,20.72-10.14,41.31-20.54,61.96-30.83,1.66-.83,3.39-1.53,5.8-2.62.14,2.42.32,4.24.33,6.06.01,78.17,0,156.35.02,234.52,0,3,.06,5.46-3.49,7.2-22.27,10.89-44.39,22.08-66.57,33.15-.88.44-1.85.7-3.63,1.36v-92.95c-4.07,1.88-7.18,3.18-10.18,4.71-31.18,15.97-62.3,32.05-93.54,47.88-3.84,1.94-4.53,4.54-4.52,8.29.09,26.93-.07,53.85.15,80.78.04,4.9-1.63,7.35-6.03,9.45-21.41,10.26-42.64,20.91-63.94,31.42-1.39.69-2.82,1.29-5.29,2.42Z"/>
+        </svg>
+        <span style="font-family: 'Playfair Display', serif; font-weight: 700; font-size: 28px; color: var(--deep-forest); letter-spacing: -0.005em;">The Union Hub</span>
+      </div>
+    </div>
+    <div class="logo-tile" style="flex-direction: column; gap: 10px;">
+      <span class="label">Stacked lockup · square crops only</span>
+      <svg width="50" height="50" viewBox="0 0 552.18 532.22" fill="#0F6E56" aria-hidden="true">
+        <path d="M294.51,82.88c-8.68-4.36-16.87-8.05-24.61-12.53-4.49-2.6-7.94-2.22-12.39.04-44.73,22.63-89.64,44.91-134.36,67.56-28.42,14.39-49.35,35.84-59.05,66.69-2.82,8.97-4.65,18.66-4.71,28.04-.41,63.23-.22,126.47-.22,189.7,0,1.1,0,2.2,0,3.54,0,2.11-2.3,3.43-4.12,2.35-6.56-3.88-12.45-7.12-17.77-11.11C13,398.94.06,374.78.08,344.07c.04-53.51.27-107.01-.08-160.52-.26-39.82,18.24-68.14,52.77-85.82,57.38-29.39,115.19-57.95,172.99-86.53C248.92-.24,273.54-2.17,298.87,2.05c19.59,3.26,36.38,13.21,53.72,21.86,64.71,32.29,129.36,64.68,194.02,97.06h0c2,1.01,1.99,3.86-.01,4.86-17.57,8.78-34.26,17.09-50.91,25.46-51.26,25.78-102.49,51.63-153.77,77.38-14.73,7.4-29.69,14.35-41.88,25.86-20.9,19.75-33,43.64-33.1,72.67-.24,66.71-.08,133.42-.11,200.12,0,.77-.05,1.54-.12,2.38-.16,1.92-2.21,3.08-3.94,2.23-4.9-2.41-9.36-4.6-13.81-6.83-18.15-9.09-36.26-18.26-54.46-27.24-3.39-1.67-4.62-3.71-4.62-7.59.12-71.75-.09-143.49.15-215.24.11-31.39,16.62-53.26,43.45-67.08,49.28-25.38,99.07-49.77,148.64-74.59.62-.31,1.22-.64,1.88-1.01,1.82-1.03,1.86-3.63.07-4.72-.4-.24-.79-.46-1.18-.66-6.97-3.52-14.03-6.84-20.92-10.5"/>
+        <path d="M295.15,529.05c-.22-2.62-.5-4.44-.5-6.27-.02-64.62-.21-129.25.09-193.87.14-29.23,14.47-50.34,39.77-64.2,9.73-5.33,19.8-10.05,29.73-15.02,1.49-.74,3.08-1.28,5.47-2.25.23,2.55.53,4.34.54,6.13.03,24.84.01,49.68,0,74.52,0,6.51.49,6.81,6.38,3.85,32.07-16.1,64.11-32.29,96.26-48.23,4.62-2.29,6.58-4.94,6.51-10.32-.29-25.71-.05-51.42-.21-77.13-.02-3.99,1.18-6.27,4.86-8.07,20.72-10.14,41.31-20.54,61.96-30.83,1.66-.83,3.39-1.53,5.8-2.62.14,2.42.32,4.24.33,6.06.01,78.17,0,156.35.02,234.52,0,3,.06,5.46-3.49,7.2-22.27,10.89-44.39,22.08-66.57,33.15-.88.44-1.85.7-3.63,1.36v-92.95c-4.07,1.88-7.18,3.18-10.18,4.71-31.18,15.97-62.3,32.05-93.54,47.88-3.84,1.94-4.53,4.54-4.52,8.29.09,26.93-.07,53.85.15,80.78.04,4.9-1.63,7.35-6.03,9.45-21.41,10.26-42.64,20.91-63.94,31.42-1.39.69-2.82,1.29-5.29,2.42Z"/>
+      </svg>
+      <span style="font-family: 'Playfair Display', serif; font-weight: 700; font-size: 19px; color: var(--deep-forest);">The Union Hub</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">03.2 — Colour variants</span>
+    <h2 class="h2">Four approved variants. <em>No others.</em></h2>
+  </div>
+  <div class="logo-wall" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="logo-tile">
+      <span class="label">Forest on Off White</span>
+      <svg width="120" height="120" viewBox="0 0 552.18 532.22" fill="#0F6E56" aria-hidden="true"><path d="M294.51,82.88c-8.68-4.36-16.87-8.05-24.61-12.53-4.49-2.6-7.94-2.22-12.39.04-44.73,22.63-89.64,44.91-134.36,67.56-28.42,14.39-49.35,35.84-59.05,66.69-2.82,8.97-4.65,18.66-4.71,28.04-.41,63.23-.22,126.47-.22,189.7,0,1.1,0,2.2,0,3.54,0,2.11-2.3,3.43-4.12,2.35-6.56-3.88-12.45-7.12-17.77-11.11C13,398.94.06,374.78.08,344.07c.04-53.51.27-107.01-.08-160.52-.26-39.82,18.24-68.14,52.77-85.82,57.38-29.39,115.19-57.95,172.99-86.53C248.92-.24,273.54-2.17,298.87,2.05c19.59,3.26,36.38,13.21,53.72,21.86,64.71,32.29,129.36,64.68,194.02,97.06h0c2,1.01,1.99,3.86-.01,4.86-17.57,8.78-34.26,17.09-50.91,25.46-51.26,25.78-102.49,51.63-153.77,77.38-14.73,7.4-29.69,14.35-41.88,25.86-20.9,19.75-33,43.64-33.1,72.67-.24,66.71-.08,133.42-.11,200.12,0,.77-.05,1.54-.12,2.38-.16,1.92-2.21,3.08-3.94,2.23-4.9-2.41-9.36-4.6-13.81-6.83-18.15-9.09-36.26-18.26-54.46-27.24-3.39-1.67-4.62-3.71-4.62-7.59.12-71.75-.09-143.49.15-215.24.11-31.39,16.62-53.26,43.45-67.08,49.28-25.38,99.07-49.77,148.64-74.59.62-.31,1.22-.64,1.88-1.01,1.82-1.03,1.86-3.63.07-4.72-.4-.24-.79-.46-1.18-.66-6.97-3.52-14.03-6.84-20.92-10.5"/><path d="M295.15,529.05c-.22-2.62-.5-4.44-.5-6.27-.02-64.62-.21-129.25.09-193.87.14-29.23,14.47-50.34,39.77-64.2,9.73-5.33,19.8-10.05,29.73-15.02,1.49-.74,3.08-1.28,5.47-2.25.23,2.55.53,4.34.54,6.13.03,24.84.01,49.68,0,74.52,0,6.51.49,6.81,6.38,3.85,32.07-16.1,64.11-32.29,96.26-48.23,4.62-2.29,6.58-4.94,6.51-10.32-.29-25.71-.05-51.42-.21-77.13-.02-3.99,1.18-6.27,4.86-8.07,20.72-10.14,41.31-20.54,61.96-30.83,1.66-.83,3.39-1.53,5.8-2.62.14,2.42.32,4.24.33,6.06.01,78.17,0,156.35.02,234.52,0,3,.06,5.46-3.49,7.2-22.27,10.89-44.39,22.08-66.57,33.15-.88.44-1.85.7-3.63,1.36v-92.95c-4.07,1.88-7.18,3.18-10.18,4.71-31.18,15.97-62.3,32.05-93.54,47.88-3.84,1.94-4.53,4.54-4.52,8.29.09,26.93-.07,53.85.15,80.78.04,4.9-1.63,7.35-6.03,9.45-21.41,10.26-42.64,20.91-63.94,31.42-1.39.69-2.82,1.29-5.29,2.42Z"/></svg>
+    </div>
+    <div class="logo-tile dark">
+      <span class="label">Active on Deep Forest</span>
+      <svg width="120" height="120" viewBox="0 0 552.18 532.22" fill="#1D9E75" aria-hidden="true"><path d="M294.51,82.88c-8.68-4.36-16.87-8.05-24.61-12.53-4.49-2.6-7.94-2.22-12.39.04-44.73,22.63-89.64,44.91-134.36,67.56-28.42,14.39-49.35,35.84-59.05,66.69-2.82,8.97-4.65,18.66-4.71,28.04-.41,63.23-.22,126.47-.22,189.7,0,1.1,0,2.2,0,3.54,0,2.11-2.3,3.43-4.12,2.35-6.56-3.88-12.45-7.12-17.77-11.11C13,398.94.06,374.78.08,344.07c.04-53.51.27-107.01-.08-160.52-.26-39.82,18.24-68.14,52.77-85.82,57.38-29.39,115.19-57.95,172.99-86.53C248.92-.24,273.54-2.17,298.87,2.05c19.59,3.26,36.38,13.21,53.72,21.86,64.71,32.29,129.36,64.68,194.02,97.06h0c2,1.01,1.99,3.86-.01,4.86-17.57,8.78-34.26,17.09-50.91,25.46-51.26,25.78-102.49,51.63-153.77,77.38-14.73,7.4-29.69,14.35-41.88,25.86-20.9,19.75-33,43.64-33.1,72.67-.24,66.71-.08,133.42-.11,200.12,0,.77-.05,1.54-.12,2.38-.16,1.92-2.21,3.08-3.94,2.23-4.9-2.41-9.36-4.6-13.81-6.83-18.15-9.09-36.26-18.26-54.46-27.24-3.39-1.67-4.62-3.71-4.62-7.59.12-71.75-.09-143.49.15-215.24.11-31.39,16.62-53.26,43.45-67.08,49.28-25.38,99.07-49.77,148.64-74.59.62-.31,1.22-.64,1.88-1.01,1.82-1.03,1.86-3.63.07-4.72-.4-.24-.79-.46-1.18-.66-6.97-3.52-14.03-6.84-20.92-10.5"/><path d="M295.15,529.05c-.22-2.62-.5-4.44-.5-6.27-.02-64.62-.21-129.25.09-193.87.14-29.23,14.47-50.34,39.77-64.2,9.73-5.33,19.8-10.05,29.73-15.02,1.49-.74,3.08-1.28,5.47-2.25.23,2.55.53,4.34.54,6.13.03,24.84.01,49.68,0,74.52,0,6.51.49,6.81,6.38,3.85,32.07-16.1,64.11-32.29,96.26-48.23,4.62-2.29,6.58-4.94,6.51-10.32-.29-25.71-.05-51.42-.21-77.13-.02-3.99,1.18-6.27,4.86-8.07,20.72-10.14,41.31-20.54,61.96-30.83,1.66-.83,3.39-1.53,5.8-2.62.14,2.42.32,4.24.33,6.06.01,78.17,0,156.35.02,234.52,0,3,.06,5.46-3.49,7.2-22.27,10.89-44.39,22.08-66.57,33.15-.88.44-1.85.7-3.63,1.36v-92.95c-4.07,1.88-7.18,3.18-10.18,4.71-31.18,15.97-62.3,32.05-93.54,47.88-3.84,1.94-4.53,4.54-4.52,8.29.09,26.93-.07,53.85.15,80.78.04,4.9-1.63,7.35-6.03,9.45-21.41,10.26-42.64,20.91-63.94,31.42-1.39.69-2.82,1.29-5.29,2.42Z"/></svg>
+    </div>
+    <div class="logo-tile forest">
+      <span class="label">Off White on Forest</span>
+      <svg width="120" height="120" viewBox="0 0 552.18 532.22" fill="#F5F4F1" aria-hidden="true"><path d="M294.51,82.88c-8.68-4.36-16.87-8.05-24.61-12.53-4.49-2.6-7.94-2.22-12.39.04-44.73,22.63-89.64,44.91-134.36,67.56-28.42,14.39-49.35,35.84-59.05,66.69-2.82,8.97-4.65,18.66-4.71,28.04-.41,63.23-.22,126.47-.22,189.7,0,1.1,0,2.2,0,3.54,0,2.11-2.3,3.43-4.12,2.35-6.56-3.88-12.45-7.12-17.77-11.11C13,398.94.06,374.78.08,344.07c.04-53.51.27-107.01-.08-160.52-.26-39.82,18.24-68.14,52.77-85.82,57.38-29.39,115.19-57.95,172.99-86.53C248.92-.24,273.54-2.17,298.87,2.05c19.59,3.26,36.38,13.21,53.72,21.86,64.71,32.29,129.36,64.68,194.02,97.06h0c2,1.01,1.99,3.86-.01,4.86-17.57,8.78-34.26,17.09-50.91,25.46-51.26,25.78-102.49,51.63-153.77,77.38-14.73,7.4-29.69,14.35-41.88,25.86-20.9,19.75-33,43.64-33.1,72.67-.24,66.71-.08,133.42-.11,200.12,0,.77-.05,1.54-.12,2.38-.16,1.92-2.21,3.08-3.94,2.23-4.9-2.41-9.36-4.6-13.81-6.83-18.15-9.09-36.26-18.26-54.46-27.24-3.39-1.67-4.62-3.71-4.62-7.59.12-71.75-.09-143.49.15-215.24.11-31.39,16.62-53.26,43.45-67.08,49.28-25.38,99.07-49.77,148.64-74.59.62-.31,1.22-.64,1.88-1.01,1.82-1.03,1.86-3.63.07-4.72-.4-.24-.79-.46-1.18-.66-6.97-3.52-14.03-6.84-20.92-10.5"/><path d="M295.15,529.05c-.22-2.62-.5-4.44-.5-6.27-.02-64.62-.21-129.25.09-193.87.14-29.23,14.47-50.34,39.77-64.2,9.73-5.33,19.8-10.05,29.73-15.02,1.49-.74,3.08-1.28,5.47-2.25.23,2.55.53,4.34.54,6.13.03,24.84.01,49.68,0,74.52,0,6.51.49,6.81,6.38,3.85,32.07-16.1,64.11-32.29,96.26-48.23,4.62-2.29,6.58-4.94,6.51-10.32-.29-25.71-.05-51.42-.21-77.13-.02-3.99,1.18-6.27,4.86-8.07,20.72-10.14,41.31-20.54,61.96-30.83,1.66-.83,3.39-1.53,5.8-2.62.14,2.42.32,4.24.33,6.06.01,78.17,0,156.35.02,234.52,0,3,.06,5.46-3.49,7.2-22.27,10.89-44.39,22.08-66.57,33.15-.88.44-1.85.7-3.63,1.36v-92.95c-4.07,1.88-7.18,3.18-10.18,4.71-31.18,15.97-62.3,32.05-93.54,47.88-3.84,1.94-4.53,4.54-4.52,8.29.09,26.93-.07,53.85.15,80.78.04,4.9-1.63,7.35-6.03,9.45-21.41,10.26-42.64,20.91-63.94,31.42-1.39.69-2.82,1.29-5.29,2.42Z"/></svg>
+    </div>
+    <div class="logo-tile mint">
+      <span class="label">Forest on Mint</span>
+      <svg width="120" height="120" viewBox="0 0 552.18 532.22" fill="#0F6E56" aria-hidden="true"><path d="M294.51,82.88c-8.68-4.36-16.87-8.05-24.61-12.53-4.49-2.6-7.94-2.22-12.39.04-44.73,22.63-89.64,44.91-134.36,67.56-28.42,14.39-49.35,35.84-59.05,66.69-2.82,8.97-4.65,18.66-4.71,28.04-.41,63.23-.22,126.47-.22,189.7,0,1.1,0,2.2,0,3.54,0,2.11-2.3,3.43-4.12,2.35-6.56-3.88-12.45-7.12-17.77-11.11C13,398.94.06,374.78.08,344.07c.04-53.51.27-107.01-.08-160.52-.26-39.82,18.24-68.14,52.77-85.82,57.38-29.39,115.19-57.95,172.99-86.53C248.92-.24,273.54-2.17,298.87,2.05c19.59,3.26,36.38,13.21,53.72,21.86,64.71,32.29,129.36,64.68,194.02,97.06h0c2,1.01,1.99,3.86-.01,4.86-17.57,8.78-34.26,17.09-50.91,25.46-51.26,25.78-102.49,51.63-153.77,77.38-14.73,7.4-29.69,14.35-41.88,25.86-20.9,19.75-33,43.64-33.1,72.67-.24,66.71-.08,133.42-.11,200.12,0,.77-.05,1.54-.12,2.38-.16,1.92-2.21,3.08-3.94,2.23-4.9-2.41-9.36-4.6-13.81-6.83-18.15-9.09-36.26-18.26-54.46-27.24-3.39-1.67-4.62-3.71-4.62-7.59.12-71.75-.09-143.49.15-215.24.11-31.39,16.62-53.26,43.45-67.08,49.28-25.38,99.07-49.77,148.64-74.59.62-.31,1.22-.64,1.88-1.01,1.82-1.03,1.86-3.63.07-4.72-.4-.24-.79-.46-1.18-.66-6.97-3.52-14.03-6.84-20.92-10.5"/><path d="M295.15,529.05c-.22-2.62-.5-4.44-.5-6.27-.02-64.62-.21-129.25.09-193.87.14-29.23,14.47-50.34,39.77-64.2,9.73-5.33,19.8-10.05,29.73-15.02,1.49-.74,3.08-1.28,5.47-2.25.23,2.55.53,4.34.54,6.13.03,24.84.01,49.68,0,74.52,0,6.51.49,6.81,6.38,3.85,32.07-16.1,64.11-32.29,96.26-48.23,4.62-2.29,6.58-4.94,6.51-10.32-.29-25.71-.05-51.42-.21-77.13-.02-3.99,1.18-6.27,4.86-8.07,20.72-10.14,41.31-20.54,61.96-30.83,1.66-.83,3.39-1.53,5.8-2.62.14,2.42.32,4.24.33,6.06.01,78.17,0,156.35.02,234.52,0,3,.06,5.46-3.49,7.2-22.27,10.89-44.39,22.08-66.57,33.15-.88.44-1.85.7-3.63,1.36v-92.95c-4.07,1.88-7.18,3.18-10.18,4.71-31.18,15.97-62.3,32.05-93.54,47.88-3.84,1.94-4.53,4.54-4.52,8.29.09,26.93-.07,53.85.15,80.78.04,4.9-1.63,7.35-6.03,9.45-21.41,10.26-42.64,20.91-63.94,31.42-1.39.69-2.82,1.29-5.29,2.42Z"/></svg>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">03.3 — Rules</span>
+    <h2 class="h2">Clear space. <em>Minimum size.</em> Don'ts.</h2>
+  </div>
+  <dl class="def">
+    <dt>Clear space</dt>
+    <dd>Equal to one full mark height on every side. No copy, no rule, no other mark inside that boundary.</dd>
+    <dt>Minimum size</dt>
+    <dd>Mark — 20px digital, 0.3" print. Horizontal lockup — 120px digital, 1" print. The contour holds detail down to 20px and softens below it; if the surface forces something smaller, use a wordmark-only treatment instead.</dd>
+    <dt>Don't</dt>
+    <dd>Don't recolour individual paths. Don't outline the mark. Don't shadow, gradient, rotate, or stretch it. Don't enclose it in a box. Don't pair it with another mark inside the clear-space boundary.</dd>
+    <dt>Files</dt>
+    <dd>SVG is canonical — <code>logo.svg</code> at the brand root, viewBox 552.18 × 532.22. PNG @1x/2x/3x for raster. EPS for print vendors who insist.</dd>
+  </dl>
+</section>
+
+<!-- ═══════════════════════════════════ CHAPTER 04 — COLOUR (full bleed) ═══════════════════════════════════ -->
+<section class="opener" id="ch04">
+  <div class="opener-meta">
+    <span class="eyebrow">Chapter 04</span>
+    <span class="eyebrow muted">Colour System</span>
+  </div>
+  <div class="num-massive">04</div>
+  <div class="opener-title">
+    <h2 class="display-2">Colour <em>System.</em></h2>
+    <p class="lede">Two greens with two jobs. One red used almost never. Everything else is restraint.</p>
+  </div>
+</section>
+
+<!-- Full-bleed swatch wall -->
+<div class="palette-wall">
+  <div class="swatch on-light" style="background:#F5F4F1;">
+    <div>
+      <div class="sw-tag">01 · Default page</div>
+      <h3 class="sw-name" style="margin-top: 18px;">Off White</h3>
+    </div>
+    <div class="sw-meta">#F5F4F1<br>RGB 245, 244, 241<br>The page</div>
+  </div>
+  <div class="swatch on-dark" style="background:#0F6E56;">
+    <div>
+      <div class="sw-tag">02 · Primary brand</div>
+      <h3 class="sw-name" style="margin-top: 18px;">Forest Green</h3>
+    </div>
+    <div class="sw-meta">#0F6E56<br>RGB 15, 110, 86<br>Anchor &amp; CTA</div>
+  </div>
+  <div class="swatch on-dark" style="background:#1D9E75;">
+    <div>
+      <div class="sw-tag">03 · Verified state</div>
+      <h3 class="sw-name" style="margin-top: 18px;">Active Green</h3>
+    </div>
+    <div class="sw-meta">#1D9E75<br>RGB 29, 158, 117<br>Verified — only</div>
+  </div>
+  <div class="swatch on-light" style="background:#E1F5EE;">
+    <div>
+      <div class="sw-tag">04 · Soft surface</div>
+      <h3 class="sw-name" style="margin-top: 18px;">Mint Tint</h3>
+    </div>
+    <div class="sw-meta">#E1F5EE<br>RGB 225, 245, 238<br>Calm fill</div>
+  </div>
+
+  <div class="swatch on-dark" style="background:#0D1F1A;">
+    <div>
+      <div class="sw-tag">05 · Dark surface</div>
+      <h3 class="sw-name" style="margin-top: 18px;">Deep Forest</h3>
+    </div>
+    <div class="sw-meta">#0D1F1A<br>RGB 13, 31, 26<br>Dark mode</div>
+  </div>
+  <div class="swatch on-dark" style="background:#111111;">
+    <div>
+      <div class="sw-tag">06 · Body text</div>
+      <h3 class="sw-name" style="margin-top: 18px;">Near Black</h3>
+    </div>
+    <div class="sw-meta">#111111<br>RGB 17, 17, 17<br>Type</div>
+  </div>
+  <div class="swatch on-dark" style="background:#888780;">
+    <div>
+      <div class="sw-tag">07 · Muted text</div>
+      <h3 class="sw-name" style="margin-top: 18px;">Mid Gray</h3>
+    </div>
+    <div class="sw-meta">#888780<br>RGB 136, 135, 128<br>Captions only</div>
+  </div>
+  <div class="swatch on-dark" style="background:#E24B4A;">
+    <div>
+      <div class="sw-tag">08 · Invalid state</div>
+      <h3 class="sw-name" style="margin-top: 18px;">Alert Red</h3>
+    </div>
+    <div class="sw-meta">#E24B4A<br>RGB 226, 75, 74<br>Failure — only</div>
+  </div>
+</div>
+
+<section>
+  <div class="section-head">
+    <span class="num">04.1 — Philosophy</span>
+    <h2 class="h2">Two greens. Two jobs. <em>No gradients.</em></h2>
+  </div>
+  <div class="grid-12 stack-md">
+    <div class="col-7">
+      <p>Forest Green is the brand. Active Green is the verified state. Those are different things and the colour system enforces the difference. Mint Tint exists for soft surfaces. Deep Forest exists for dark surfaces. Alert Red exists for one specific moment — a failed verification — and otherwise stays out of the work entirely.</p>
+      <p>There are no gradients in this system. Anywhere. A gradient is a hedge between two answers, and this brand answers in one.</p>
+    </div>
+    <div class="col-5">
+      <div class="card">
+        <span class="eyebrow">Usage Ratios</span>
+        <h3 class="h3" style="margin-top: 14px;">The page is mostly Off White.</h3>
+        <p style="margin-bottom: 18px;">Forest is the anchor. Active appears only on verified states. Alert flickers, never fields.</p>
+        <div class="ratio-bar">
+          <div style="width: 60%; background: #F5F4F1; color: #0D1F1A;">60%</div>
+          <div style="width: 18%; background: #0F6E56;">18%</div>
+          <div style="width: 10%; background: #0D1F1A;">10%</div>
+          <div style="width: 6%;  background: #1D9E75;">6%</div>
+          <div style="width: 5%;  background: #E1F5EE; color: #0D1F1A;">5%</div>
+          <div style="width: 1%;  background: #E24B4A;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="dark">
+  <div class="section-head">
+    <span class="num">04.2 — Combinations</span>
+    <h2 class="h2">Approved. <em>Forbidden.</em> Why both lists matter.</h2>
+  </div>
+
+  <div class="grid-12 stack-md">
+    <div class="col-6">
+      <span class="eyebrow on-dark" style="margin-bottom: 14px;">Approved</span>
+      <div class="logo-wall" style="grid-template-columns: repeat(2,1fr); margin-top: 14px;">
+        <div class="logo-tile" style="background: #F5F4F1; min-height: 120px;"><span style="font-family: 'Playfair Display', serif; font-weight: 700; font-size: 22px; color: #0F6E56;">Forest on Off&nbsp;White</span></div>
+        <div class="logo-tile" style="background: #0D1F1A; min-height: 120px; border-color: var(--hair-on-dark);"><span style="font-family: 'Playfair Display', serif; font-weight: 700; font-size: 22px; color: #F5F4F1;">Off&nbsp;White on Deep&nbsp;Forest</span></div>
+        <div class="logo-tile" style="background: #0F6E56; min-height: 120px;"><span style="font-family: 'Playfair Display', serif; font-weight: 700; font-size: 22px; color: #F5F4F1;">Off&nbsp;White on Forest</span></div>
+        <div class="logo-tile" style="background: #E1F5EE; min-height: 120px;"><span style="font-family: 'Playfair Display', serif; font-weight: 700; font-size: 22px; color: #0D1F1A;">Deep&nbsp;Forest on Mint</span></div>
+      </div>
+    </div>
+    <div class="col-6">
+      <span class="eyebrow on-dark" style="color: var(--alert); margin-bottom: 14px;">
+        Forbidden
+      </span>
+      <div class="logo-wall" style="grid-template-columns: repeat(2,1fr); margin-top: 14px;">
+        <div class="logo-tile" style="background: #1D9E75; min-height: 120px;"><span style="font-family: 'Playfair Display', serif; font-weight: 700; font-size: 20px; color: #0F6E56;">Forest on Active</span></div>
+        <div class="logo-tile" style="background: #E1F5EE; min-height: 120px;"><span style="font-family: 'Playfair Display', serif; font-weight: 700; font-size: 20px; color: #1D9E75;">Active on Mint</span></div>
+        <div class="logo-tile" style="background: #0F6E56; min-height: 120px;"><span style="font-family: 'Playfair Display', serif; font-weight: 700; font-size: 20px; color: #E24B4A;">Alert on Forest</span></div>
+        <div class="logo-tile" style="background: #888780; min-height: 120px;"><span style="font-family: 'Playfair Display', serif; font-weight: 700; font-size: 20px; color: #F5F4F1;">Anything on Mid Gray</span></div>
+      </div>
+      <p style="margin-top: 18px;">Two greens together fail contrast. Alert touches only calm surfaces — never brand surfaces. Mid Gray is for type, never for fields.</p>
+    </div>
+  </div>
+
+  <dl class="def" style="margin-top: clamp(56px, 8vh, 96px);">
+    <dt>Body text</dt><dd>Near Black on Off White — contrast 16.4:1 (AAA).</dd>
+    <dt>Brand on light</dt><dd>Forest on Off White — contrast 5.7:1 (AA Body &amp; AA Large).</dd>
+    <dt>Verified state</dt><dd>Active Green on Mint — passes for icon &amp; large display only. Body copy in verified contexts uses Deep Forest.</dd>
+    <dt>Alert state</dt><dd>Alert Red on Off White — contrast 4.6:1 (AA Body). Always paired with the X icon and a status word — colour is never the only signal.</dd>
+  </dl>
+</section>
+
+<!-- ═══════════════════════════════════ CHAPTER 05 — TYPOGRAPHY ═══════════════════════════════════ -->
+<section class="opener mint" id="ch05">
+  <div class="opener-meta">
+    <span class="eyebrow">Chapter 05</span>
+    <span class="eyebrow muted">Typography</span>
+  </div>
+  <div class="num-massive">05</div>
+  <div class="opener-title">
+    <h2 class="display-2">Typo<em>graphy.</em></h2>
+    <p class="lede">Serif heavy for authority. Sans light for honesty. Most brands use both heavy. We don't.</p>
+  </div>
+</section>
+
+<!-- Massive specimen -->
+<section style="padding-top: clamp(40px, 6vh, 80px); padding-bottom: clamp(20px, 3vh, 40px);">
+  <span class="eyebrow">05.1 — Display · Playfair Display</span>
+  <h2 class="specimen-massive" style="margin-top: 24px;">Aa <em>Aa</em></h2>
+</section>
+
+<section style="padding-top: clamp(20px, 3vh, 48px);">
+  <div class="grid-12 stack-md">
+    <div class="col-7">
+      <h2 class="h2">A serif that <em>declares.</em> A sans that doesn't shout.</h2>
+      <p style="margin-top: 18px;">Playfair Display — high-contrast, classic, slightly editorial — does the declaring. DM Sans at weight 300 — light, geometric, unbothered — does the rest. Body copy at light weight is unusual on purpose. It signals an interface that is calm, not selling, and that trusts the reader to read.</p>
+    </div>
+    <div class="col-5">
+      <div class="card">
+        <span class="eyebrow">Pairing rule</span>
+        <h3 class="h3" style="margin-top: 14px;">Heavy serif, light sans.</h3>
+        <p>If you find yourself reaching for DM Sans 700, switch to Playfair instead. The brand is heavier in the headline and lighter in the body — never the other way around.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">05.2 — Body · DM Sans Light</span>
+  <h2 class="specimen-massive" style="font-family: 'DM Sans', sans-serif; font-weight: 300; letter-spacing: -0.03em; margin-top: 24px;">Aa <em style="font-weight: 300; font-style: italic; color: var(--forest);">Aa</em></h2>
+</section>
+
+<section>
+  <span class="eyebrow">05.3 — Mono · DM Mono</span>
+  <h2 class="specimen-massive" style="font-family: 'DM Mono', monospace; font-weight: 500; letter-spacing: 0.0em; font-size: clamp(140px, 28vw, 420px); margin-top: 24px;">Aa <em style="font-style: normal; color: var(--forest);">@</em></h2>
+</section>
+
+<section class="dark">
+  <div class="section-head">
+    <span class="num">05.4 — Type scale</span>
+    <h2 class="h2">One scale. <em>Used everywhere.</em></h2>
+  </div>
+
+  <div class="specimen-row">
+    <span class="label">H1 / Display</span>
+    <span class="sample" style="font-size: clamp(40px, 6vw, 92px);">Verified <em style="color: var(--active); font-style: italic;">since 2019.</em></span>
+  </div>
+  <div class="specimen-row">
+    <span class="label">H2 / Section</span>
+    <span class="sample" style="font-size: clamp(28px, 3.6vw, 52px);">Real-time digital membership.</span>
+  </div>
+  <div class="specimen-row">
+    <span class="label">H3 / Subhead</span>
+    <span class="sample" style="font-size: 24px;">Active member since 2019.</span>
+  </div>
+  <div class="specimen-row body">
+    <span class="label">Lede</span>
+    <span class="sample" style="font-size: 22px; color: rgba(245,244,241,0.85);">A printed card is accurate the day it leaves the printer.</span>
+  </div>
+  <div class="specimen-row body">
+    <span class="label">Body</span>
+    <span class="sample" style="font-size: 16px; color: rgba(245,244,241,0.8);">A member walks up to vote. Rep opens phone camera. Scans. Verified.</span>
+  </div>
+  <div class="specimen-row body">
+    <span class="label">UI / Button</span>
+    <span class="sample" style="font-size: 14.5px; font-weight: 500; color: var(--off-white);">Get early access</span>
+  </div>
+  <div class="specimen-row mono">
+    <span class="label">Eyebrow</span>
+    <span class="sample" style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--active);">Real-time digital membership</span>
+  </div>
+  <div class="specimen-row mono">
+    <span class="label">ID / Numerals</span>
+    <span class="sample" style="font-size: 16px; color: var(--off-white);">UH–2026–104873</span>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ CHAPTER 06 — LAYOUT ═══════════════════════════════════ -->
+<section class="opener" id="ch06">
+  <div class="opener-meta">
+    <span class="eyebrow">Chapter 06</span>
+    <span class="eyebrow muted">Layout, Grid &amp; the 0.5px Border</span>
+  </div>
+  <div class="num-massive">06</div>
+  <div class="opener-title">
+    <h2 class="display-2">Layout <em>&amp; Grid.</em></h2>
+    <p class="lede">No shadows. No drop-blurs. No glow. The hairline at fifteen percent black is the entire elevation system.</p>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">06.1 — The 0.5px Border</span>
+    <h2 class="h2">The hairline is the <em>elevation system.</em></h2>
+  </div>
+
+  <p style="margin-bottom: clamp(36px, 5vh, 56px); max-width: 62ch;">Every container, card, input, and divider in this brand uses one rule: <strong>0.5px solid rgba(0,0,0,0.15)</strong> on light surfaces, <strong>0.5px solid rgba(245,244,241,0.18)</strong> on dark. There are no shadows. There is no glow. There is no drop blur. Depth is implied through hairlines and whitespace alone.</p>
+
+  <div class="grid-12">
+    <div class="col-4"><div class="card tall"><span class="eyebrow">Default</span><h3 class="h3" style="margin-top: 14px;">On light</h3><p style="font-family: 'DM Mono', monospace; font-size: 12.5px;">rgba(0,0,0,0.15)</p></div></div>
+    <div class="col-4"><div class="card dark tall"><span class="eyebrow on-dark">Inverse</span><h3 class="h3" style="margin-top: 14px;">On dark</h3><p style="font-family: 'DM Mono', monospace; font-size: 12.5px;">rgba(245,244,241,0.18)</p></div></div>
+    <div class="col-4"><div class="card mint tall"><span class="eyebrow">Mint</span><h3 class="h3" style="margin-top: 14px;">On mint</h3><p style="font-family: 'DM Mono', monospace; font-size: 12.5px; color: var(--deep-forest);">rgba(15,110,86,0.25)</p></div></div>
+  </div>
+</section>
+
+<section class="mint">
+  <div class="section-head">
+    <span class="num">06.2 — Spacing &amp; Radius</span>
+    <h2 class="h2">One spacing scale. <em>Three radii.</em></h2>
+  </div>
+
+  <div class="grid-12 stack-md">
+    <div class="col-6">
+      <div class="card">
+        <span class="eyebrow">Spacing scale</span>
+        <p style="font-family: 'DM Mono', monospace; font-size: 16px; letter-spacing: 0.06em; color: var(--ink); margin-top: 14px;">4 · 8 · 16 · 24 · 32 · 48 · 64 · 96 · 128</p>
+        <p>Pick a value from the scale or argue for a new one in writing.</p>
+      </div>
+    </div>
+    <div class="col-6">
+      <dl class="def">
+        <dt>Buttons</dt><dd><strong>4px.</strong> Reads as a button, not a badge.</dd>
+        <dt>Inputs</dt><dd><strong>8px.</strong> Slightly softer to receive a hand.</dd>
+        <dt>Cards</dt><dd><strong>12px.</strong> The signature container radius.</dd>
+        <dt>Pills</dt><dd><strong>999px.</strong> Status only.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">06.3 — Section Anatomy</span>
+    <h2 class="h2">Every marketing section, <em>same five beats.</em></h2>
+  </div>
+  <div class="card" style="max-width: 60ch;">
+    <ol style="margin: 0; padding-left: 22px; font-size: 15.5px; line-height: 2; color: var(--ink-soft);">
+      <li><strong>Eyebrow.</strong> 11px DM Mono uppercase. One line.</li>
+      <li><strong>Headline.</strong> Playfair 700. One sentence. One emphasis word in italic Forest.</li>
+      <li><strong>Lede.</strong> DM Sans 300, 18–20px. Two sentences maximum.</li>
+      <li><strong>Block.</strong> Card grid, demo, scene, or table. One per section.</li>
+      <li><strong>Action.</strong> One CTA. Verb + outcome. No second CTA.</li>
+    </ol>
+  </div>
+  <p style="margin-top: 36px; max-width: 60ch;"><strong>Whitespace as discipline.</strong> If the page feels crowded, the page <em>is</em> crowded. The rule of thumb: a section header should have at least 64px of clear space above it, and the next block at least 32px below the lede.</p>
+</section>
+
+<!-- ═══════════════════════════════════ CHAPTER 07 — VERIFICATION ═══════════════════════════════════ -->
+<section class="opener forest" id="ch07">
+  <div class="opener-meta">
+    <span class="eyebrow on-dark">Chapter 07</span>
+    <span class="eyebrow muted" style="color: rgba(245,244,241,0.6);">Verification System</span>
+  </div>
+  <div class="num-massive">07</div>
+  <div class="opener-title">
+    <h2 class="display-2">Verifi<em>cation.</em></h2>
+    <p class="lede" style="color: rgba(245,244,241,0.9);">Two states. Green check. Red X. There is no third state. There is no maybe.</p>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">07.1 — Two states only</span>
+    <h2 class="h2">Verified <em>or</em> Invalid. Nothing in between.</h2>
+  </div>
+
+  <p style="margin-bottom: clamp(36px, 5vh, 56px); max-width: 62ch;">The verification system is intentionally binary. A maybe is a failure. An "expired but recently active" is a failure. The product reduces a complicated answer to one of two outcomes, every time.</p>
+
+  <div class="grid-12">
+    <div class="col-6" style="display: flex; justify-content: center;">
+      <div class="verify-screen">
+        <div class="vs-icon">
+          <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><path d="M9 17 L14 22 L23 11" fill="none" stroke="#F5F4F1" stroke-width="3.5" stroke-linecap="square"/></svg>
+        </div>
+        <div class="vs-state">Verified</div>
+        <div class="vs-meta">Active member since 2019<br>UH–2026–104873</div>
+      </div>
+    </div>
+    <div class="col-6" style="display: flex; justify-content: center;">
+      <div class="verify-screen invalid">
+        <div class="vs-icon">
+          <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><path d="M10 10 L22 22 M22 10 L10 22" stroke="#F5F4F1" stroke-width="3.5" stroke-linecap="square"/></svg>
+        </div>
+        <div class="vs-state">Invalid</div>
+        <div class="vs-meta">Not in roster · Last sync 4 min ago</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: clamp(56px, 8vh, 96px); display: flex; gap: 18px; flex-wrap: wrap;">
+    <div class="pill verified"><span class="dot"></span>Verified · Active member since 2019</div>
+    <div class="pill invalid"><span class="dot"></span>Invalid · Not in roster</div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">07.2 — The Member Card</span>
+    <h2 class="h2">The card <em>is</em> the brand.</h2>
+  </div>
+
+  <p style="margin-bottom: clamp(36px, 5vh, 56px); max-width: 62ch;">This is what a member sees on their phone. It is what a rep sees when scanning. It is the most-used surface of the entire product. Treat it accordingly.</p>
+
+  <div class="grid-12">
+    <div class="col-5" style="display: flex; justify-content: center;">
+      <div class="member-card">
+        <div class="mc-head">
+          <svg width="32" height="32" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="#0F6E56"/><path d="M36 62 L52 78 L86 42" fill="none" stroke="#F5F4F1" stroke-width="9" stroke-linecap="square"/></svg>
+          <span class="mc-org">Local 79 · CUPE</span>
+        </div>
+        <div class="mc-name">Maya Okonkwo</div>
+        <div class="mc-meta">Active member since 2019 · UH–2026–104873</div>
+        <div class="pill verified" style="margin-bottom: 18px;"><span class="dot"></span>Verified</div>
+        <div style="border: 0.5px solid var(--hair); border-radius: 8px; padding: 10px; display: flex; align-items: center; gap: 12px;">
+          <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">
+            <rect width="64" height="64" fill="#F5F4F1"/>
+            <g fill="#111111">
+              <rect x="6" y="6" width="14" height="14"/><rect x="44" y="6" width="14" height="14"/><rect x="6" y="44" width="14" height="14"/>
+              <rect x="10" y="10" width="6" height="6" fill="#F5F4F1"/><rect x="48" y="10" width="6" height="6" fill="#F5F4F1"/><rect x="10" y="48" width="6" height="6" fill="#F5F4F1"/>
+              <rect x="26" y="8"  width="2" height="2"/><rect x="30" y="8"  width="2" height="2"/><rect x="34" y="8"  width="2" height="2"/>
+              <rect x="26" y="14" width="2" height="2"/><rect x="34" y="14" width="2" height="2"/>
+              <rect x="26" y="22" width="2" height="2"/><rect x="30" y="22" width="2" height="2"/><rect x="34" y="22" width="2" height="2"/><rect x="40" y="22" width="2" height="2"/>
+              <rect x="22" y="28" width="2" height="2"/><rect x="26" y="28" width="2" height="2"/><rect x="34" y="28" width="2" height="2"/>
+              <rect x="22" y="34" width="2" height="2"/><rect x="30" y="34" width="2" height="2"/><rect x="38" y="34" width="2" height="2"/>
+              <rect x="22" y="40" width="2" height="2"/><rect x="26" y="40" width="2" height="2"/><rect x="30" y="40" width="2" height="2"/><rect x="40" y="40" width="2" height="2"/>
+              <rect x="26" y="46" width="2" height="2"/><rect x="34" y="46" width="2" height="2"/><rect x="40" y="46" width="2" height="2"/>
+              <rect x="26" y="52" width="2" height="2"/><rect x="30" y="52" width="2" height="2"/><rect x="38" y="52" width="2" height="2"/>
+            </g>
+          </svg>
+          <div style="font-family: 'DM Sans', sans-serif; font-weight: 300; font-size: 12px; color: var(--ink-soft); line-height: 1.45;">
+            <strong style="font-weight: 500; color: var(--deep-forest);">Show this to your rep.</strong><br>
+            One tap. No app. The card stays current.
+          </div>
+        </div>
+        <div class="mc-foot"><span>The Union Hub</span><span>Last sync · 12:04</span></div>
+      </div>
+    </div>
+    <div class="col-7">
+      <div class="card" style="height: 100%;">
+        <span class="eyebrow">Anatomy</span>
+        <h3 class="h3" style="margin-top: 14px;">Six elements. No more.</h3>
+        <ol style="margin: 0; padding-left: 20px; font-size: 14.5px; line-height: 1.95; color: var(--ink-soft);">
+          <li><strong>Mark + organisation.</strong> The local. Not "The Union Hub" branding — the user is in <em>their</em> union.</li>
+          <li><strong>Member name.</strong> Playfair 700. The largest type on the surface.</li>
+          <li><strong>Membership meta.</strong> Active member since · Member ID. Mono numerals.</li>
+          <li><strong>Status pill.</strong> Verified, always shown. Single source of truth.</li>
+          <li><strong>QR.</strong> Quiet zone full. Plain instruction beside it.</li>
+          <li><strong>Sync stamp.</strong> Last sync time. Visible, not hidden in a tooltip.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="mint">
+  <div class="section-head">
+    <span class="num">07.3 — QR &amp; Iconography</span>
+    <h2 class="h2">Black on Off White. <em>Square caps. No fashion.</em></h2>
+  </div>
+  <dl class="def">
+    <dt>QR colour</dt><dd>Always Near Black on Off White. No brand-coloured QR codes — they fail at low-light scans.</dd>
+    <dt>QR quiet zone</dt><dd>Full default quiet zone. No logo overlay inside the QR — it lowers scan reliability and gains nothing.</dd>
+    <dt>Icon stroke</dt><dd>1.5px, square caps, miter joins. Strokes only — except for the two filled status icons.</dd>
+    <dt>Icon grid</dt><dd>24×24 base, 16×16 dense.</dd>
+    <dt>Icon colour</dt><dd>Forest on light, Off White on dark. Never coloured by category.</dd>
+  </dl>
+</section>
+
+<!-- ═══════════════════════════════════ CHAPTER 08 — VOICE IN APPLICATION ═══════════════════════════════════ -->
+<section class="opener" id="ch08">
+  <div class="opener-meta">
+    <span class="eyebrow">Chapter 08</span>
+    <span class="eyebrow muted">Voice in Application</span>
+  </div>
+  <div class="num-massive">08</div>
+  <div class="opener-title">
+    <h2 class="display-2">Voice <em>in Use.</em></h2>
+    <p class="lede">The brand isn't the headline. The brand is what the button says.</p>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">08.1 — The hero line</span>
+    <h2 class="h2">The opening sentence is <em>load-bearing.</em></h2>
+  </div>
+
+  <div class="demo-frame mint">
+    <span class="eyebrow">Real-time digital membership</span>
+    <h2 class="display-2" style="font-size: clamp(40px, 6vw, 80px); margin-top: 18px; max-width: 14ch;">Your union card is a piece of paper. <em>That ends now.</em></h2>
+    <p class="lede" style="margin-top: 22px; max-width: 50ch; color: var(--deep-forest);">Real-time digital membership for unions. Instant verification. No apps. No passwords. <strong style="color: var(--deep-forest); font-weight: 500;">No bullshit.</strong></p>
+    <div class="row" style="margin-top: 28px;">
+      <a class="btn btn-primary">Get early access</a>
+      <a class="btn btn-ghost">See how it works</a>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">08.2 — Buttons &amp; forms</span>
+    <h2 class="h2">Verb plus outcome. <em>That's the whole rule.</em></h2>
+  </div>
+
+  <div class="grid-12 stack-md">
+    <div class="col-6">
+      <div class="card">
+        <span class="eyebrow">Approved buttons</span>
+        <div class="row" style="margin-top: 18px;">
+          <a class="btn btn-primary">Get early access</a>
+          <a class="btn btn-ghost">See how it works</a>
+        </div>
+        <div class="row" style="margin-top: 12px;">
+          <a class="btn btn-primary">Verify member</a>
+          <a class="btn btn-ghost">Read the brief</a>
+        </div>
+        <p style="margin-top: 24px;"><strong>Banned:</strong> <span class="strike">Learn more · Click here · Sign up · Submit · Get started</span></p>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="card">
+        <span class="eyebrow">Form rules</span>
+        <h3 class="h3" style="margin-top: 14px;">Short labels. No asterisks.</h3>
+        <div style="margin-top: 14px;">
+          <label style="font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 13px; color: var(--ink); display: block; margin-bottom: 6px;">Union name</label>
+          <input class="input" placeholder="CUPE Local 79">
+          <p style="font-family: 'DM Sans', sans-serif; font-weight: 300; font-size: 12.5px; color: var(--muted); margin-top: 6px;">The local that will hold the roster.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">08.3 — System messages</span>
+    <h2 class="h2">Specific, present-tense, <em>never apologetic.</em></h2>
+  </div>
+  <dl class="def">
+    <dt>Success</dt><dd><strong>Verified.</strong> Active member since 2019.</dd>
+    <dt>Error</dt><dd><strong>Not in roster.</strong> Last sync was 4 minutes ago. Ask the local to refresh.</dd>
+    <dt>Empty</dt><dd>No members yet. Upload a CSV to get started.</dd>
+    <dt>SMS</dt><dd>Your Union Hub card is ready. One link, no app: <em>uh.link/m/abc123</em></dd>
+    <dt>Email subject</dt><dd>"Your card is ready." — five words, no exclamation, no emoji.</dd>
+  </dl>
+</section>
+
+<!-- ═══════════════════════════════════ CHAPTER 09 — IN USE ═══════════════════════════════════ -->
+<section class="opener mint" id="ch09">
+  <div class="opener-meta">
+    <span class="eyebrow">Chapter 09</span>
+    <span class="eyebrow muted">Brand in Use</span>
+  </div>
+  <div class="num-massive">09</div>
+  <div class="opener-title">
+    <h2 class="display-2">In <em>Use.</em></h2>
+    <p class="lede">The product is mostly seen on a phone, in a hallway, by a person with thirty seconds. Designed accordingly.</p>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">09.1 — Marketing site hero</span>
+    <h2 class="h2">The first frame the visitor sees.</h2>
+  </div>
+
+  <div class="demo-frame">
+    <span class="eyebrow">Real-time digital membership</span>
+    <h2 class="display-2" style="font-size: clamp(36px, 6vw, 76px); margin-top: 18px; max-width: 14ch;">Your union card is a piece of paper. <em>That ends now.</em></h2>
+    <p class="lede" style="margin-top: 22px;">Real-time digital membership for unions. Instant verification. No apps. No passwords. <strong>No bullshit.</strong></p>
+    <div class="row" style="margin-top: 28px;">
+      <a class="btn btn-primary">Get early access</a>
+      <a class="btn btn-ghost">See how it works</a>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">09.2 — The 12-second scene</span>
+    <h2 class="h2">What it looks like <em>at the door.</em></h2>
+  </div>
+
+  <div class="scene">
+    <div class="timer"><span class="live-dot"></span>00:12 timer</div>
+    <ol style="margin: 8px 0 0 0; padding-left: 22px; font-size: 16px; line-height: 1.95; color: var(--deep-forest);">
+      <li>Member walks up. Phone in hand. Card already on screen.</li>
+      <li>Rep raises phone. Camera open. Scans the QR.</li>
+      <li>Screen turns green. <strong style="color: var(--forest); font-weight: 500;">Verified — Active member since 2019.</strong></li>
+      <li>Member moves through. Total time: <strong>12 seconds</strong>.</li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">09.3 — Print · Union hall poster</span>
+    <h2 class="h2">The on-prem ask.</h2>
+  </div>
+
+  <div class="grid-12">
+    <div class="col-7">
+      <div class="demo-frame mint" style="display: flex; flex-direction: column; gap: 16px; align-items: flex-start;">
+        <span class="eyebrow">Local 79 · Members</span>
+        <h2 class="display-2" style="font-size: clamp(30px, 5vw, 56px); max-width: 14ch;">Your card is now <em>digital.</em></h2>
+        <p style="color: var(--deep-forest); max-width: 44ch;">Watch your phone for a text from the local. One tap. No app. The card stays current — even if you lose your phone, log into another, and reload the link.</p>
+        <span class="eyebrow" style="margin-top: 12px;">Questions → local79@theunionhub.com</span>
+      </div>
+    </div>
+    <div class="col-5">
+      <div class="card" style="height: 100%;">
+        <span class="eyebrow">Print specs</span>
+        <dl class="def" style="border-top: 0; margin-top: 14px;">
+          <dt>Stock</dt><dd>Uncoated, off-white. 100lb cover or matte vinyl for hall walls.</dd>
+          <dt>Sizes</dt><dd>11×17 hall poster. 5×8 cheat-sheet for reps.</dd>
+          <dt>Inks</dt><dd>Forest spot recommended. CMYK build acceptable.</dd>
+          <dt>Bleed</dt><dd>0.125" all sides. Safety 0.25".</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ CHAPTER 10 — GOVERNANCE ═══════════════════════════════════ -->
+<section class="opener" id="ch10">
+  <div class="opener-meta">
+    <span class="eyebrow">Chapter 10</span>
+    <span class="eyebrow muted">Governance</span>
+  </div>
+  <div class="num-massive">10</div>
+  <div class="opener-title">
+    <h2 class="display-2">Gover<em>nance.</em></h2>
+    <p class="lede">Who owns the brand, what triggers a review, and where the open questions live.</p>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">10.1 — Custodian</span>
+    <h2 class="h2">One owner. <em>Versioned source of truth.</em></h2>
+  </div>
+  <dl class="def">
+    <dt>Brand owner</dt><dd>The Union Hub Founding Team. Until a brand lead is hired, all visual and verbal exceptions route through the founder.</dd>
+    <dt>Source of truth</dt><dd>This document, version-controlled in the project repository at <em>/brand</em>.</dd>
+    <dt>Last review</dt><dd>2026 · v1.0</dd>
+  </dl>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">10.2 — Review triggers</span>
+    <h2 class="h2">When the brand <em>has</em> to be re-examined.</h2>
+  </div>
+  <dl class="def">
+    <dt>Mandatory</dt><dd>New product surface (rep-side tool, admin dashboard). New audience (employers, regulators). New geography. Major policy change (privacy, data residency).</dd>
+    <dt>Optional</dt><dd>New campaign, new typeface request, new colour proposal. The default answer to all three is no — write a one-page argument first.</dd>
+  </dl>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="num">10.3 — Open questions for v1.1</span>
+    <h2 class="h2">What we'll <em>settle next.</em></h2>
+  </div>
+  <ol style="margin: 0; padding-left: 22px; font-size: 16px; line-height: 2; color: var(--ink-soft); max-width: 70ch;">
+    <li>Co-branding rules with locals. When does a CUPE 79 card show The Union Hub mark, and at what scale?</li>
+    <li>Internationalisation. Type stack and tone shifts for French Canada and Spanish.</li>
+    <li>Accessibility audit beyond colour. Screen-reader script for the card and the verify screen.</li>
+    <li>Print collateral kit. A finished, mailable poster + cheat-sheet card for reps.</li>
+    <li>Crisis comms voice. A short appendix for the day a roster sync fails publicly.</li>
+  </ol>
+</section>
+
+<section class="forest full" style="text-align: left;">
+  <span class="eyebrow on-dark" style="color: var(--mint); margin-bottom: 32px;">A closing rule</span>
+  <p class="pull" style="color: var(--off-white); border-left-color: var(--mint); max-width: 24ch;">When in doubt, do less. Cut the line in half. Then cut <em style="color: var(--mint);">that</em> line in half. The brand is what survives.</p>
+</section>
+
+<!-- ═══════════════════════════════════ COLOPHON ═══════════════════════════════════ -->
+<section class="dark" id="colophon">
+  <span class="eyebrow on-dark">Colophon</span>
+  <h2 class="display-2" style="margin-top: 28px;">One book. <em>One brand.</em></h2>
+  <p style="margin-top: 28px; max-width: 60ch;">Set in Playfair Display and DM Sans. Eyebrows in DM Mono. All typefaces from Google Fonts under the SIL Open Font License. Drawn on an off-white field with hairline borders at fifteen percent black, and not a single shadow anywhere in the file.</p>
+  <p style="max-width: 60ch;">This document is the system of record for what The Union Hub looks like, sounds like, and refuses to be. It is updated — never edited quietly. When a rule changes, the version number changes with it.</p>
+
+  <div class="colophon-grid">
+    <div><b>Volume</b><span>01 · v1.0 · 2026</span></div>
+    <div><b>Owner</b><span>The Union Hub · Founding Team</span></div>
+    <div><b>Path</b><span>/Theunionhub/brandbook.html</span></div>
+    <div><b>Print version</b><span><a href="TheUnionHub_BrandBook.html" style="color: var(--active); text-decoration: underline; text-decoration-thickness: 0.5px; text-underline-offset: 4px;">TheUnionHub_BrandBook.html</a></span></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+  // Page progress bar
+  (function () {
+    var bar = document.getElementById('progress');
+    var nav = document.getElementById('nav');
+    function onScroll() {
+      var h = document.documentElement;
+      var b = document.body;
+      var st = h.scrollTop || b.scrollTop;
+      var sh = (h.scrollHeight || b.scrollHeight) - h.clientHeight;
+      var pct = sh > 0 ? (st / sh) * 100 : 0;
+      bar.style.width = pct + '%';
+
+      // Toggle dark nav over dark sections
+      var sections = document.querySelectorAll('section.dark, section.forest, section.opener.dark, section.opener.forest');
+      var navH = nav.getBoundingClientRect().height;
+      var darkActive = false;
+      sections.forEach(function (s) {
+        var r = s.getBoundingClientRect();
+        if (r.top <= navH && r.bottom > navH) darkActive = true;
+      });
+      nav.classList.toggle('dark', darkActive);
+    }
+    document.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+</script>
+
+<script defer src="js/live.js"></script>
+
+</body>
+</html>
