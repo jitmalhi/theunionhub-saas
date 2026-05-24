@@ -117,7 +117,7 @@ theunionhub-saas/
 ├── supabase/                        ← schema as code
 │   ├── migrations/
 │   │   ├── 0001_init_tenants.sql           ← tenants table + slug uniqueness ✓ live
-│   │   ├── 0002_members_add_tenant_id.sql  ← evolve existing members table   · planned
+│   │   ├── 0002_members_add_tenant_id.sql  ← evolve existing members table   ✓ live
 │   │   ├── 0003_rls_policies.sql           ← strict tenant_id isolation      · planned
 │   │   └── 0004_audit_log.sql                                                · planned
 │   ├── seed.sql                            ← demo tenant + 3 demo members    ✓ live

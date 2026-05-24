@@ -28,6 +28,19 @@
     document.head.appendChild(m);
   }
 </script>
+
+<!-- Runtime config (public). Read by /lib/supabase.js and /lib/tenant.js.
+     The anon key is intentionally client-visible — RLS is the boundary.
+     Duplicates the constants in the body <script>; both will collapse
+     once env-driven injection lands. -->
+<script>
+  window.__UH_CONFIG__ = {
+    SUPABASE_URL:       'https://frdvhmzbsmczknqtexvx.supabase.co',
+    SUPABASE_ANON_KEY:  'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P',
+    PUBLIC_BASE_DOMAIN: 'theunionhub.com'
+  };
+</script>
+
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -39,6 +52,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Brand tokens first (defines the canonical greens used as fallbacks
+     when --accent-tenant isn't set). Tenant overrides last (sets
+     --accent-tenant on :root via lib/tenant.js). -->
+<link rel="stylesheet" href="/css/tokens.css">
 <style>
   /* ──────────────────────────────────────────────────────────────
      /verify/[id] — Verification result page (demo)
@@ -139,7 +157,9 @@
     text-align: center;
     transition: background-color .25s ease;
   }
-  .screen.verified  { background: var(--forest); }
+  /* Verified screen paints the tenant accent. Falls back to brand --forest
+     when no tenant context is resolved (apex preview, unresolved subdomain). */
+  .screen.verified  { background: var(--accent-tenant, var(--forest)); }
   .screen.invalid   { background: var(--alert); }
   .screen.collected { background: var(--collected); }
   .screen.notfound  { background: var(--ink); }
@@ -214,7 +234,9 @@
     appearance: none;
     border: 1px solid rgba(255,255,255,0.6);
     background: #ffffff;
-    color: var(--forest);
+    /* Reads through the tenant accent on the verified screen so the button
+       label matches the surrounding background colour. */
+    color: var(--accent-tenant, var(--forest));
     font-family: 'DM Sans', sans-serif;
     font-weight: 500;
     font-size: 17px;
@@ -299,9 +321,11 @@
   }
   .powered .mark { display: inline-block; vertical-align: -3px; margin-right: 8px; }
 
-  /* Loading spinner — must be visible within ~1s on real load */
+  /* Loading spinner — must be visible within ~1s on real load.
+     Uses tenant accent so the load→verified transition is a single
+     coherent colour, not a brand-green→tenant-accent flash. */
   .spinner-screen {
-    background: var(--forest);
+    background: var(--accent-tenant, var(--forest));
     min-height: 100dvh; min-height: 100vh;
     display: flex; align-items: center; justify-content: center;
     color: rgba(255,255,255,0.85);
@@ -371,6 +395,11 @@
     }
   }
 </style>
+
+<!-- Per-tenant override surface. Loaded last so its selectors win over the
+     inline rules above. The --accent-tenant value is set on :root by
+     lib/tenant.js once the tenant row resolves. -->
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
 </head>
 <body>
 
@@ -393,15 +422,33 @@
 
 <script>
   // ─── Supabase ───────────────────────────────────────────
+  // Duplicates window.__UH_CONFIG__ from <head>. Kept here for backwards
+  // compatibility with the prototype's inline pattern; safe to remove
+  // once all fetches route through lib/supabase.js.
   const SUPABASE_URL = 'https://frdvhmzbsmczknqtexvx.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P';
+
+  // Set by the boot IIFE after lib/tenant.js resolves. Threaded into every
+  // Supabase REST call via sbHeaders() so RLS policies (from migration
+  // 0002 onward) see the correct tenant context. Without this header,
+  // anon SELECT on members returns 0 rows.
+  let currentTenant   = null;
+  let currentTenantId = null;
+
+  function sbHeaders(extra) {
+    const h = {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`
+    };
+    if (currentTenantId) h['x-tenant-id'] = currentTenantId;
+    if (extra) Object.assign(h, extra);
+    return h;
+  }
 
   async function fetchMemberById(id) {
     const url = `${SUPABASE_URL}/rest/v1/members?id=eq.${encodeURIComponent(id)}&select=*`;
     try {
-      const res = await fetch(url, {
-        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
-      });
+      const res = await fetch(url, { headers: sbHeaders() });
       if (!res.ok) return null;
       const rows = await res.json();
       return rows[0] || null;
@@ -413,11 +460,7 @@
     try {
       fetch(`${SUPABASE_URL}/rest/v1/rpc/record_verification`, {
         method: 'POST',
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json'
-        },
+        headers: sbHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ p_member_id: memberId, p_result: result }),
         keepalive: true
       }).catch(() => {});
@@ -428,11 +471,7 @@
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/check_already_collected`, {
         method: 'POST',
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json'
-        },
+        headers: sbHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ p_member_id: memberId })
       });
       if (!res.ok) return { already: false, paid_at: null };
@@ -445,11 +484,7 @@
   async function markMemberPaid(memberId) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/mark_member_paid`, {
       method: 'POST',
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json'
-      },
+      headers: sbHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ p_member_id: memberId })
     });
     if (!res.ok) throw new Error('mark_failed');
@@ -631,8 +666,15 @@
       history.replaceState(null, '', url);
     }
 
-    // Match meta theme-color for nicer mobile chrome bars
-    const theme = { verified: '#0F6E56', invalid: '#E24B4A', collected: '#E8863A', notfound: '#111111', loading: '#0F6E56' }[result] || '#0F6E56';
+    // Match meta theme-color for nicer mobile chrome bars. Verified and
+    // loading share the tenant accent so the colour transition into the
+    // verified screen is continuous; non-success states stay canonical
+    // (the verifier needs to see red/amber/black unambiguously).
+    const tenantAccent = currentTenant && currentTenant.accent_hex;
+    const themeMap = { verified: '#0F6E56', invalid: '#E24B4A', collected: '#E8863A', notfound: '#111111', loading: '#0F6E56' };
+    const theme = (result === 'verified' || result === 'loading') && tenantAccent
+      ? tenantAccent
+      : (themeMap[result] || '#0F6E56');
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme);
 
     if (result === 'loading')   { screen.innerHTML = renderLoading(); return; }
@@ -651,16 +693,46 @@
   // Boot.
   // Live mode:  ?id=<uuid>  → fetch the row and derive verified/invalid/notfound.
   // Demo mode:  ?result=<x> → switcher / hardcoded fallback.
+  //
+  // Before either path, resolve the tenant from the hostname and:
+  //   1. Store its id in currentTenantId so every Supabase REST call
+  //      thereafter carries x-tenant-id (required by post-0002 RLS).
+  //   2. Apply --accent-tenant so the verified screen paints the tenant
+  //      colour instead of brand --forest.
+  //   3. Patch member.union_name / member.local_number so the .ucol line
+  //      reflects the tenant's identity, not the prototype default.
   (async () => {
     const params = new URLSearchParams(location.search);
     const liveId = params.get('id');
+
+    // Tenant resolution — fail-safe: any error returns null and we render
+    // with the hardcoded prototype defaults (verifier still gets a usable
+    // answer even if Supabase blips or lib/tenant.js fails to load).
+    try {
+      const tenantMod = await import('/lib/tenant.js');
+      currentTenant = await tenantMod.getTenant();
+      if (currentTenant) {
+        currentTenantId = currentTenant.id;
+        tenantMod.applyTenantTheme(currentTenant);
+      }
+    } catch (e) {
+      console.warn('[uh/verify] tenant module failed to load:', e && e.message ? e.message : e);
+    }
+
+    // Patch denormalised identity fields from the tenant (authoritative).
+    function applyTenantToMember(m) {
+      if (!currentTenant) return m;
+      m.union_name   = currentTenant.display_name || m.union_name;
+      m.local_number = currentTenant.local_number || m.local_number;
+      return m;
+    }
 
     if (liveId) {
       document.querySelector('.demo-bar')?.remove();
       setResult('loading');
       const row = await fetchMemberById(liveId);
       if (!row) { setResult('notfound'); return; }
-      member = row;
+      member = applyTenantToMember(row);
 
       if (row.status === 'active') {
         const check = await checkAlreadyCollected(row.id);
@@ -680,6 +752,7 @@
       return;
     }
 
+    member = applyTenantToMember(member);
     const initial = params.get('result') || 'verified';
     const target = ['loading','verified','invalid','collected','notfound'].includes(initial) ? initial : 'verified';
     if (target === 'loading') {

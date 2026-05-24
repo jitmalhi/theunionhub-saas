@@ -444,15 +444,29 @@
 
 <script>
   // ─── Supabase ───────────────────────────────────────────
+  // Duplicates window.__UH_CONFIG__ from <head>; kept for backwards
+  // compatibility with the prototype's inline pattern.
   const SUPABASE_URL = 'https://frdvhmzbsmczknqtexvx.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P';
+
+  // Set by the boot IIFE after lib/tenant.js resolves. Without this,
+  // post-0002 RLS on members returns 0 rows and ?id= renders notfound.
+  let currentTenantId = null;
+
+  function sbHeaders(extra) {
+    const h = {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`
+    };
+    if (currentTenantId) h['x-tenant-id'] = currentTenantId;
+    if (extra) Object.assign(h, extra);
+    return h;
+  }
 
   async function fetchMemberById(id) {
     const url = `${SUPABASE_URL}/rest/v1/members?id=eq.${encodeURIComponent(id)}&select=*`;
     try {
-      const res = await fetch(url, {
-        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
-      });
+      const res = await fetch(url, { headers: sbHeaders() });
       if (!res.ok) return null;
       const rows = await res.json();
       return rows[0] || null;
@@ -640,12 +654,17 @@
 
     // Resolve the tenant in parallel with anything else. Fail-safe: any
     // error inside lib/tenant.js returns null and the page renders with
-    // its hardcoded prototype defaults.
+    // its hardcoded prototype defaults. The tenant id is also stamped
+    // onto currentTenantId so sbHeaders() includes x-tenant-id on every
+    // subsequent Supabase call (required by post-0002 RLS).
     let tenant = null;
     try {
       const tenantMod = await import('/lib/tenant.js');
       tenant = await tenantMod.getTenant();
-      if (tenant) tenantMod.applyTenantTheme(tenant);
+      if (tenant) {
+        currentTenantId = tenant.id;
+        tenantMod.applyTenantTheme(tenant);
+      }
     } catch (e) {
       console.warn('[uh/card] tenant module failed to load:', e && e.message ? e.message : e);
     }
