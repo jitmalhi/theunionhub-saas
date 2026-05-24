@@ -5,7 +5,7 @@
 
 This repository is the **multi-tenant SaaS rebuild** of [theunionhub.com](https://theunionhub.com). It supersedes the single-tenant static prototype at `C:\Theunionhub` and is engineered for horizontal scale across unions (locals, districts, internationals) on **Vercel + Supabase**.
 
-Brand discipline is non-negotiable. Tokens, type, and layout rules in this README are derived directly from the canonical brand book at [Brand/brandbook.html](Brand/brandbook.html). If a colour, font, or radius isn't listed here, it doesn't ship.
+Brand discipline is non-negotiable. Tokens, type, and layout rules are derived directly from the canonical brand book at [Brand/brandbook.html](Brand/brandbook.html) and materialised as CSS custom properties in [css/tokens.css](css/tokens.css). Every stylesheet imports `tokens.css` first. No raw hex values in component CSS — ever.
 
 ---
 
@@ -40,7 +40,7 @@ The migration is **clean-slate at the file layout**; the Supabase project is **e
 
 ### Frontend
 - **Vanilla HTML + ES modules** — no framework. The brand is editorial; the markup is too.
-- **CSS custom properties only** — design tokens in [styles/tokens.css](styles/tokens.css). No Sass, no Tailwind, no utility-class soup.
+- **CSS custom properties only** — design tokens in [css/tokens.css](css/tokens.css). No Sass, no Tailwind, no utility-class soup.
 - **Progressive enhancement** — every page renders without JS; live features attach only when their markup exists (pattern established by `js/live.js`).
 
 ### Tooling (kept minimal)
@@ -67,11 +67,12 @@ theunionhub-saas/
 │   ├── robots.txt
 │   └── sitemap.xml
 │
-├── styles/                          ← single source of truth for all CSS
-│   ├── tokens.css                   ← design tokens (colour, type, spacing)
+├── css/                             ← single source of truth for all CSS
+│   ├── tokens.css                   ← design tokens (colour, type, spacing, motion)
 │   ├── reset.css                    ← minimal normalize
 │   ├── base.css                     ← body, headings, links
-│   └── components.css               ← .btn, .pill, .card, .util, .nav, etc.
+│   ├── components.css               ← .btn, .pill, .card, .util, .nav, etc.
+│   └── site.css                     ← legacy shared shell (carried from prototype)
 │
 ├── app/                             ← public marketing site (root domain)
 │   ├── index.html
@@ -128,11 +129,86 @@ theunionhub-saas/
 
 **Tenancy contract:** every database row that belongs to a union has a `tenant_id uuid not null` column; every API route resolves the tenant from the host header in `api/_middleware.js` and stamps it on the request; every Supabase query runs under RLS that compares `auth.jwt() ->> 'tenant_id'` to the row's `tenant_id`. There is no application-level filtering — the database is the boundary.
 
+### 3.1 · Subdomain → Tenant Routing
+
+One codebase serves every union. Tenants are identified by the **leftmost label of the host header** — there is never a separate deployment per union.
+
+| Host                          | Tenant slug | Resolves to                                        |
+| ----------------------------- | ----------- | -------------------------------------------------- |
+| `theunionhub.com`             | *(none)*    | Marketing site → `app/index.html`                  |
+| `www.theunionhub.com`         | *(none)*    | 301 → `theunionhub.com`                            |
+| `local183.theunionhub.com`    | `local183`  | Tenant app for IBEW Local 183                      |
+| `local419.theunionhub.com`    | `local419`  | Tenant app for IBEW Local 419                      |
+| `<any>.theunionhub.com`       | `<any>`     | Lookup in `tenants` table; 404 if no row, 410 if archived |
+| `demo.lvh.me:3000`            | `demo`      | Local-dev seeded tenant (lvh.me → 127.0.0.1)       |
+
+**Resolution pipeline (every request, every page):**
+
+```
+   Browser request                                Vercel
+   ─────────────────                              ──────────────────────────
+   GET https://local183.theunionhub.com/card?id=…
+        │
+        ▼
+   1. Wildcard DNS  *.theunionhub.com ─ CNAME ─►  cname.vercel-dns.com
+        │
+        ▼
+   2. Edge middleware   api/_middleware.js
+        ├─ parse Host header                  →  "local183.theunionhub.com"
+        ├─ strip apex (PUBLIC_BASE_DOMAIN)    →  slug = "local183"
+        ├─ SELECT id, name, status, theme
+        │    FROM tenants WHERE slug = $1
+        │    AND status = 'active'            →  tenant row (or 404/410)
+        ├─ set request header  x-tenant-id    →  uuid
+        └─ rewrite URL  /card?id=…            →  /tenants/_template/card.html
+        │
+        ▼
+   3. Static page renders                     →  /tenants/_template/card.html
+        ├─ reads window.__TENANT__ injected by middleware
+        └─ calls /api/tenants/local183/members?id=…
+        │
+        ▼
+   4. Serverless API route                    →  Supabase query under RLS
+        └─ JWT carries tenant_id; RLS rejects cross-tenant reads at the DB
+```
+
+**Provisioning a new union** (e.g. onboarding `local52`):
+
+```bash
+npm run new-tenant -- --slug local52 --name "IBEW Local 52" --contact admin@local52.org
+# 1. INSERT INTO tenants (slug, name, contact_email, status) VALUES …
+# 2. verifies DNS:  local52.theunionhub.com → cname.vercel-dns.com
+# 3. issues magic-link to contact_email for first admin sign-in
+# 4. seeds the tenant's audit_log with row 0 ("tenant created")
+```
+
+No code changes, no redeploys, no per-tenant build artefacts. `local52.theunionhub.com` is live the moment the DNS check passes and the `tenants` row exists.
+
+**Reserved slugs** (never assignable to a union): `www`, `app`, `api`, `admin`, `status`, `docs`, `blog`, `mail`, `assets`, `cdn`, `static`, `demo`. Enforced by a CHECK constraint on `tenants.slug` and re-checked in `new-tenant.mjs`.
+
+**Per-tenant theming stays inside the brand.** A tenant may override only:
+1. `--accent-tenant` (one accent hex, validated for WCAG AA against `--off-white`)
+2. Logo SVG (stored in `tenant-assets` Supabase Storage bucket)
+3. Display name and local number
+
+Everything else — typography, layout, motion, hairlines — is locked by [css/tokens.css](css/tokens.css). Unions get a tenant, not a redesign.
+
 ---
 
 ## 4 · CSS Global Design Tokens
 
-The canonical token sheet lives at [styles/tokens.css](styles/tokens.css) (to be created during scaffold). Every page imports it first. **No raw hex values in component CSS — ever.** Reference tokens or extend the token sheet.
+The canonical token sheet lives at [css/tokens.css](css/tokens.css). Every page imports it **first**, before any other stylesheet. **No raw hex values in component CSS — ever.** Reference tokens or extend the token sheet.
+
+```html
+<!-- always first -->
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/components.css">
+```
+
+The token file groups variables into seven blocks: colour (brand + neutrals + semantic + text + hairlines + aliases), typography (families, weights, scale, line-heights, letter-spacing), spacing & layout, radius, border widths, breakpoints, motion (durations, easings), and z-index. It also ships the canonical `@keyframes uhpulse` and the `prefers-reduced-motion` reset.
+
+The colour/typography sections below are a quick reference; if they ever disagree with `css/tokens.css`, **the file wins**.
 
 ### 4.1 · Colour
 

@@ -1,0 +1,200 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   The Union Hub · Global Design Tokens
+   Source of truth: Brand/brandbook.html (Volume 01 · v1.0)
+
+   Every stylesheet in this repo imports tokens.css first.
+   No raw hex values in component CSS. If a value is missing, add it here.
+
+   Hard brand rules enforced by this file:
+     · No box-shadow.        Depth comes from hairlines + contrast.
+     · No gradients.         Surfaces are flat.
+     · Hairlines are 0.5px.  Use --hair / --hair-on-dark.
+     · Italic <em> in headings ALWAYS shifts to --forest.
+     · prefers-reduced-motion: reduce  → animation/transition durations
+       collapse to 0 (see bottom of file).
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root {
+
+  /* ════════════ 1 · COLOUR — Brand greens ════════════ */
+  --forest:        #0F6E56;   /* primary; CTAs, links, brand mark, italic emphasis */
+  --active:        #1D9E75;   /* live state, hover-on-primary, success accents     */
+  --mint:          #E1F5EE;   /* tint surfaces, verified-state backgrounds         */
+  --deep-forest:   #0D1F1A;   /* dark surfaces, headings on light                  */
+
+  /* ════════════ 1.1 · COLOUR — Neutrals ════════════ */
+  --near-black:    #111111;
+  --off-white:     #F5F4F1;   /* default page background */
+  --paper:         #FAF9F5;   /* panel background, code blocks, status cards */
+  --mid-gray:      #888780;
+
+  /* ════════════ 1.2 · COLOUR — Semantic ════════════ */
+  --alert:         #E24B4A;   /* error, destructive, "don't" examples */
+  --warn:          #C68A1B;   /* degraded state, caution              */
+  --warn-bg:       #FBF1DC;   /* warn banner tint                     */
+  --alert-bg:      #FBE0DF;   /* alert banner tint                    */
+
+  /* ════════════ 1.3 · COLOUR — Text ════════════ */
+  --ink:           #111111;   /* body text on light                   */
+  --ink-soft:      #2A2A2A;   /* secondary body text on light         */
+  --muted:         #888780;   /* meta, eyebrow muted, labels          */
+
+  /* ════════════ 1.4 · COLOUR — Hairlines (structural unit of the brand) ════════════ */
+  --hair:          rgba(0, 0, 0, 0.15);
+  --hair-on-dark:  rgba(245, 244, 241, 0.18);
+
+  /* ════════════ 1.5 · COLOUR — Aliases (semantic → brand) ════════════ */
+  /* Use these in components so brand re-skinning never touches component CSS. */
+  --primary:           var(--forest);
+  --primary-hover:     var(--active);
+  --secondary:         var(--deep-forest);
+  --accent:            var(--mint);
+  --surface:           var(--off-white);
+  --surface-elevated:  var(--paper);
+  --surface-inverse:   var(--deep-forest);
+  --text:              var(--ink);
+  --text-secondary:    var(--ink-soft);
+  --text-muted:        var(--muted);
+  --text-on-primary:   var(--off-white);
+  --border:            var(--hair);
+  --border-inverse:    var(--hair-on-dark);
+  --danger:            var(--alert);
+  --success:           var(--active);
+
+
+  /* ════════════ 2 · TYPOGRAPHY — Families ════════════ */
+  --font-display:  'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-body:     'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:     'DM Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Weights loaded by Google Fonts in <head>:
+     Playfair Display : 400, 600, 700, 900 (+ italic 400, 700, 900)
+     DM Sans          : 300, 400, 500, 700
+     DM Mono          : 400, 500                                          */
+  --fw-light:      300;
+  --fw-regular:    400;
+  --fw-medium:     500;
+  --fw-semibold:   600;
+  --fw-bold:       700;
+  --fw-black:      900;
+
+  /* ════════════ 2.1 · TYPOGRAPHY — Scale (clamp-driven, editorial) ════════════ */
+  --fs-display-1:  clamp(72px, 14vw, 240px);   /* hero / cover           */
+  --fs-display-2:  clamp(56px, 10vw, 168px);   /* chapter openers        */
+  --fs-h1:         clamp(36px, 5.5vw, 64px);   /* page <h1>              */
+  --fs-h2:         clamp(36px, 5.4vw, 72px);   /* section <h2>           */
+  --fs-h3:         clamp(20px, 2vw, 26px);     /* subsection <h3>        */
+  --fs-h4:         18px;                       /* prose <h4>             */
+  --fs-lede:       clamp(17px, 1.6vw, 22px);   /* hero lede paragraph    */
+  --fs-body:       15.5px;                     /* default <p>            */
+  --fs-body-ui:    16px;                       /* body of the page       */
+  --fs-small:      14px;                       /* meta, captions         */
+  --fs-eyebrow:    11px;                       /* DM Mono eyebrow labels */
+  --fs-meta:       10.5px;                     /* utility bar, hairtag   */
+  --fs-micro:      10px;                       /* logo tag, footer tag   */
+
+  /* Line heights */
+  --lh-display:    0.92;     /* display-1 */
+  --lh-headline:   1.05;     /* h2        */
+  --lh-tight:      1.2;      /* h3        */
+  --lh-snug:       1.55;     /* lede      */
+  --lh-body:       1.65;     /* body      */
+  --lh-prose:      1.72;     /* long-form */
+
+  /* Letter spacing */
+  --ls-display:   -0.025em;  /* display-1                */
+  --ls-headline:  -0.01em;   /* h1, h2, h3               */
+  --ls-body:      -0.005em;  /* body specimens           */
+  --ls-eyebrow:    0.18em;   /* eyebrow / nav meta       */
+  --ls-mono:       0.16em;   /* DM Mono labels           */
+  --ls-tab:        0.06em;   /* tabular, ratio bars      */
+
+
+  /* ════════════ 3 · SPACING & LAYOUT ════════════ */
+  --pad-x:         clamp(20px, 5vw, 88px);   /* horizontal page padding   */
+  --pad-x-tight:   clamp(16px, 4vw, 48px);   /* dense panels              */
+  --section-y:     clamp(96px, 14vh, 160px); /* full-bleed editorial gap  */
+  --section-y-md:  clamp(48px, 8vw, 96px);   /* page-head / standard      */
+  --stack-lg:      clamp(72px, 10vh, 128px);
+  --stack-md:      clamp(36px, 5vh, 56px);
+  --stack-sm:      16px;
+  --gutter:        18px;                     /* grid-12 gap               */
+
+  --wrap-max:      1240px;                   /* content max-width         */
+  --prose-max:     68ch;                     /* long-form line length     */
+  --measure:       56ch;                     /* default paragraph measure */
+  --grid-cols:     12;                       /* editorial grid columns    */
+
+  /* ════════════ 3.1 · RADIUS ════════════ */
+  --rad:           12px;     /* cards, buttons, panels      */
+  --rad-sm:        8px;      /* inputs, small pills         */
+  --rad-pill:      999px;    /* pills, status dots          */
+  --rad-icon:      4px;      /* code chips, small chips     */
+
+  /* ════════════ 3.2 · BORDER WIDTHS ════════════ */
+  /* The brand's structural unit is 0.5px. Do not exceed --bw-accent
+     (1.5px, used only as a left-rule on callouts / status banners). */
+  --bw-hair:       0.5px;
+  --bw-accent:     1.5px;
+
+  /* ════════════ 3.3 · BREAKPOINTS (reference; use in @media directly) ════════════ */
+  --bp-sm:         520px;
+  --bp-md:         720px;
+  --bp-lg:         800px;
+  --bp-xl:         900px;
+  --bp-2xl:        1100px;
+
+
+  /* ════════════ 4 · MOTION ════════════ */
+  /* Durations */
+  --dur-instant:   100ms;
+  --dur-fast:      150ms;    /* hover, link colour shifts          */
+  --dur-base:      180ms;    /* nav shrink, layout micro-changes   */
+  --dur-slow:      700ms;    /* scroll-reveal fade-ups             */
+  --dur-pulse:     2400ms;   /* live-dot pulse (uhpulse)           */
+
+  /* Easings */
+  --ease-out:      cubic-bezier(0.2, 0.7, 0.2, 1);   /* scroll-reveal     */
+  --ease-standard: ease;
+  --ease-linear:   linear;
+
+
+  /* ════════════ 5 · Z-INDEX ════════════ */
+  --z-base:        1;
+  --z-sticky:      50;       /* sticky nav        */
+  --z-progress:    60;       /* page progress bar */
+  --z-toast:       80;       /* consent toast     */
+  --z-modal:       90;
+  --z-skiplink:    100;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   6 · GLOBAL KEYFRAMES
+   Canonical pulse for live-state dots. Mirror of js/live.js `uhpulse`.
+   Do NOT invent a second pulse — extend this one.
+   ────────────────────────────────────────────────────────────────────────── */
+@keyframes uhpulse {
+  0%   { box-shadow: 0 0 0 0   rgba(29, 158, 117, 0.55); }
+  100% { box-shadow: 0 0 0 8px rgba(29, 158, 117, 0);    }
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   7 · MOTION ACCESSIBILITY
+   Brand rule: `prefers-reduced-motion: reduce` strips motion, keeps state.
+   ────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-instant: 0ms;
+    --dur-fast:    0ms;
+    --dur-base:    0ms;
+    --dur-slow:    0ms;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
