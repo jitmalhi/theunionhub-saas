@@ -18,10 +18,11 @@
 --   · Migration 0002 applied   →  Section B also runs.
 --   · Neither applied          →  This file errors out on Section A.
 --
--- The three demo UUIDs originate in the prototype's js/live.js and are
--- referenced from card.html?id=… and verify.html?id=… for the live
--- demo links on the marketing site. Changing them here means updating
--- those references too — keep this file and js/live.js in sync.
+-- The three demo UUIDs originated in the prototype's js/live.js (now
+-- lib/live.js) and are still referenced from card.html?id=… and
+-- verify.html?id=… for the live demo links on the marketing site.
+-- Changing them here means updating those references too — keep this
+-- file in sync with the inline DEMO_IDS in card.html / verify.html.
 -- ════════════════════════════════════════════════════════════════════════
 
 BEGIN;

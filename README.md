@@ -17,7 +17,7 @@ Brand discipline is non-negotiable. Tokens, type, and layout rules are derived d
 | Tenancy             | Single-tenant prototype              | Multi-tenant, subdomain-routed (`<slug>.theunionhub.com`)              |
 | Backend             | Supabase project `frdvhmzbsmczknqtexvx` (shared) | Supabase with strict RLS per `tenant_id`                        |
 | Frontend            | Hand-rolled HTML + 3 JS files        | Vanilla HTML + ES modules, no build step (deliberate)                  |
-| Secrets             | Anon key hardcoded in `js/live.js`   | Env-driven Supabase client, public anon key per tenant via API route   |
+| Secrets             | Anon key hardcoded in `lib/live.js`   | Env-driven Supabase client, public anon key per tenant via API route   |
 | Auth                | None                                 | Supabase magic-link, member self-verify only — no passwords            |
 | Deployment surface  | 1 site                               | Marketing site (root) + N tenant apps (subdomain) + shared admin       |
 
@@ -41,7 +41,7 @@ The migration is **clean-slate at the file layout**; the Supabase project is **e
 ### Frontend
 - **Vanilla HTML + ES modules** — no framework. The brand is editorial; the markup is too.
 - **CSS custom properties only** — design tokens in [css/tokens.css](css/tokens.css). No Sass, no Tailwind, no utility-class soup.
-- **Progressive enhancement** — every page renders without JS; live features attach only when their markup exists (pattern established by `js/live.js`).
+- **Progressive enhancement** — every page renders without JS; live features attach only when their markup exists (pattern established by `lib/live.js`).
 
 ### Tooling (kept minimal)
 - `git` — version control, conventional commits.
@@ -74,10 +74,6 @@ theunionhub-saas/
 │   ├── base.css                     ← body, headings, links               · planned
 │   ├── components.css               ← .btn, .pill, .card, .util, .nav    · planned
 │   └── site.css                     ← legacy shared shell (carried from prototype) ✓ live
-│
-├── js/                              ← LEGACY prototype scripts (referenced by current HTML)
-│   ├── live.js                      ← carry-over; refactor target → lib/live.js
-│   └── qrcode.js                    ← carry-over; move to lib/ during refactor
 │
 ├── app/                             ← public marketing site (apex domain) ✓ live
 │   ├── index.html
@@ -130,8 +126,8 @@ theunionhub-saas/
 │   ├── admin-settings.js            ← tenant settings fetch + update_tenant_settings RPC ✓ live
 │   ├── admin-team.js                ← list/add/remove tenant_admins wrappers ✓ live
 │   ├── admin-logo.js                ← Storage upload + set_tenant_logo RPC ✓ live
-│   ├── live.js                      ← refactor of js/live.js, tenant-aware    · planned
-│   └── qrcode.js                    ← migrated from js/qrcode.js              · planned
+│   ├── live.js                      ← util bar + live counters + roster + scroll-reveal + consent ✓ live
+│   └── qrcode.js                    ← vendored QR generator (Kazuhiko Arase) ✓ live
 │
 ├── supabase/                        ← schema as code
 │   ├── migrations/
@@ -145,7 +141,8 @@ theunionhub-saas/
 │   │   ├── 0008_strict_tenant_admin_rls.sql ← tighten RLS to require tenant_admins + lookup_member RPC ✓ live
 │   │   ├── 0009_admin_member_create.sql    ← admin_add_member + admin_add_members_bulk RPCs ✓ live
 │   │   ├── 0010_tenant_dues_cycle.sql      ← per-tenant dues cycle + tenant_cycle_start() helper ✓ live
-│   │   └── 0011_tenant_logo.sql            ← Storage bucket + RLS + set_tenant_logo RPC ✓ live
+│   │   ├── 0011_tenant_logo.sql            ← Storage bucket + RLS + set_tenant_logo RPC ✓ live
+│   │   └── 0012_public_roster.sql          ← curated demo roster RPC for the marketing strip ✓ live
 │   ├── seed.sql                            ← demo tenant + 3 demo members    ✓ live
 │   └── config.toml                                                           · planned
 │
@@ -324,7 +321,7 @@ These are not suggestions. The brand book enforces them; review will reject any 
 - **Hairlines are `0.5px`.** Not 1px. Not `border: 1px solid #eee`. Use `--hair` or `--hair-on-dark`.
 - **No emojis in UI copy** unless explicitly approved by the founder.
 - **Italic = `--forest`.** Every `<em>` in a heading shifts colour.
-- **Pulse animation** for live states uses the keyframe in `js/live.js` (`uhpulse`) — do not invent a new one.
+- **Pulse animation** for live states uses the keyframe in `lib/live.js` (`uhpulse`) — do not invent a new one.
 - **`prefers-reduced-motion: reduce` is respected.** Strip the pulse, keep the state.
 
 ---
@@ -363,7 +360,7 @@ To exercise multi-tenancy locally, `lvh.me` resolves all subdomains to `127.0.0.
 
 The following items from `C:\Theunionhub` are **carried forward** and must be resolved during scaffold:
 
-1. **`js/live.js`** — currently embeds Supabase URL and anon key as string literals (`frdvhmzbsmczknqtexvx`, `sb_publishable_…`). Migrate to `lib/supabase.js` reading from `import.meta.env` / runtime config injected by the edge middleware.
+1. **`lib/live.js`** — currently embeds Supabase URL and anon key as string literals (`frdvhmzbsmczknqtexvx`, `sb_publishable_…`). Migrate to `lib/supabase.js` reading from `import.meta.env` / runtime config injected by the edge middleware.
 2. **`.htaccess`** — Apache-specific. Vercel uses `vercel.json` for rewrites, headers, redirects. The `.htaccess` rules (HTTPS redirect, 404 mapping, security headers) must be translated, not copied.
 3. **`sitemap.xml` & `robots.txt`** — currently single-tenant. Generate per-tenant sitemaps at `/<tenant>/sitemap.xml` via API route.
 4. **Demo member IDs** (`550bc413…`, `21e63983…`, `fd1be966…`) — seed into the `demo` tenant via `supabase/seed.sql`.

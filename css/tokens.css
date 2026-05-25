@@ -171,7 +171,7 @@
 
 /* ──────────────────────────────────────────────────────────────────────────
    6 · GLOBAL KEYFRAMES
-   Canonical pulse for live-state dots. Mirror of js/live.js `uhpulse`.
+   Canonical pulse for live-state dots. Mirror of lib/live.js `uhpulse`.
    Do NOT invent a second pulse — extend this one.
    ────────────────────────────────────────────────────────────────────────── */
 @keyframes uhpulse {

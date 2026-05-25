@@ -41,7 +41,7 @@
 import { next, rewrite } from '@vercel/edge';
 
 export const config = {
-  matcher: '/((?!api/|_vercel/|css/|js/|lib/|Brand/|.*\\.[a-zA-Z0-9]+$).*)',
+  matcher: '/((?!api/|_vercel/|css/|lib/|Brand/|.*\\.[a-zA-Z0-9]+$).*)',
 };
 
 /* ─── Constants ───────────────────────────────────────────────────────── */
@@ -107,7 +107,6 @@ function isStaticOrInternal(pathname) {
     pathname.startsWith('/api/')   ||
     pathname.startsWith('/_vercel/') ||
     pathname.startsWith('/css/')   ||
-    pathname.startsWith('/js/')    ||
     pathname.startsWith('/lib/')   ||
     pathname.startsWith('/Brand/') ||
     /\.[a-zA-Z0-9]+$/.test(pathname)
