@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Team · Admin · The Union Hub</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<script>
+  window.__UH_CONFIG__ = {
+    SUPABASE_URL:       'https://frdvhmzbsmczknqtexvx.supabase.co',
+    SUPABASE_ANON_KEY:  'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P',
+    PUBLIC_BASE_DOMAIN: 'theunionhub.com'
+  };
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/admin/admin.css">
+</head>
+
+<body>
+
+<nav class="admin-nav" role="navigation" aria-label="Admin">
+  <div class="admin-nav-brand">
+    <span class="mark" aria-hidden="true" data-tenant-initial>·</span>
+    <div class="admin-nav-brand-stack">
+      <span class="admin-nav-tenant-name" data-tenant-name>—</span>
+      <span class="admin-nav-context">Admin</span>
+    </div>
+  </div>
+  <div class="admin-nav-meta">
+    <span class="admin-nav-email" data-admin-email>…</span>
+    <button class="admin-btn admin-btn-ghost" type="button" data-signout>Sign out</button>
+  </div>
+</nav>
+
+<nav class="admin-subnav" role="navigation" aria-label="Admin sections">
+  <a href="/admin">Dashboard</a>
+  <a href="/admin/members">Members</a>
+  <a href="/admin/team" aria-current="page">Team</a>
+  <a href="/admin/audit">Audit</a>
+  <a href="/admin/settings">Settings</a>
+</nav>
+
+<main class="admin-main">
+  <header class="admin-page-head">
+    <span class="admin-eyebrow"><span data-tenant-name>—</span> · Team</span>
+    <h1 class="admin-page-title">Team.</h1>
+    <p class="admin-page-meta">
+      <span data-team-summary>Loading…</span>
+      <span aria-hidden="true"> · </span>
+      <span>Admins share full access without sharing the magic link.</span>
+    </p>
+  </header>
+
+  <!-- Bootstrap-mode banner. Only shown when zero explicit admins exist. -->
+  <section class="admin-banner is-warn" data-bootstrap-banner hidden role="status" aria-live="polite">
+    <div class="admin-banner-body">
+      <h3>Bootstrap mode.</h3>
+      <p>
+        No permanent admins yet. You currently have access because your email
+        (<strong data-bootstrap-email>—</strong>) matches the tenant's
+        <strong>contact_email</strong>. Add a permanent admin (yourself or someone else)
+        to lock in your access — once any explicit admin exists, the bootstrap fallback
+        turns off.
+      </p>
+    </div>
+    <div class="admin-banner-actions">
+      <button class="admin-btn admin-btn-primary" type="button" data-self-promote>
+        Make me a permanent admin
+      </button>
+    </div>
+  </section>
+
+  <!-- Add admin form -->
+  <form class="admin-form" data-add-form>
+    <label class="admin-form-field">
+      <span class="admin-form-label">Invite by email</span>
+      <p class="admin-form-help">
+        The invitee must have signed in at least once via /admin/signin so a Supabase
+        auth.users row exists. If they haven't, you'll see a hint to send them the
+        sign-in link first.
+      </p>
+      <input
+        class="admin-form-input"
+        type="email"
+        name="email"
+        autocomplete="off"
+        inputmode="email"
+        placeholder="coworker@your-local.org"
+        required
+        data-input-email
+      >
+    </label>
+    <div class="admin-form-actions">
+      <button type="submit" class="admin-btn admin-btn-primary" data-add-submit>
+        Add admin
+      </button>
+    </div>
+    <p class="admin-form-status" data-add-status role="status" aria-live="polite"></p>
+  </form>
+
+  <!-- Admin list -->
+  <table class="data-table" aria-label="Tenant admins">
+    <thead>
+      <tr>
+        <th scope="col">Email</th>
+        <th scope="col">Role</th>
+        <th scope="col">Added</th>
+        <th scope="col">Added by</th>
+        <th scope="col" class="col-go" aria-hidden="true"></th>
+      </tr>
+    </thead>
+    <tbody data-tbody>
+      <tr><td colspan="5" class="data-table-empty">Loading…</td></tr>
+    </tbody>
+  </table>
+</main>
+
+<footer class="admin-foot">
+  <span>The Union Hub · Admin</span>
+  <span>Signed in as <span data-admin-email-foot>…</span></span>
+</footer>
+
+<script type="module">
+  import { requireAuth, watchAuth, signOut } from '/lib/auth-guard.js';
+  import { getTenant, applyTenantTheme } from '/lib/tenant.js';
+  import { listTeamAdmins, addTeamAdmin, removeTeamAdmin } from '/lib/admin-team.js';
+
+  const session = await requireAuth();
+  if (!session) throw new Error('redirecting');
+
+  let tenant = null;
+  try {
+    tenant = await getTenant();
+    if (tenant) applyTenantTheme(tenant);
+  } catch (e) { console.warn('[uh/admin/team] tenant resolve failed:', e?.message); }
+  if (tenant?.slug) document.querySelector('[data-tenant-initial]').textContent = tenant.slug.charAt(0).toUpperCase();
+
+  const myEmail = session.user?.email || '—';
+  const myId    = session.user?.id    || null;
+  document.querySelector('[data-admin-email]').textContent      = myEmail;
+  document.querySelector('[data-admin-email-foot]').textContent = myEmail;
+  watchAuth();
+  document.querySelector('[data-signout]')?.addEventListener('click', signOut);
+
+  // ─── Helpers ─────────────────────────────────────────────────────
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function fmtDateTime(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso); if (isNaN(d)) return '—';
+    return d.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  // Map RPC exception codes → friendly messages. The codes match RAISE
+  // EXCEPTION text in migrations 0006 and 0007.
+  function friendlyError(code, email) {
+    switch (code) {
+      case 'invalid_email':            return 'Enter a valid email address.';
+      case 'user_not_signed_in_yet':   return `${email} hasn’t signed in yet. Send them the sign-in link first (https://${location.host}/admin/signin), then try again.`;
+      case 'not_tenant_admin':         return 'You are not authorised to manage admins on this tenant.';
+      case 'not_authenticated':        return 'Your session expired. Sign in again.';
+      case 'no_tenant_context':        return 'Tenant context is missing — refresh the page.';
+      case 'cannot_remove_last_admin': return 'You can’t remove the last admin. Add a co-admin first.';
+      case 'list_failed':
+      case 'add_failed':
+      case 'remove_failed':            return 'Something went wrong. Try again in a moment.';
+      default:                         return code || 'Something went wrong. Try again in a moment.';
+    }
+  }
+
+  // ─── Add form ─────────────────────────────────────────────────────
+  const addForm    = document.querySelector('[data-add-form]');
+  const addInput   = document.querySelector('[data-input-email]');
+  const addBtn     = document.querySelector('[data-add-submit]');
+  const addStatus  = document.querySelector('[data-add-status]');
+
+  function setAddStatus(msg, kind) {
+    addStatus.textContent = msg || '';
+    addStatus.classList.remove('is-error', 'is-success');
+    if (kind) addStatus.classList.add('is-' + kind);
+  }
+
+  addForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = (addInput.value || '').trim();
+    if (!email) { setAddStatus('Enter an email.', 'error'); return; }
+
+    addBtn.disabled = true; addBtn.textContent = 'Adding…'; setAddStatus('');
+    try {
+      await addTeamAdmin(email);
+      addInput.value = '';
+      setAddStatus(`Added ${email}.`, 'success');
+      setTimeout(() => setAddStatus(''), 3500);
+      await refresh();
+    } catch (err) {
+      console.error(err);
+      setAddStatus(friendlyError(err?.message, email), 'error');
+    } finally {
+      addBtn.disabled = false; addBtn.textContent = 'Add admin';
+    }
+  });
+
+  // ─── Self-promote (bootstrap-mode banner) ────────────────────────
+  document.querySelector('[data-self-promote]').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    btn.disabled = true; btn.textContent = 'Promoting…';
+    try {
+      // Calling add_tenant_admin with the caller's own email triggers
+      // the auto-promotion path inside the RPC — same result as if we
+      // were inviting a co-admin, just self-targeted.
+      await addTeamAdmin(myEmail);
+      await refresh();
+    } catch (err) {
+      console.error(err);
+      setAddStatus(friendlyError(err?.message, myEmail), 'error');
+      btn.disabled = false; btn.textContent = 'Make me a permanent admin';
+    }
+  });
+
+  // ─── Remove (two-tap inline confirmation) ────────────────────────
+  function bindRemoveButtons(rows) {
+    const CONFIRM_TIMEOUT_MS = 3000;
+    document.querySelectorAll('[data-remove-btn]').forEach((btn) => {
+      let timer = null;
+      btn.addEventListener('click', async () => {
+        const userId = btn.dataset.userId;
+        const email  = btn.dataset.email;
+
+        if (btn.dataset.state !== 'confirm') {
+          btn.dataset.state = 'confirm';
+          btn.textContent   = 'Confirm';
+          btn.classList.add('admin-btn-ghost');
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            btn.dataset.state = 'idle';
+            btn.textContent   = 'Remove';
+          }, CONFIRM_TIMEOUT_MS);
+          return;
+        }
+
+        clearTimeout(timer);
+        btn.disabled = true; btn.textContent = 'Removing…';
+        try {
+          await removeTeamAdmin(userId);
+          await refresh();
+        } catch (err) {
+          console.error(err);
+          setAddStatus(friendlyError(err?.message, email), 'error');
+          btn.disabled = false;
+          btn.dataset.state = 'idle';
+          btn.textContent   = 'Remove';
+        }
+      });
+    });
+  }
+
+  // ─── Render ──────────────────────────────────────────────────────
+  function paint(rows) {
+    const banner    = document.querySelector('[data-bootstrap-banner]');
+    const bootEmail = document.querySelector('[data-bootstrap-email]');
+    const tbody     = document.querySelector('[data-tbody]');
+    const summary   = document.querySelector('[data-team-summary]');
+
+    if (rows.length === 0) {
+      // Bootstrap mode: show the banner, hide the table list (or show
+      // an empty state). We still render an empty table so the visual
+      // structure is consistent.
+      banner.hidden = false;
+      bootEmail.textContent = myEmail;
+      summary.textContent = '0 permanent admins';
+      tbody.innerHTML = `
+        <tr><td colspan="5" class="data-table-empty">
+          No permanent admins yet. Promote yourself (or invite a co-admin) to
+          start the team list.
+        </td></tr>`;
+      return;
+    }
+
+    banner.hidden = true;
+    summary.textContent = `${rows.length} permanent admin${rows.length === 1 ? '' : 's'}`;
+
+    tbody.innerHTML = rows.map((r) => {
+      const isMe       = myId && r.user_id === myId;
+      const isLast     = rows.length === 1;
+      // The RPC will refuse the remove anyway if it's the last; we
+      // disable the button visually too so the user doesn't bother.
+      const removeDisabled = isLast;
+      const removeAttr = removeDisabled ? 'disabled' : '';
+      const removeTitle = removeDisabled
+        ? 'Can’t remove the last admin — add a co-admin first.'
+        : (isMe ? 'Remove yourself from the admin team.' : `Remove ${r.email}.`);
+
+      return `
+        <tr>
+          <td class="col-name">
+            ${escapeHtml(r.email || '—')}
+            ${isMe ? '<span class="col-meta"> · you</span>' : ''}
+          </td>
+          <td><span class="status-pill active"><span class="dot" aria-hidden="true"></span>${escapeHtml(r.role || 'admin')}</span></td>
+          <td class="col-meta">${escapeHtml(fmtDateTime(r.created_at))}</td>
+          <td class="col-meta" title="${escapeHtml(r.created_by || '')}">${escapeHtml(r.created_by_email || (r.created_by ? r.created_by.slice(0, 8) + '…' : '— (backfill)'))}</td>
+          <td class="col-go">
+            <button type="button"
+                    class="admin-btn admin-btn-ghost"
+                    data-remove-btn
+                    data-user-id="${escapeHtml(r.user_id)}"
+                    data-email="${escapeHtml(r.email || '')}"
+                    data-state="idle"
+                    title="${escapeHtml(removeTitle)}"
+                    ${removeAttr}>Remove</button>
+          </td>
+        </tr>`;
+    }).join('');
+
+    bindRemoveButtons(rows);
+  }
+
+  async function refresh() {
+    document.querySelector('[data-tbody]').innerHTML =
+      '<tr><td colspan="5" class="data-table-empty">Loading…</td></tr>';
+    try {
+      const rows = await listTeamAdmins();
+      paint(rows);
+    } catch (err) {
+      console.error('[uh/admin/team] list failed:', err);
+      document.querySelector('[data-bootstrap-banner]').hidden = true;
+      document.querySelector('[data-tbody]').innerHTML =
+        `<tr><td colspan="5" class="data-table-empty">${escapeHtml(friendlyError(err?.message))}</td></tr>`;
+      document.querySelector('[data-team-summary]').textContent = '—';
+    }
+  }
+
+  refresh();
+</script>
+
+</body>
+</html>

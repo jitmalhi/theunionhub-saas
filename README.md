@@ -102,7 +102,8 @@ theunionhub-saas/
 │           ├── index.html           ← /admin (dashboard: live tiles + recent verifications)
 │           ├── members.html         ← /admin/members (list + filter + paginate)
 │           ├── member.html          ← /admin/member?id=… (detail + edit + history)
-│           ├── audit.html           ← /admin/audit (audit-log view, paginated)
+│           ├── team.html            ← /admin/team (list + add + remove tenant admins)
+│           ├── audit.html           ← /admin/audit (audit-log view + action/actor filters)
 │           ├── settings.html        ← /admin/settings (tenant settings form + WCAG check)
 │           └── admin.css            ← shared admin shell (brand-aligned)
 │
@@ -125,6 +126,7 @@ theunionhub-saas/
 │   ├── admin-members.js             ← member list/get/update + per-member history ✓ live
 │   ├── admin-audit.js               ← paginated audit-log fetch ✓ live
 │   ├── admin-settings.js            ← tenant settings fetch + update_tenant_settings RPC ✓ live
+│   ├── admin-team.js                ← list/add/remove tenant_admins wrappers ✓ live
 │   ├── live.js                      ← refactor of js/live.js, tenant-aware    · planned
 │   └── qrcode.js                    ← migrated from js/qrcode.js              · planned
 │
@@ -135,7 +137,8 @@ theunionhub-saas/
 │   │   ├── 0003_public_stats.sql           ← SECURITY DEFINER global counts  ✓ live
 │   │   ├── 0004_audit_log.sql              ← verifications + dues + audit + RPCs ✓ live
 │   │   ├── 0005_tenant_admin_settings.sql  ← update_tenant_settings RPC (admin email gate) ✓ live
-│   │   └── 0006_tenant_admins.sql          ← multi-admin membership + add/remove RPCs ✓ live
+│   │   ├── 0006_tenant_admins.sql          ← multi-admin membership + add/remove RPCs ✓ live
+│   │   └── 0007_list_tenant_admins.sql     ← list_tenant_admins() RPC (admin + email join) ✓ live
 │   ├── seed.sql                            ← demo tenant + 3 demo members    ✓ live
 │   └── config.toml                                                           · planned
 │
