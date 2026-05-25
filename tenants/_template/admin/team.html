@@ -136,6 +136,7 @@
   import { requireAuth, watchAuth, signOut } from '/lib/auth-guard.js';
   import { getTenant, applyTenantTheme } from '/lib/tenant.js';
   import { listTeamAdmins, addTeamAdmin, removeTeamAdmin } from '/lib/admin-team.js';
+  import createClient from '/lib/supabase.js';
 
   const session = await requireAuth();
   if (!session) throw new Error('redirecting');
@@ -169,7 +170,10 @@
   function friendlyError(code, email) {
     switch (code) {
       case 'invalid_email':            return 'Enter a valid email address.';
-      case 'user_not_signed_in_yet':   return `${email} hasn’t signed in yet. Send them the sign-in link first (https://${location.host}/admin/signin), then try again.`;
+      // user_not_signed_in_yet is handled specially in the submit
+      // handler (we auto-send a magic link). The case is kept here as
+      // a defensive fallback if the auto-invite path itself fails.
+      case 'user_not_signed_in_yet':   return `${email} hasn’t signed in yet. Share https://${location.host}/admin/signin with them, then re-add.`;
       case 'not_tenant_admin':         return 'You are not authorised to manage admins on this tenant.';
       case 'not_authenticated':        return 'Your session expired. Sign in again.';
       case 'no_tenant_context':        return 'Tenant context is missing — refresh the page.';
@@ -178,6 +182,30 @@
       case 'add_failed':
       case 'remove_failed':            return 'Something went wrong. Try again in a moment.';
       default:                         return code || 'Something went wrong. Try again in a moment.';
+    }
+  }
+
+  // Auto-invite path: when add_tenant_admin raises user_not_signed_in_yet,
+  // we fire a magic link to the invitee via Supabase Auth so they get
+  // an email automatically. The inviter doesn't have to copy-paste a
+  // URL. Email stays in the input so the inviter just clicks Add admin
+  // again once the invitee has signed in.
+  async function autoInviteAndExplain(email) {
+    setAddStatus(`Sending invite to ${email}…`);
+    try {
+      const supabase = createClient();
+      await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: `${location.origin}/admin/callback` },
+      });
+      setAddStatus(
+        `Invite sent to ${email}. Once they click the magic link and sign in once, click "Add admin" again to grant access.`,
+        'success'
+      );
+    } catch (err) {
+      console.error('[uh/admin/team] auto-invite failed:', err);
+      // Auto-invite failed; fall back to the manual instruction.
+      setAddStatus(friendlyError('user_not_signed_in_yet', email), 'error');
     }
   }
 
@@ -207,7 +235,16 @@
       await refresh();
     } catch (err) {
       console.error(err);
-      setAddStatus(friendlyError(err?.message, email), 'error');
+      // The only error code that gets the special auto-invite treatment.
+      // Everything else surfaces through the friendly-error mapping as-is.
+      // Note: we deliberately do NOT clear addInput.value here so the
+      // inviter can click "Add admin" again once the invitee has signed
+      // in, without retyping.
+      if (err?.message === 'user_not_signed_in_yet') {
+        await autoInviteAndExplain(email);
+      } else {
+        setAddStatus(friendlyError(err?.message, email), 'error');
+      }
     } finally {
       addBtn.disabled = false; addBtn.textContent = 'Add admin';
     }

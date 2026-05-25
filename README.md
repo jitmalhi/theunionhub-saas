@@ -142,7 +142,8 @@ theunionhub-saas/
 │   │   ├── 0006_tenant_admins.sql          ← multi-admin membership + add/remove RPCs ✓ live
 │   │   ├── 0007_list_tenant_admins.sql     ← list_tenant_admins() RPC (admin + email join) ✓ live
 │   │   ├── 0008_strict_tenant_admin_rls.sql ← tighten RLS to require tenant_admins + lookup_member RPC ✓ live
-│   │   └── 0009_admin_member_create.sql    ← admin_add_member + admin_add_members_bulk RPCs ✓ live
+│   │   ├── 0009_admin_member_create.sql    ← admin_add_member + admin_add_members_bulk RPCs ✓ live
+│   │   └── 0010_tenant_dues_cycle.sql      ← per-tenant dues cycle + tenant_cycle_start() helper ✓ live
 │   ├── seed.sql                            ← demo tenant + 3 demo members    ✓ live
 │   └── config.toml                                                           · planned
 │

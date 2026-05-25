@@ -79,6 +79,25 @@
     </label>
 
     <div class="admin-form-field">
+      <span class="admin-form-label">Dues cycle</span>
+      <p class="admin-form-help">
+        How often the "already collected" check resets in the verify flow.
+        A weekly cycle means a member scanned + marked paid on Monday shows
+        "Already collected" through Sunday; the new week resets Monday.
+        Changing this affects future collections only — historical rows
+        aren't re-bucketed, so members paid in the current period under
+        the old setting may be eligible to be marked paid again under the
+        new setting.
+      </p>
+      <div class="admin-form-radio-row" role="radiogroup" aria-label="Dues cycle">
+        <label class="admin-form-radio"><input type="radio" name="dues_cycle" value="daily">Daily</label>
+        <label class="admin-form-radio"><input type="radio" name="dues_cycle" value="weekly">Weekly (Mon–Sun)</label>
+        <label class="admin-form-radio"><input type="radio" name="dues_cycle" value="monthly">Monthly</label>
+        <label class="admin-form-radio"><input type="radio" name="dues_cycle" value="quarterly">Quarterly</label>
+      </div>
+    </div>
+
+    <div class="admin-form-field">
       <span class="admin-form-label">Accent colour</span>
       <p class="admin-form-help">
         The hex paints the union name on the digital card, the verify-screen background, and admin highlights.
@@ -214,6 +233,11 @@
     swatch.style.background = hex;
     paintContrast(hex);
 
+    // Dues cycle — defaults to 'daily' for rows that pre-date 0010.
+    const cycle = (t.dues_cycle || 'daily').toLowerCase();
+    const cycleRadio = document.querySelector(`input[name="dues_cycle"][value="${cycle}"]`);
+    if (cycleRadio) cycleRadio.checked = true;
+
     document.querySelector('[data-info-slug]').textContent     = t.slug || '—';
     document.querySelector('[data-info-email]').textContent    = t.contact_email || '—';
     document.querySelector('[data-info-status]').textContent   = t.status || '—';
@@ -276,10 +300,12 @@
     const display = inputDisplay.value.trim();
     const local   = inputLocal.value.trim();
     const utype   = inputType.value.trim();
+    const cycle   = (new FormData(form).get('dues_cycle') || '').toString();
     if (display !== (original.display_name || ''))   patch.display_name = display;
     if (local   !== (original.local_number || ''))   patch.local_number = local;
     if (utype   !== (original.union_type   || ''))   patch.union_type   = utype;
     if (hex     !== (original.accent_hex   || '').toUpperCase()) patch.accent_hex = hex;
+    if (cycle && cycle !== (original.dues_cycle || 'daily')) patch.dues_cycle = cycle;
 
     if (!Object.keys(patch).length) { setStatus('Nothing changed.', null); return; }
 
@@ -298,6 +324,7 @@
       if      (code === 'not_tenant_admin')    setStatus('Your email is not the admin on file for this tenant. Ask ops to update contact_email.', 'error');
       else if (code === 'not_authenticated')   setStatus('Sign in again — your session expired.', 'error');
       else if (code === 'no_tenant_context')   setStatus("Couldn't resolve which tenant to update.", 'error');
+      else if (code === 'invalid_dues_cycle')  setStatus('Dues cycle must be daily, weekly, monthly, or quarterly.', 'error');
       else                                      setStatus("Couldn't save. Try again in a moment.", 'error');
     } finally {
       saveBtn.disabled = false; saveBtn.textContent = 'Save changes';
