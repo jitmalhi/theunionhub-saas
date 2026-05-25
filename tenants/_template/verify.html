@@ -446,12 +446,19 @@
   }
 
   async function fetchMemberById(id) {
-    const url = `${SUPABASE_URL}/rest/v1/members?id=eq.${encodeURIComponent(id)}&select=*`;
+    // Goes through the lookup_member SECURITY DEFINER RPC because anon's
+    // direct SELECT on public.members was removed in migration 0008.
+    // The RPC reads x-tenant-id itself, filters server-side, and only
+    // returns the display fields this page paints.
     try {
-      const res = await fetch(url, { headers: sbHeaders() });
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/lookup_member`, {
+        method: 'POST',
+        headers: sbHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ p_id: id })
+      });
       if (!res.ok) return null;
       const rows = await res.json();
-      return rows[0] || null;
+      return (Array.isArray(rows) ? rows[0] : rows) || null;
     } catch { return null; }
   }
 

@@ -138,7 +138,8 @@ theunionhub-saas/
 │   │   ├── 0004_audit_log.sql              ← verifications + dues + audit + RPCs ✓ live
 │   │   ├── 0005_tenant_admin_settings.sql  ← update_tenant_settings RPC (admin email gate) ✓ live
 │   │   ├── 0006_tenant_admins.sql          ← multi-admin membership + add/remove RPCs ✓ live
-│   │   └── 0007_list_tenant_admins.sql     ← list_tenant_admins() RPC (admin + email join) ✓ live
+│   │   ├── 0007_list_tenant_admins.sql     ← list_tenant_admins() RPC (admin + email join) ✓ live
+│   │   └── 0008_strict_tenant_admin_rls.sql ← tighten RLS to require tenant_admins + lookup_member RPC ✓ live
 │   ├── seed.sql                            ← demo tenant + 3 demo members    ✓ live
 │   └── config.toml                                                           · planned
 │
