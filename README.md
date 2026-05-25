@@ -129,6 +129,7 @@ theunionhub-saas/
 │   ├── admin-audit.js               ← paginated audit-log fetch ✓ live
 │   ├── admin-settings.js            ← tenant settings fetch + update_tenant_settings RPC ✓ live
 │   ├── admin-team.js                ← list/add/remove tenant_admins wrappers ✓ live
+│   ├── admin-logo.js                ← Storage upload + set_tenant_logo RPC ✓ live
 │   ├── live.js                      ← refactor of js/live.js, tenant-aware    · planned
 │   └── qrcode.js                    ← migrated from js/qrcode.js              · planned
 │
@@ -143,7 +144,8 @@ theunionhub-saas/
 │   │   ├── 0007_list_tenant_admins.sql     ← list_tenant_admins() RPC (admin + email join) ✓ live
 │   │   ├── 0008_strict_tenant_admin_rls.sql ← tighten RLS to require tenant_admins + lookup_member RPC ✓ live
 │   │   ├── 0009_admin_member_create.sql    ← admin_add_member + admin_add_members_bulk RPCs ✓ live
-│   │   └── 0010_tenant_dues_cycle.sql      ← per-tenant dues cycle + tenant_cycle_start() helper ✓ live
+│   │   ├── 0010_tenant_dues_cycle.sql      ← per-tenant dues cycle + tenant_cycle_start() helper ✓ live
+│   │   └── 0011_tenant_logo.sql            ← Storage bucket + RLS + set_tenant_logo RPC ✓ live
 │   ├── seed.sql                            ← demo tenant + 3 demo members    ✓ live
 │   └── config.toml                                                           · planned
 │

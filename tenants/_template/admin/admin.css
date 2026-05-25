@@ -922,6 +922,44 @@ button, input { font: inherit; }
 }
 
 
+/* ════════════ TENANT LOGO (settings page) ════════════ */
+.logo-row {
+  display: flex; align-items: center; gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.logo-preview {
+  width: 96px; height: 96px; flex: none;
+  border-radius: var(--rad-sm);
+  border: var(--bw-hair) solid var(--hair);
+  background: var(--paper);
+  display: grid; place-items: center;
+  overflow: hidden;
+  padding: 8px;
+}
+.logo-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.logo-preview .empty {
+  font-family: var(--font-mono);
+  font-weight: var(--fw-medium);
+  font-size: 10px;
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+}
+.logo-actions {
+  display: inline-flex; gap: 12px; flex-wrap: wrap;
+}
+.logo-actions .admin-btn {
+  cursor: pointer;          /* the file-input label looks like a button */
+}
+
+
 /* ════════════ FILE DROP ZONE (CSV import) ════════════ */
 .file-drop-zone {
   display: block;

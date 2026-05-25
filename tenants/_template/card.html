@@ -453,6 +453,15 @@
   // post-0002 RLS on members returns 0 rows and ?id= renders notfound.
   let currentTenantId = null;
 
+  // Lifted to module scope so setState() can re-apply the theme on the
+  // freshly-rendered DOM after every switcher click — applyTenantTheme
+  // is what fills [data-tenant-logo] with the tenant's logo (when set)
+  // and replaces tenant slots like [data-tenant-name]. Without this,
+  // the boot's one-shot apply only touches the initial empty DOM and
+  // every subsequent setState() render goes back to the fallback SVG.
+  let currentTenant = null;
+  let tenantMod     = null;
+
   function sbHeaders(extra) {
     const h = {
       apikey: SUPABASE_KEY,
@@ -561,7 +570,7 @@
     return `
       <article class="card" aria-label="Digital membership card">
         <header class="card-head">
-          ${markSvg(26)}
+          <div data-tenant-logo>${markSvg(26)}</div>
           <span class="label">Digital Membership Card</span>
         </header>
 
@@ -589,7 +598,7 @@
     return `
       <article class="card skeleton" aria-busy="true" aria-label="Loading membership card">
         <header class="card-head">
-          ${markSvg(26)}
+          <div data-tenant-logo>${markSvg(26)}</div>
           <span class="label">Digital Membership Card</span>
         </header>
         <div class="skeleton-bar name-skel"></div>
@@ -625,15 +634,28 @@
     url.searchParams.set('state', state);
     history.replaceState(null, '', url);
 
+    // Re-paint the tenant theme onto whatever fresh DOM we're about to
+    // render. The boot's one-shot applyTenantTheme runs against an
+    // empty #root, so without this every setState() render reverts the
+    // [data-tenant-logo] slot to its fallback SVG. tenantMod may be
+    // null on the very first setState() call (before the boot's import
+    // finishes); the null check keeps that case safe.
+    const repaintTenant = () => {
+      if (tenantMod && currentTenant) tenantMod.applyTenantTheme(currentTenant);
+    };
+
     if (state === 'loading') {
       root.innerHTML = renderSkeleton();
+      repaintTenant();
       return;
     }
     if (state === 'notfound') {
       root.innerHTML = renderNotFound();
+      repaintTenant();
       return;
     }
     root.innerHTML = renderCard(state);
+    repaintTenant();
     // Render QR if applicable
     if (state !== 'suspended') {
       const target = document.getElementById('qr');
@@ -663,14 +685,16 @@
     // error inside lib/tenant.js returns null and the page renders with
     // its hardcoded prototype defaults. The tenant id is also stamped
     // onto currentTenantId so sbHeaders() includes x-tenant-id on every
-    // subsequent Supabase call (required by post-0002 RLS).
-    let tenant = null;
+    // subsequent Supabase call (required by post-0002 RLS). Both
+    // currentTenant + tenantMod are MODULE-SCOPED (declared above) so
+    // setState() can re-apply the theme on every re-render — that's
+    // what fills [data-tenant-logo] with the tenant's logo.
     try {
-      const tenantMod = await import('/lib/tenant.js');
-      tenant = await tenantMod.getTenant();
-      if (tenant) {
-        currentTenantId = tenant.id;
-        tenantMod.applyTenantTheme(tenant);
+      tenantMod = await import('/lib/tenant.js');
+      currentTenant = await tenantMod.getTenant();
+      if (currentTenant) {
+        currentTenantId = currentTenant.id;
+        tenantMod.applyTenantTheme(currentTenant);
       }
     } catch (e) {
       console.warn('[uh/card] tenant module failed to load:', e && e.message ? e.message : e);
@@ -680,9 +704,9 @@
     // public.members carries denormalised copies post-0002, but the
     // tenant is the authoritative source — if it exists, it wins.
     function applyTenantToMember(m) {
-      if (!tenant) return m;
-      m.union_name   = tenant.display_name   || m.union_name;
-      m.local_number = tenant.local_number   || m.local_number;
+      if (!currentTenant) return m;
+      m.union_name   = currentTenant.display_name   || m.union_name;
+      m.local_number = currentTenant.local_number   || m.local_number;
       return m;
     }
 

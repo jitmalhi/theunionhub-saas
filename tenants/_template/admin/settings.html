@@ -60,6 +60,33 @@
   </header>
 
   <form class="admin-form" data-settings-form hidden>
+    <div class="admin-form-field">
+      <span class="admin-form-label">Tenant logo</span>
+      <p class="admin-form-help">
+        Replaces the platform mark on member cards. PNG, JPG, SVG, or WebP,
+        up to 5 MB. Use a square (1:1) image for the cleanest fit. Uploads
+        happen immediately on file select; no need to click Save.
+      </p>
+      <div class="logo-row">
+        <div class="logo-preview" data-logo-preview>
+          <span class="empty">No logo</span>
+        </div>
+        <div class="logo-actions">
+          <label class="admin-btn admin-btn-primary">
+            <span data-logo-pick-label>Choose file</span>
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/svg+xml,image/webp"
+              data-logo-input
+              hidden
+            >
+          </label>
+          <button type="button" class="admin-btn admin-btn-ghost" data-logo-remove hidden>Remove logo</button>
+        </div>
+      </div>
+      <p class="admin-form-status" data-logo-status role="status" aria-live="polite"></p>
+    </div>
+
     <label class="admin-form-field">
       <span class="admin-form-label">Display name</span>
       <p class="admin-form-help">Shown as the union name on the card and verify pages.</p>
@@ -147,6 +174,7 @@
   import { requireAuth, watchAuth, signOut } from '/lib/auth-guard.js';
   import { getTenant, applyTenantTheme } from '/lib/tenant.js';
   import { getTenantSettings, updateTenantSettings } from '/lib/admin-settings.js';
+  import { uploadLogo, setLogoUrl, removeLogo } from '/lib/admin-logo.js';
 
   const session = await requireAuth();
   if (!session) throw new Error('redirecting');
@@ -223,6 +251,106 @@
 
   let original = null;
 
+  // ─── Logo controls (file → upload → setLogoUrl → repaint preview) ──
+  const logoInput    = document.querySelector('[data-logo-input]');
+  const logoPreview  = document.querySelector('[data-logo-preview]');
+  const logoRemove   = document.querySelector('[data-logo-remove]');
+  const logoStatus   = document.querySelector('[data-logo-status]');
+  const logoPickLbl  = document.querySelector('[data-logo-pick-label]');
+  let logoRemoveArmed = false;       // two-tap confirm for destructive remove
+  let logoRemoveTimer = null;
+
+  function paintLogo(url) {
+    logoPreview.replaceChildren();
+    if (url) {
+      const img = document.createElement('img');
+      img.src = url; img.alt = 'Tenant logo';
+      logoPreview.appendChild(img);
+      logoRemove.hidden = false;
+      logoPickLbl.textContent = 'Replace';
+    } else {
+      const span = document.createElement('span');
+      span.className = 'empty';
+      span.textContent = 'No logo';
+      logoPreview.appendChild(span);
+      logoRemove.hidden = true;
+      logoPickLbl.textContent = 'Choose file';
+    }
+  }
+
+  function setLogoStatus(msg, kind) {
+    logoStatus.textContent = msg || '';
+    logoStatus.classList.remove('is-error', 'is-success');
+    if (kind) logoStatus.classList.add('is-' + kind);
+  }
+
+  function friendlyLogoError(code) {
+    switch (code) {
+      case 'no_file':            return 'No file selected.';
+      case 'file_too_large':     return 'File is larger than the 5 MB limit.';
+      case 'unsupported_mime':   return 'Only PNG, JPG, SVG, or WebP are accepted.';
+      case 'no_tenant_context':  return 'Tenant context is missing — refresh the page.';
+      case 'not_authenticated':  return 'Your session expired. Sign in again.';
+      case 'not_tenant_admin':   return 'You aren’t authorised to manage this tenant’s logo.';
+      case 'invalid_url':        return 'Logo URL is malformed.';
+      case 'upload_failed':      return 'Upload failed. Check the file and try again.';
+      default:                   return code || 'Something went wrong. Try again in a moment.';
+    }
+  }
+
+  logoInput.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLogoStatus('Uploading…');
+    logoInput.disabled = true;
+    try {
+      const url = await uploadLogo(file);
+      await setLogoUrl(url);
+      paintLogo(url);
+      if (original) original.logo_url = url;
+      setLogoStatus('Logo updated.', 'success');
+      setTimeout(() => setLogoStatus(''), 2500);
+    } catch (err) {
+      console.error('[uh/admin/settings] logo upload failed:', err);
+      setLogoStatus(friendlyLogoError(err?.message), 'error');
+    } finally {
+      logoInput.disabled = false;
+      e.target.value = '';                  // reset so same file can be picked again
+    }
+  });
+
+  logoRemove.addEventListener('click', async () => {
+    // Two-tap confirm, matching verify.html / team.html patterns.
+    if (!logoRemoveArmed) {
+      logoRemoveArmed = true;
+      logoRemove.textContent = 'Tap to confirm';
+      clearTimeout(logoRemoveTimer);
+      logoRemoveTimer = setTimeout(() => {
+        logoRemoveArmed = false;
+        logoRemove.textContent = 'Remove logo';
+      }, 3000);
+      return;
+    }
+    clearTimeout(logoRemoveTimer);
+    logoRemoveArmed = false;
+    logoRemove.disabled = true;
+    logoRemove.textContent = 'Removing…';
+    setLogoStatus('Removing…');
+    try {
+      await removeLogo();
+      paintLogo(null);
+      if (original) original.logo_url = null;
+      setLogoStatus('Logo removed.', 'success');
+      setTimeout(() => setLogoStatus(''), 2500);
+    } catch (err) {
+      console.error('[uh/admin/settings] logo remove failed:', err);
+      setLogoStatus(friendlyLogoError(err?.message), 'error');
+    } finally {
+      logoRemove.disabled = false;
+      logoRemove.textContent = 'Remove logo';
+    }
+  });
+
   function fillFromRow(t) {
     inputDisplay.value = t.display_name || '';
     inputLocal.value   = t.local_number || '';
@@ -237,6 +365,9 @@
     const cycle = (t.dues_cycle || 'daily').toLowerCase();
     const cycleRadio = document.querySelector(`input[name="dues_cycle"][value="${cycle}"]`);
     if (cycleRadio) cycleRadio.checked = true;
+
+    // Logo preview state.
+    paintLogo(t.logo_url || null);
 
     document.querySelector('[data-info-slug]').textContent     = t.slug || '—';
     document.querySelector('[data-info-email]').textContent    = t.contact_email || '—';
