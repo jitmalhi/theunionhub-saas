@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Import members · Admin · The Union Hub</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<script>
+  window.__UH_CONFIG__ = {
+    SUPABASE_URL:       'https://frdvhmzbsmczknqtexvx.supabase.co',
+    SUPABASE_ANON_KEY:  'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P',
+    PUBLIC_BASE_DOMAIN: 'theunionhub.com'
+  };
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/admin/admin.css">
+</head>
+
+<body>
+
+<nav class="admin-nav" role="navigation" aria-label="Admin">
+  <div class="admin-nav-brand">
+    <span class="mark" aria-hidden="true" data-tenant-initial>·</span>
+    <div class="admin-nav-brand-stack">
+      <span class="admin-nav-tenant-name" data-tenant-name>—</span>
+      <span class="admin-nav-context">Admin</span>
+    </div>
+  </div>
+  <div class="admin-nav-meta">
+    <span class="admin-nav-email" data-admin-email>…</span>
+    <button class="admin-btn admin-btn-ghost" type="button" data-signout>Sign out</button>
+  </div>
+</nav>
+
+<nav class="admin-subnav" role="navigation" aria-label="Admin sections">
+  <a href="/admin">Dashboard</a>
+  <a href="/admin/members" aria-current="page">Members</a>
+  <a href="/admin/team">Team</a>
+  <a href="/admin/audit">Audit</a>
+  <a href="/admin/settings">Settings</a>
+</nav>
+
+<main class="admin-main">
+  <a href="/admin/members" class="back-link">← All members</a>
+
+  <header class="admin-page-head">
+    <span class="admin-eyebrow">Members · Import</span>
+    <h1 class="admin-page-title">Import a <em>roster</em>.</h1>
+    <p class="admin-page-meta">
+      CSV with one member per row. The first row must be a header.
+      Required column: <code style="font-family:var(--font-mono);font-size:12px;color:var(--accent-tenant, var(--forest));">full_name</code>.
+      Optional columns: <code style="font-family:var(--font-mono);font-size:12px;color:var(--accent-tenant, var(--forest));">status</code>,
+      <code style="font-family:var(--font-mono);font-size:12px;color:var(--accent-tenant, var(--forest));">member_since</code>,
+      <code style="font-family:var(--font-mono);font-size:12px;color:var(--accent-tenant, var(--forest));">union_name</code>,
+      <code style="font-family:var(--font-mono);font-size:12px;color:var(--accent-tenant, var(--forest));">local_number</code>.
+      Up to 10,000 rows per file (split into 500-row batches automatically).
+    </p>
+    <p style="margin-top: 12px;">
+      <button type="button" class="admin-btn admin-btn-ghost" data-download-template>Download template CSV</button>
+    </p>
+  </header>
+
+  <!-- ─── Step 1 · Drop zone ─────────────────────────────────────── -->
+  <label class="file-drop-zone" data-drop-zone tabindex="0" aria-label="Choose CSV file or drop one here">
+    <input type="file" accept=".csv,text/csv" data-file-input>
+    <div class="file-drop-zone-label" data-drop-label>Choose a CSV file</div>
+    <div class="file-drop-zone-hint">or drop one here · UTF-8, RFC 4180 quoting</div>
+  </label>
+
+  <!-- ─── Step 2 · Preview + confirm ──────────────────────────────── -->
+  <section data-preview-section hidden style="margin-top: 32px;">
+    <h2 class="activity-title" style="margin-bottom: 12px;">Preview</h2>
+    <p class="admin-page-meta" data-preview-summary>—</p>
+
+    <div data-validation-errors hidden></div>
+
+    <div style="overflow-x: auto;">
+      <table class="data-table" aria-label="CSV preview" data-preview-table></table>
+    </div>
+
+    <div class="admin-form-actions">
+      <button type="button" class="admin-btn admin-btn-primary" data-import-btn>Import rows</button>
+      <button type="button" class="admin-btn admin-btn-ghost" data-cancel-btn>Choose a different file</button>
+    </div>
+  </section>
+
+  <!-- ─── Step 3 · Progress + results ─────────────────────────────── -->
+  <section data-progress-section hidden style="margin-top: 32px;">
+    <h2 class="activity-title" style="margin-bottom: 12px;">Importing</h2>
+    <p class="admin-page-meta" data-progress-label>—</p>
+    <div class="import-progress"><div class="import-progress-fill" data-progress-fill style="width:0%"></div></div>
+  </section>
+
+  <section data-results-section hidden style="margin-top: 32px;">
+    <h2 class="activity-title" style="margin-bottom: 16px;">Results</h2>
+    <div class="import-summary" data-summary>
+      <div class="import-summary-stat is-success">
+        <span class="num" data-summary-success>0</span>
+        <span class="label">Imported</span>
+      </div>
+      <div class="import-summary-stat is-fail">
+        <span class="num" data-summary-fail>0</span>
+        <span class="label">Failed</span>
+      </div>
+      <div class="import-summary-stat">
+        <span class="num" data-summary-total>0</span>
+        <span class="label">Total rows</span>
+      </div>
+    </div>
+
+    <table class="data-table" aria-label="Per-row results" data-results-table hidden>
+      <thead>
+        <tr>
+          <th scope="col">CSV row</th>
+          <th scope="col">Name</th>
+          <th scope="col">Result</th>
+          <th scope="col">Detail</th>
+        </tr>
+      </thead>
+      <tbody data-results-body></tbody>
+    </table>
+
+    <div class="admin-form-actions">
+      <a href="/admin/members" class="admin-btn admin-btn-primary">Done — back to members</a>
+      <button type="button" class="admin-btn admin-btn-ghost" data-import-another>Import another file</button>
+    </div>
+  </section>
+</main>
+
+<footer class="admin-foot">
+  <span>The Union Hub · Admin</span>
+  <span>Signed in as <span data-admin-email-foot>…</span></span>
+</footer>
+
+<script type="module">
+  import { requireAuth, watchAuth, signOut } from '/lib/auth-guard.js';
+  import { getTenant, applyTenantTheme } from '/lib/tenant.js';
+  import { importInBatches } from '/lib/admin-members.js';
+
+  const session = await requireAuth();
+  if (!session) throw new Error('redirecting');
+
+  let tenant = null;
+  try {
+    tenant = await getTenant();
+    if (tenant) applyTenantTheme(tenant);
+  } catch (e) { console.warn('[uh/admin/import] tenant resolve failed:', e?.message); }
+  if (tenant?.slug) document.querySelector('[data-tenant-initial]').textContent = tenant.slug.charAt(0).toUpperCase();
+
+  const email = session.user?.email || '—';
+  document.querySelector('[data-admin-email]').textContent      = email;
+  document.querySelector('[data-admin-email-foot]').textContent = email;
+  watchAuth();
+  document.querySelector('[data-signout]')?.addEventListener('click', signOut);
+
+  // ─── Constants ────────────────────────────────────────────────────
+  const MAX_ROWS = 10_000;
+  const KNOWN_COLUMNS = new Set(['full_name', 'status', 'member_since', 'union_name', 'local_number']);
+  const REQUIRED_COLUMNS = ['full_name'];
+
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ─── Minimal RFC 4180 CSV parser ──────────────────────────────────
+  // Handles quoted fields (with embedded commas), escaped quotes (""),
+  // and quoted multi-line fields. Returns array of arrays.
+  function parseCSV(text) {
+    const rows = [];
+    let row = [];
+    let field = '';
+    let inQuote = false;
+    let i = 0;
+    const len = text.length;
+    while (i < len) {
+      const c = text[i];
+      if (inQuote) {
+        if (c === '"') {
+          if (text[i + 1] === '"') { field += '"'; i += 2; continue; }
+          inQuote = false; i++;
+        } else {
+          field += c; i++;
+        }
+      } else {
+        if (c === '"') { inQuote = true; i++; }
+        else if (c === ',') { row.push(field); field = ''; i++; }
+        else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; i++; }
+        else if (c === '\r') {
+          // \r\n or bare \r — both terminate the row
+          row.push(field); rows.push(row); row = []; field = '';
+          i += (text[i + 1] === '\n') ? 2 : 1;
+        }
+        else { field += c; i++; }
+      }
+    }
+    // Final field (no trailing newline)
+    if (field !== '' || row.length > 0) { row.push(field); rows.push(row); }
+    // Drop trailing fully-empty row from a file that ends in a newline
+    while (rows.length && rows[rows.length - 1].every((f) => f === '')) rows.pop();
+    return rows;
+  }
+
+  // ─── Header normalisation ─────────────────────────────────────────
+  function normaliseHeader(h) {
+    return String(h || '').trim().toLowerCase().replace(/\s+/g, '_');
+  }
+
+  // ─── Parse file → { headers, rows, warnings, errors } ─────────────
+  let parsed = null;     // last successful parse
+  let csvObjects = null; // [{full_name, status, …}, …] ready for the RPC
+
+  async function readFile(file) {
+    parsed = null; csvObjects = null;
+    document.querySelector('[data-validation-errors]').hidden = true;
+    document.querySelector('[data-validation-errors]').innerHTML = '';
+
+    const text = await file.text();
+    const rows = parseCSV(text);
+
+    if (rows.length < 2) {
+      showValidation(['CSV is empty or has only a header — nothing to import.']);
+      return;
+    }
+    if (rows.length - 1 > MAX_ROWS) {
+      showValidation([`File has ${rows.length - 1} data rows; maximum is ${MAX_ROWS.toLocaleString()}. Split the file and re-upload.`]);
+      return;
+    }
+
+    const headers = rows[0].map(normaliseHeader);
+    const dataRows = rows.slice(1);
+
+    const missing = REQUIRED_COLUMNS.filter((c) => !headers.includes(c));
+    if (missing.length) {
+      showValidation([`Missing required column${missing.length > 1 ? 's' : ''}: ${missing.join(', ')}.`]);
+      return;
+    }
+
+    const unknownCols = headers.filter((h) => h && !KNOWN_COLUMNS.has(h));
+    const warnings = unknownCols.length
+      ? [`Ignoring unknown column${unknownCols.length > 1 ? 's' : ''}: ${unknownCols.join(', ')}.`]
+      : [];
+
+    // Build the JSON objects, mapping by header position
+    const objs = dataRows.map((rowFields) => {
+      const obj = {};
+      headers.forEach((h, i) => {
+        if (KNOWN_COLUMNS.has(h)) obj[h] = (rowFields[i] ?? '').trim();
+      });
+      return obj;
+    });
+
+    parsed = { headers, rows: dataRows, warnings };
+    csvObjects = objs;
+
+    showPreview(headers, dataRows, warnings);
+  }
+
+  function showValidation(errors) {
+    const el = document.querySelector('[data-validation-errors]');
+    el.hidden = false;
+    el.innerHTML = `
+      <div class="admin-banner is-alert" style="margin: 16px 0;">
+        <div class="admin-banner-body">
+          <h3>Can’t import this file</h3>
+          <p>${errors.map(escapeHtml).join('<br>')}</p>
+        </div>
+      </div>`;
+    document.querySelector('[data-preview-section]').hidden = false;
+    document.querySelector('[data-preview-table]').innerHTML = '';
+    document.querySelector('[data-preview-summary]').textContent = '';
+    document.querySelector('[data-import-btn]').disabled = true;
+  }
+
+  function showPreview(headers, dataRows, warnings) {
+    document.querySelector('[data-preview-section]').hidden = false;
+    document.querySelector('[data-progress-section]').hidden = true;
+    document.querySelector('[data-results-section]').hidden = true;
+    document.querySelector('[data-import-btn]').disabled = false;
+
+    document.querySelector('[data-preview-summary]').innerHTML =
+      `${dataRows.length.toLocaleString()} row${dataRows.length === 1 ? '' : 's'} ready.` +
+      (warnings.length ? ` <span style="color:var(--warn)">${escapeHtml(warnings.join(' '))}</span>` : '');
+
+    const showCount = Math.min(dataRows.length, 8);
+    const tbl = document.querySelector('[data-preview-table]');
+    tbl.innerHTML = `
+      <thead><tr>${headers.map((h) => `<th scope="col">${escapeHtml(h)}</th>`).join('')}</tr></thead>
+      <tbody>
+        ${dataRows.slice(0, showCount).map((r) => `
+          <tr>${headers.map((_, i) => `<td class="col-meta">${escapeHtml(r[i] ?? '')}</td>`).join('')}</tr>
+        `).join('')}
+        ${dataRows.length > showCount ? `
+          <tr><td colspan="${headers.length}" class="col-meta" style="text-align:center; padding:14px;">
+            … and ${dataRows.length - showCount} more
+          </td></tr>` : ''}
+      </tbody>`;
+  }
+
+  // ─── Friendly error mapping for per-row results ──────────────────
+  function friendlyRowError(code) {
+    switch (code) {
+      case 'full_name_required':      return 'Full name is required.';
+      case 'missing_required_field':  return 'A required field was empty or missing.';
+      case 'invalid_value':           return 'Status must be active / inactive / suspended / pending.';
+      case 'invalid_date':            return 'member_since must be YYYY-MM-DD.';
+      case 'duplicate':               return 'Member already exists.';
+      default:                        return code || 'Insert failed.';
+    }
+  }
+
+  // ─── Run the import ───────────────────────────────────────────────
+  async function runImport() {
+    if (!csvObjects?.length) return;
+
+    document.querySelector('[data-preview-section]').hidden = true;
+    document.querySelector('[data-progress-section]').hidden = false;
+    document.querySelector('[data-results-section]').hidden = true;
+
+    const total = csvObjects.length;
+    document.querySelector('[data-progress-label]').textContent = `0 of ${total.toLocaleString()} sent…`;
+    document.querySelector('[data-progress-fill]').style.width = '0%';
+
+    try {
+      const results = await importInBatches(csvObjects, {
+        batchSize: 500,
+        onProgress: (done) => {
+          const pct = Math.round((done / total) * 100);
+          document.querySelector('[data-progress-fill]').style.width = `${pct}%`;
+          document.querySelector('[data-progress-label]').textContent = `${done.toLocaleString()} of ${total.toLocaleString()} sent…`;
+        },
+      });
+      showResults(results);
+    } catch (err) {
+      console.error(err);
+      document.querySelector('[data-progress-section]').hidden = true;
+      showValidation([`Import failed: ${escapeHtml(err?.message || 'unknown error')}`]);
+    }
+  }
+
+  function showResults(results) {
+    const success = results.filter((r) => r.success).length;
+    const fail    = results.length - success;
+
+    document.querySelector('[data-progress-section]').hidden = true;
+    document.querySelector('[data-results-section]').hidden = false;
+    document.querySelector('[data-summary-success]').textContent = success.toLocaleString();
+    document.querySelector('[data-summary-fail]').textContent    = fail.toLocaleString();
+    document.querySelector('[data-summary-total]').textContent   = results.length.toLocaleString();
+
+    // Only show the per-row table if there were any failures — for a
+    // clean import, the summary tiles tell the whole story.
+    const failed = results.filter((r) => !r.success);
+    const tbl = document.querySelector('[data-results-table]');
+    if (failed.length === 0) {
+      tbl.hidden = true;
+      return;
+    }
+    tbl.hidden = false;
+    const body = document.querySelector('[data-results-body]');
+    body.innerHTML = failed.map((r) => {
+      const csvRowNum = r.row_index + 2;  // header is row 1, data starts at row 2
+      const name = (csvObjects[r.row_index]?.full_name || '').trim() || '(empty)';
+      return `
+        <tr>
+          <td class="col-meta">${csvRowNum}</td>
+          <td class="col-name">${escapeHtml(name)}</td>
+          <td><span class="status-pill suspended"><span class="dot" aria-hidden="true"></span>Failed</span></td>
+          <td class="col-meta">${escapeHtml(friendlyRowError(r.error_code))}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  // ─── Bindings ────────────────────────────────────────────────────
+  const dropZone = document.querySelector('[data-drop-zone]');
+  const fileInput = document.querySelector('[data-file-input]');
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      document.querySelector('[data-drop-label]').textContent = file.name;
+      readFile(file);
+    }
+  });
+
+  // Drag-drop
+  ['dragenter', 'dragover'].forEach((ev) => {
+    dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.add('is-dragover'); });
+  });
+  ['dragleave', 'drop'].forEach((ev) => {
+    dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.remove('is-dragover'); });
+  });
+  dropZone.addEventListener('drop', (e) => {
+    const file = e.dataTransfer?.files?.[0];
+    if (file) {
+      document.querySelector('[data-drop-label]').textContent = file.name;
+      readFile(file);
+    }
+  });
+
+  document.querySelector('[data-import-btn]').addEventListener('click', runImport);
+
+  document.querySelector('[data-cancel-btn]').addEventListener('click', () => {
+    fileInput.value = '';
+    document.querySelector('[data-drop-label]').textContent = 'Choose a CSV file';
+    document.querySelector('[data-preview-section]').hidden = true;
+    csvObjects = null; parsed = null;
+  });
+
+  document.querySelector('[data-import-another]').addEventListener('click', () => {
+    fileInput.value = '';
+    document.querySelector('[data-drop-label]').textContent = 'Choose a CSV file';
+    document.querySelector('[data-results-section]').hidden = true;
+    csvObjects = null; parsed = null;
+  });
+
+  // Template download
+  document.querySelector('[data-download-template]').addEventListener('click', () => {
+    const csv =
+      'full_name,status,member_since,union_name,local_number\n' +
+      '"Jane Doe",active,2020-01-15,,\n' +
+      '"John Smith",inactive,2018-06-04,,\n' +
+      '"Maya Okonkwo",pending,,,B-9\n';
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'members-template.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  });
+</script>
+
+</body>
+</html>

@@ -102,6 +102,8 @@ theunionhub-saas/
 │           ├── index.html           ← /admin (dashboard: live tiles + recent verifications)
 │           ├── members.html         ← /admin/members (list + filter + paginate)
 │           ├── member.html          ← /admin/member?id=… (detail + edit + history)
+│           ├── member-new.html      ← /admin/member-new (single member create form)
+│           ├── import.html          ← /admin/import (CSV roster import + per-row results)
 │           ├── team.html            ← /admin/team (list + add + remove tenant admins)
 │           ├── audit.html           ← /admin/audit (audit-log view + action/actor filters)
 │           ├── settings.html        ← /admin/settings (tenant settings form + WCAG check)
@@ -139,7 +141,8 @@ theunionhub-saas/
 │   │   ├── 0005_tenant_admin_settings.sql  ← update_tenant_settings RPC (admin email gate) ✓ live
 │   │   ├── 0006_tenant_admins.sql          ← multi-admin membership + add/remove RPCs ✓ live
 │   │   ├── 0007_list_tenant_admins.sql     ← list_tenant_admins() RPC (admin + email join) ✓ live
-│   │   └── 0008_strict_tenant_admin_rls.sql ← tighten RLS to require tenant_admins + lookup_member RPC ✓ live
+│   │   ├── 0008_strict_tenant_admin_rls.sql ← tighten RLS to require tenant_admins + lookup_member RPC ✓ live
+│   │   └── 0009_admin_member_create.sql    ← admin_add_member + admin_add_members_bulk RPCs ✓ live
 │   ├── seed.sql                            ← demo tenant + 3 demo members    ✓ live
 │   └── config.toml                                                           · planned
 │

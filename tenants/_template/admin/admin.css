@@ -912,6 +912,111 @@ button, input { font: inherit; }
 .admin-banner.is-alert { border-left-color: var(--alert); }
 
 
+/* ════════════ PAGE-HEAD ACTION ROW (members list, future pages) ════════════ */
+.admin-page-head-row {
+  display: flex; flex-wrap: wrap; gap: 16px;
+  align-items: flex-end; justify-content: space-between;
+}
+.admin-page-head-actions {
+  display: inline-flex; gap: 12px; flex-wrap: wrap;
+}
+
+
+/* ════════════ FILE DROP ZONE (CSV import) ════════════ */
+.file-drop-zone {
+  display: block;
+  position: relative;
+  padding: 48px 24px;
+  border: 1.5px dashed var(--hair);
+  border-radius: var(--rad);
+  background: var(--paper);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-standard),
+              background var(--dur-fast) var(--ease-standard);
+}
+.file-drop-zone:hover,
+.file-drop-zone:focus-within,
+.file-drop-zone.is-dragover {
+  border-color: var(--accent-tenant, var(--forest));
+  background: var(--off-white);
+}
+.file-drop-zone input[type="file"] {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  opacity: 0; cursor: pointer;
+}
+.file-drop-zone-label {
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  font-size: 20px;
+  color: var(--deep-forest);
+  margin-bottom: 6px;
+  pointer-events: none;
+}
+.file-drop-zone-hint {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+
+/* ════════════ IMPORT PROGRESS BAR ════════════ */
+.import-progress {
+  height: 4px;
+  background: var(--paper);
+  border: var(--bw-hair) solid var(--hair);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+.import-progress-fill {
+  height: 100%;
+  background: var(--accent-tenant, var(--forest));
+  transition: width var(--dur-base) var(--ease-out);
+}
+
+
+/* ════════════ IMPORT SUMMARY TILES ════════════ */
+.import-summary {
+  display: flex; flex-wrap: wrap; gap: 0;
+  border: var(--bw-hair) solid var(--hair);
+  border-radius: var(--rad);
+  background: var(--paper);
+  margin: 16px 0 24px;
+  overflow: hidden;
+}
+.import-summary-stat {
+  flex: 1; min-width: 140px;
+  padding: 22px 26px;
+  border-right: var(--bw-hair) solid var(--hair);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.import-summary-stat:last-child { border-right: 0; }
+.import-summary-stat .num {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: clamp(28px, 3vw, 36px);
+  line-height: 1;
+  letter-spacing: var(--ls-headline);
+  color: var(--deep-forest);
+  font-variant-numeric: tabular-nums;
+}
+.import-summary-stat .label {
+  font-family: var(--font-mono);
+  font-weight: var(--fw-medium);
+  font-size: var(--fs-eyebrow);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.import-summary-stat.is-success .num { color: var(--forest); }
+.import-summary-stat.is-fail    .num { color: var(--alert); }
+
+
 /* ════════════ ACCESSIBILITY ════════════ */
 .visually-hidden {
   position: absolute;

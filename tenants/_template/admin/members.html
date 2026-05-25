@@ -54,9 +54,17 @@
 
 <main class="admin-main">
   <header class="admin-page-head">
-    <span class="admin-eyebrow"><span data-tenant-name>—</span> · Roster</span>
-    <h1 class="admin-page-title">Members.</h1>
-    <p class="admin-page-meta"><span data-total-line>Loading…</span></p>
+    <div class="admin-page-head-row">
+      <div>
+        <span class="admin-eyebrow"><span data-tenant-name>—</span> · Roster</span>
+        <h1 class="admin-page-title">Members.</h1>
+        <p class="admin-page-meta"><span data-total-line>Loading…</span></p>
+      </div>
+      <div class="admin-page-head-actions">
+        <a href="/admin/import"     class="admin-btn admin-btn-ghost">Import CSV</a>
+        <a href="/admin/member-new" class="admin-btn admin-btn-primary">+ Add member</a>
+      </div>
+    </div>
   </header>
 
   <div class="filter-bar">
