@@ -259,8 +259,7 @@ export default async function middleware(request) {
   /* 4a · Tenant lookup failed (Supabase down, table missing, env unset).
           Fail open: route by slug, let the page surface the issue. */
   if (tenant.status === 'error') {
-    const tenantPage = TENANT_PAGES.has(page) ? page : 'card';
-    const target = `/tenants/_template/${tenantPage === 'index' ? 'card' : tenantPage}.html`;
+    const target = resolveTenantTemplate(page);
     const response = rewrite(new URL(target, request.url));
     response.headers.set('x-tenant-slug', slug);
     response.headers.set('x-tenant-lookup', tenant.reason);
@@ -303,11 +302,28 @@ export default async function middleware(request) {
 
   /* 4e · Happy path — active tenant. Rewrite to the template, inject
           headers so the page renders with zero additional fetches. */
-  const tenantPage = TENANT_PAGES.has(page)
-    ? (page === 'index' ? 'card' : page)
-    : page;
-
-  const target = `/tenants/_template/${tenantPage}.html`;
+  const target = resolveTenantTemplate(page);
   const response = rewrite(new URL(target, request.url));
   return injectTenantHeaders(response, tenant);
+}
+
+/**
+ * Map a normalised page name to the static HTML file that serves it.
+ *
+ *   ''           → /tenants/_template/card.html          (legacy default)
+ *   'index'      → /tenants/_template/card.html          (alias)
+ *   'card'       → /tenants/_template/card.html
+ *   'verify'     → /tenants/_template/verify.html
+ *   'admin'      → /tenants/_template/admin/index.html   (directory default)
+ *   'admin/sub'  → /tenants/_template/admin/sub.html
+ *   '<other>'    → /tenants/_template/<other>.html       (Vercel 404s if missing)
+ */
+function resolveTenantTemplate(page) {
+  if (page === 'admin') return '/tenants/_template/admin/index.html';
+  if (page.startsWith('admin/')) {
+    const sub = page.slice('admin/'.length);
+    return `/tenants/_template/admin/${sub}.html`;
+  }
+  if (page === 'index' || page === '') return '/tenants/_template/card.html';
+  return `/tenants/_template/${page}.html`;
 }

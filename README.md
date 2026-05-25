@@ -95,7 +95,12 @@ theunionhub-saas/
 │   └── _template/                   ← reference layout — NEVER deployed as a tenant
 │       ├── card.html                ← /card  (member digital card) ✓ live
 │       ├── verify.html              ← /verify (public verification page) ✓ live
-│       └── tenant.css               ← per-tenant accent / logo overrides ✓ live
+│       ├── tenant.css               ← per-tenant accent / logo overrides ✓ live
+│       └── admin/                   ← authenticated tenant admin app ✓ live
+│           ├── signin.html          ← /admin/signin (magic-link request)
+│           ├── callback.html        ← /admin/callback (verifyOtp + redirect)
+│           ├── index.html           ← /admin (dashboard: live tiles + recent verifications)
+│           └── admin.css            ← shared admin shell (brand-aligned)
 │
 ├── api/                             ← Vercel serverless / edge functions
 │   ├── _middleware.js               ← edge routing logic (re-exported by /middleware.js) ✓ live
@@ -111,6 +116,8 @@ theunionhub-saas/
 ├── lib/                             ← shared ES modules (browser + edge)
 │   ├── supabase.js                  ← fetch-thin client factory, env-driven ✓ live
 │   ├── tenant.js                    ← hostname → slug → tenant row + theming ✓ live
+│   ├── auth-guard.js                ← requireAuth + watchAuth + signOut for admin pages ✓ live
+│   ├── admin-stats.js               ← tenant-scoped dashboard counts + recent activity ✓ live
 │   ├── live.js                      ← refactor of js/live.js, tenant-aware    · planned
 │   └── qrcode.js                    ← migrated from js/qrcode.js              · planned
 │

@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sign in · The Union Hub Admin</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Sign in to your union's admin panel — The Union Hub.">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<!-- Runtime config (public; RLS is the boundary, not secrecy). -->
+<script>
+  window.__UH_CONFIG__ = {
+    SUPABASE_URL:       'https://frdvhmzbsmczknqtexvx.supabase.co',
+    SUPABASE_ANON_KEY:  'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P',
+    PUBLIC_BASE_DOMAIN: 'theunionhub.com'
+  };
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/admin/admin.css">
+</head>
+
+<body>
+
+<main class="auth-screen">
+  <section class="auth-card" aria-labelledby="signin-title">
+    <span class="admin-eyebrow"><span data-tenant-slug-text>—</span> · Admin</span>
+    <h1 id="signin-title">Sign <em>in</em>.</h1>
+    <p>Enter the email on file for <strong data-tenant-name>this local</strong>. We'll send a one-time link — no password required.</p>
+
+    <form data-signin-form novalidate>
+      <label class="auth-field">
+        <span class="auth-field-label">Email address</span>
+        <input
+          type="email"
+          name="email"
+          autocomplete="email"
+          inputmode="email"
+          required
+          autofocus
+          placeholder="admin@your-local.org"
+          class="auth-input"
+          data-signin-email
+        >
+      </label>
+      <button type="submit" class="admin-btn admin-btn-primary auth-submit" data-signin-submit>
+        Send magic link
+      </button>
+    </form>
+
+    <p class="auth-status" data-signin-status role="status" aria-live="polite"></p>
+
+    <div class="auth-foot">
+      <a href="/card">← Back to public site</a>
+    </div>
+  </section>
+</main>
+
+<footer class="admin-foot">
+  <span>The Union Hub · Admin</span>
+  <span data-tenant-name>—</span>
+</footer>
+
+<script type="module">
+  import { getTenant, applyTenantTheme } from '/lib/tenant.js';
+  import createClient from '/lib/supabase.js';
+
+  // Paint the tenant accent + slot fills as early as we can — the auth
+  // card lives at the tenant accent colour even before the user signs in.
+  let tenant = null;
+  try {
+    tenant = await getTenant();
+    if (tenant) applyTenantTheme(tenant);
+  } catch (e) {
+    console.warn('[uh/admin/signin] tenant resolve failed:', e?.message);
+  }
+
+  // If a session already exists, jump straight to where the user was
+  // headed (or /admin).
+  const supabase = createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    const params = new URLSearchParams(location.search);
+    const next = params.get('next') || '/admin';
+    location.replace(next);
+  }
+
+  const form    = document.querySelector('[data-signin-form]');
+  const input   = document.querySelector('[data-signin-email]');
+  const button  = document.querySelector('[data-signin-submit]');
+  const status  = document.querySelector('[data-signin-status]');
+
+  function setStatus(msg, kind) {
+    status.textContent = msg || '';
+    status.classList.remove('is-error', 'is-success');
+    if (kind) status.classList.add('is-' + kind);
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = (input.value || '').trim();
+    if (!email) { setStatus('Enter an email address.', 'error'); return; }
+
+    button.disabled = true;
+    button.textContent = 'Sending…';
+    setStatus('');
+
+    // Preserve where they were trying to go through the magic-link round-trip.
+    const params = new URLSearchParams(location.search);
+    const next = params.get('next') || '/admin';
+    const redirectTo =
+      `${location.origin}/admin/callback?next=${encodeURIComponent(next)}`;
+
+    try {
+      await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: redirectTo },
+      });
+      form.style.display = 'none';
+      setStatus(`Check your inbox at ${email} for a sign-in link.`, 'success');
+    } catch (err) {
+      console.error(err);
+      setStatus("Couldn't send the link. Check the email and try again.", 'error');
+      button.disabled = false;
+      button.textContent = 'Send magic link';
+    }
+  });
+</script>
+
+</body>
+</html>

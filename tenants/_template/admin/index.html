@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin · The Union Hub</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Tenant admin dashboard — The Union Hub.">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<script>
+  window.__UH_CONFIG__ = {
+    SUPABASE_URL:       'https://frdvhmzbsmczknqtexvx.supabase.co',
+    SUPABASE_ANON_KEY:  'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P',
+    PUBLIC_BASE_DOMAIN: 'theunionhub.com'
+  };
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/admin/admin.css">
+</head>
+
+<body>
+
+<!-- ════════════ TOP NAV ════════════ -->
+<nav class="admin-nav" role="navigation" aria-label="Admin">
+  <div class="admin-nav-brand">
+    <span class="mark" aria-hidden="true" data-tenant-initial>·</span>
+    <div class="admin-nav-brand-stack">
+      <span class="admin-nav-tenant-name" data-tenant-name>—</span>
+      <span class="admin-nav-context">Admin</span>
+    </div>
+  </div>
+  <div class="admin-nav-meta">
+    <span class="admin-nav-email" data-admin-email>…</span>
+    <button class="admin-btn admin-btn-ghost" type="button" data-signout>Sign out</button>
+  </div>
+</nav>
+
+<!-- ════════════ MAIN ════════════ -->
+<main class="admin-main">
+  <header class="admin-page-head">
+    <span class="admin-eyebrow">Local <span data-tenant-local>—</span> · Today</span>
+    <h1 class="admin-page-title">Today, at <em data-tenant-name>—</em>.</h1>
+    <p class="admin-page-meta">
+      <span data-today-date></span>
+      <span aria-hidden="true"> · </span>
+      <span>Live · auto-refreshes every 30s</span>
+    </p>
+  </header>
+
+  <!-- Live tiles -->
+  <section class="stats-grid" aria-label="Today's activity">
+    <div class="stat-cell">
+      <div class="stat-label">Members <span class="live-dot" aria-hidden="true"></span></div>
+      <div class="stat-num skel" data-stat="members">&nbsp;</div>
+      <div class="stat-sub skel" data-stat-sub="members">&nbsp;</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-label">Active</div>
+      <div class="stat-num skel" data-stat="activeMembers">&nbsp;</div>
+      <div class="stat-sub skel" data-stat-sub="activeMembers">&nbsp;</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-label">Verifications today</div>
+      <div class="stat-num skel" data-stat="verifsToday">&nbsp;</div>
+      <div class="stat-sub skel" data-stat-sub="verifsToday">&nbsp;</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-label">Dues collected today</div>
+      <div class="stat-num skel" data-stat="duesToday">&nbsp;</div>
+      <div class="stat-sub skel" data-stat-sub="duesToday">&nbsp;</div>
+    </div>
+  </section>
+
+  <!-- Recent activity -->
+  <section aria-labelledby="activity-title">
+    <div class="activity-head">
+      <h2 class="activity-title" id="activity-title">Recent verifications</h2>
+      <span class="activity-meta" data-activity-meta>Loading…</span>
+    </div>
+    <table class="activity-table">
+      <thead>
+        <tr>
+          <th scope="col">Member</th>
+          <th scope="col">Result</th>
+          <th scope="col">Time</th>
+        </tr>
+      </thead>
+      <tbody data-activity-body>
+        <tr><td colspan="3" class="activity-empty">Loading…</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<footer class="admin-foot">
+  <span>The Union Hub · Admin</span>
+  <span>Signed in as <span data-admin-email-foot>…</span></span>
+</footer>
+
+<script type="module">
+  import { requireAuth, watchAuth, signOut } from '/lib/auth-guard.js';
+  import { getTenant, applyTenantTheme } from '/lib/tenant.js';
+  import { getDashboardData } from '/lib/admin-stats.js';
+
+  // ─── Gate the page on auth. Redirects to /admin/signin if no session.
+  const session = await requireAuth();
+  if (!session) {
+    // requireAuth has issued the redirect; halt boot.
+    throw new Error('redirecting to sign-in');
+  }
+
+  // ─── Tenant context + theme paint. Tenant exists or middleware would
+  //     have returned 404/410 before we got here — but we still guard.
+  let tenant = null;
+  try {
+    tenant = await getTenant();
+    if (tenant) applyTenantTheme(tenant);
+  } catch (e) {
+    console.warn('[uh/admin] tenant resolve failed:', e?.message);
+  }
+
+  // Brand initial in the nav avatar — first letter of the slug, upper.
+  if (tenant?.slug) {
+    document.querySelector('[data-tenant-initial]').textContent =
+      tenant.slug.charAt(0).toUpperCase();
+  }
+
+  // Email shown in the nav + footer.
+  const email = session.user?.email || '—';
+  document.querySelector('[data-admin-email]').textContent      = email;
+  document.querySelector('[data-admin-email-foot]').textContent = email;
+
+  // Sign-out wires through auth-guard.signOut(); watchAuth's listener
+  // handles the redirect to /admin/signin on SIGNED_OUT.
+  watchAuth();
+  document.querySelector('[data-signout]')?.addEventListener('click', signOut);
+
+  // Today's date in the page-head meta.
+  const dateEl = document.querySelector('[data-today-date]');
+  if (dateEl) {
+    dateEl.textContent = new Date().toLocaleDateString(undefined, {
+      weekday: 'long', month: 'long', day: 'numeric',
+    });
+  }
+
+  // ─── Dashboard data fetch + paint ─────────────────────────────────
+  const tiles = {
+    members:       { el: document.querySelector('[data-stat="members"]'),       sub: document.querySelector('[data-stat-sub="members"]'),       subText: 'on the roster' },
+    activeMembers: { el: document.querySelector('[data-stat="activeMembers"]'), sub: document.querySelector('[data-stat-sub="activeMembers"]'), subText: 'currently in good standing' },
+    verifsToday:   { el: document.querySelector('[data-stat="verifsToday"]'),   sub: document.querySelector('[data-stat-sub="verifsToday"]'),   subText: 'QR scans since midnight' },
+    duesToday:     { el: document.querySelector('[data-stat="duesToday"]'),     sub: document.querySelector('[data-stat-sub="duesToday"]'),     subText: 'marked paid today' },
+  };
+
+  const RESULT_LABEL = {
+    verified:           'Verified',
+    already_collected:  'Already collected',
+    invalid:            'Not valid',
+    notfound:           'Not found',
+  };
+
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    })[c]);
+  }
+
+  function fmtNum(n) {
+    return Number(n).toLocaleString(undefined);
+  }
+
+  function fmtTime(iso) {
+    const d = new Date(iso);
+    if (isNaN(d)) return '—';
+    return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  }
+
+  function paint({ counts, recent }) {
+    // Tiles
+    for (const [key, tile] of Object.entries(tiles)) {
+      tile.el.classList.remove('skel');
+      tile.el.textContent = fmtNum(counts[key]);
+      tile.sub.classList.remove('skel');
+      tile.sub.textContent = tile.subText;
+    }
+
+    // Recent verifications table
+    const meta = document.querySelector('[data-activity-meta]');
+    const body = document.querySelector('[data-activity-body]');
+
+    if (!recent.length) {
+      meta.textContent = 'No scans yet';
+      body.innerHTML = '<tr><td colspan="3" class="activity-empty">No verifications recorded yet today or in recent memory.</td></tr>';
+      return;
+    }
+    meta.textContent = `Latest ${recent.length}`;
+
+    body.innerHTML = recent.map((row) => {
+      const name   = row.members?.full_name || '—';
+      const result = row.result || 'verified';
+      const label  = RESULT_LABEL[result] || result;
+      return `
+        <tr>
+          <td class="member">${escapeHtml(name)}</td>
+          <td>
+            <span class="result-pill ${escapeHtml(result)}">
+              <span class="dot" aria-hidden="true"></span>${escapeHtml(label)}
+            </span>
+          </td>
+          <td class="time">${escapeHtml(fmtTime(row.created_at))}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  async function refresh() {
+    try {
+      const data = await getDashboardData();
+      paint(data);
+    } catch (e) {
+      console.error('[uh/admin] dashboard fetch failed:', e);
+      // Leave whatever was last painted; show a quiet error in the meta.
+      const meta = document.querySelector('[data-activity-meta]');
+      if (meta) meta.textContent = 'Refresh failed';
+    }
+  }
+
+  // Initial paint + 30s polling. clearInterval on page hide so the tab
+  // doesn't burn requests while backgrounded; resume on focus.
+  await refresh();
+  let timer = setInterval(refresh, 30_000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      clearInterval(timer); timer = null;
+    } else if (!timer) {
+      refresh();
+      timer = setInterval(refresh, 30_000);
+    }
+  });
+</script>
+
+</body>
+</html>

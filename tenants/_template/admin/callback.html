@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Signing you in · The Union Hub Admin</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<script>
+  window.__UH_CONFIG__ = {
+    SUPABASE_URL:       'https://frdvhmzbsmczknqtexvx.supabase.co',
+    SUPABASE_ANON_KEY:  'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P',
+    PUBLIC_BASE_DOMAIN: 'theunionhub.com'
+  };
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/admin/admin.css">
+</head>
+
+<body>
+
+<main class="auth-screen">
+  <section class="auth-card" aria-labelledby="cb-title">
+    <span class="admin-eyebrow"><span data-tenant-slug-text>—</span> · Admin</span>
+    <h1 id="cb-title" data-cb-title>Signing you <em>in</em>…</h1>
+    <p data-cb-message>One moment.</p>
+    <p class="auth-status" data-cb-status role="status" aria-live="polite"></p>
+    <div class="auth-foot" data-cb-foot hidden>
+      <a href="/admin/signin">← Back to sign-in</a>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+  import { getTenant, applyTenantTheme } from '/lib/tenant.js';
+  import createClient from '/lib/supabase.js';
+
+  try {
+    const tenant = await getTenant();
+    if (tenant) applyTenantTheme(tenant);
+  } catch (e) {
+    console.warn('[uh/admin/callback] tenant resolve failed:', e?.message);
+  }
+
+  const title   = document.querySelector('[data-cb-title]');
+  const message = document.querySelector('[data-cb-message]');
+  const status  = document.querySelector('[data-cb-status]');
+  const foot    = document.querySelector('[data-cb-foot]');
+
+  function fail(reason) {
+    title.innerHTML = "Couldn't <em>sign you in</em>.";
+    message.textContent = reason || 'The sign-in link is invalid or has expired.';
+    status.textContent = '';
+    foot.hidden = false;
+  }
+
+  const params = new URLSearchParams(location.search);
+  const token_hash = params.get('token_hash');
+  const type       = params.get('type') || 'magiclink';
+  const next       = params.get('next')  || '/admin';
+
+  // Supabase supports an alternative (implicit) flow that puts tokens in
+  // the URL fragment. Our supabase.js uses PKCE which lands in the
+  // querystring as ?token_hash=. If neither is present, fail loudly.
+  if (!token_hash) {
+    fail('Missing sign-in token. Open the link from your email again.');
+  } else {
+    try {
+      const supabase = createClient();
+      await supabase.auth.verifyOtp({ token_hash, type });
+
+      title.innerHTML = "You're <em>in</em>.";
+      message.textContent = '';
+      status.textContent = 'Redirecting…';
+      status.classList.add('is-success');
+
+      // Strip the sensitive params before navigating, just in case the
+      // user copies/pastes the URL afterwards.
+      const safeNext = next.startsWith('/') ? next : '/admin';
+      location.replace(safeNext);
+    } catch (err) {
+      console.error(err);
+      fail('The sign-in link is invalid or has expired. Request a new one.');
+    }
+  }
+</script>
+
+</body>
+</html>
