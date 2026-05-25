@@ -58,6 +58,22 @@
     <p class="admin-page-meta">Every system action on this tenant. The "who looked, when, what they did" answer.</p>
   </header>
 
+  <div class="filter-bar">
+    <div class="filter-controls">
+      <label class="filter-select-wrap">
+        <span class="filter-select-label">Action</span>
+        <select class="filter-select" data-action-filter aria-label="Filter by action">
+          <option value="">All actions</option>
+          <!-- populated by JS from getDistinctActions() -->
+        </select>
+      </label>
+    </div>
+    <label class="filter-search">
+      <span class="visually-hidden">Search by actor</span>
+      <input type="search" placeholder="Actor: user:abc, system:…" data-actor-search autocomplete="off" aria-label="Search by actor">
+    </label>
+  </div>
+
   <table class="data-table" aria-label="Audit log">
     <thead>
       <tr>
@@ -90,7 +106,7 @@
 <script type="module">
   import { requireAuth, watchAuth, signOut } from '/lib/auth-guard.js';
   import { getTenant, applyTenantTheme } from '/lib/tenant.js';
-  import { listAuditLog } from '/lib/admin-audit.js';
+  import { listAuditLog, getDistinctActions } from '/lib/admin-audit.js';
 
   const session = await requireAuth();
   if (!session) throw new Error('redirecting');
@@ -108,17 +124,65 @@
   watchAuth();
   document.querySelector('[data-signout]')?.addEventListener('click', signOut);
 
-  // ─── State ─────────────────────────────────────────────────────────
+  // ─── State (page + filters), URL-synced ────────────────────────────
   const state = (() => {
     const u = new URL(location.href);
-    return { page: parseInt(u.searchParams.get('page') || '1', 10) || 1 };
+    return {
+      action: u.searchParams.get('action') || '',
+      actor:  u.searchParams.get('actor')  || '',
+      page:   parseInt(u.searchParams.get('page') || '1', 10) || 1,
+    };
   })();
 
   function syncUrl() {
     const u = new URL(location.href);
+    state.action ? u.searchParams.set('action', state.action) : u.searchParams.delete('action');
+    state.actor  ? u.searchParams.set('actor',  state.actor)  : u.searchParams.delete('actor');
     state.page > 1 ? u.searchParams.set('page', String(state.page)) : u.searchParams.delete('page');
     history.replaceState(null, '', u);
   }
+
+  // Initial filter input state from URL
+  const actionSelect = document.querySelector('[data-action-filter]');
+  const actorSearch  = document.querySelector('[data-actor-search]');
+  actorSearch.value  = state.actor;
+
+  // Populate the action dropdown from real data. Race-safe: if the
+  // current state.action isn't in the returned set (could happen if
+  // the user pasted a URL with a stale action value), we still keep
+  // the URL value selected by adding it as an extra option.
+  async function populateActions() {
+    try {
+      const actions = await getDistinctActions();
+      const opts = [...actions];
+      if (state.action && !opts.includes(state.action)) opts.push(state.action);
+      opts.sort();
+
+      // Reset the select, re-add "All", then the dynamic options.
+      actionSelect.innerHTML = '<option value="">All actions</option>' +
+        opts.map((a) => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('');
+      actionSelect.value = state.action;
+    } catch (e) {
+      console.warn('[uh/admin/audit] couldn\'t fetch actions:', e?.message);
+    }
+  }
+
+  // ─── Bindings ──────────────────────────────────────────────────────
+  actionSelect.addEventListener('change', () => {
+    state.action = actionSelect.value;
+    state.page = 1;
+    syncUrl(); refresh();
+  });
+
+  let actorTimer = null;
+  actorSearch.addEventListener('input', (e) => {
+    clearTimeout(actorTimer);
+    actorTimer = setTimeout(() => {
+      state.actor = e.target.value.trim();
+      state.page = 1;
+      syncUrl(); refresh();
+    }, 250);
+  });
 
   document.querySelector('[data-page-prev]').addEventListener('click', () => {
     if (state.page <= 1) return;
@@ -187,7 +251,11 @@
     document.querySelector('[data-tbody]').innerHTML =
       `<tr><td colspan="5" class="data-table-empty">Loading…</td></tr>`;
     try {
-      const data = await listAuditLog({ page: state.page });
+      const data = await listAuditLog({
+        action: state.action || null,
+        actor:  state.actor  || null,
+        page:   state.page,
+      });
       paint(data);
     } catch (e) {
       console.error('[uh/admin/audit] refresh failed:', e);
@@ -200,6 +268,10 @@
     }
   }
 
+  // Initial paint: kick off the action dropdown and the first list
+  // fetch concurrently. The dropdown only affects what filters are
+  // available; it doesn't gate rendering.
+  populateActions();
   refresh();
 </script>
 

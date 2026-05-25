@@ -518,6 +518,47 @@ button, input { font: inherit; }
   border-color: var(--accent-tenant, var(--forest));
 }
 
+/* Dropdown filter (audit log action selector). Pairs with .filter-search
+   inside the same .filter-bar; uses the .filter-controls row when there
+   are multiple selects. */
+.filter-controls {
+  display: inline-flex; gap: 16px; align-items: center; flex-wrap: wrap;
+}
+.filter-select-wrap {
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.filter-select-label {
+  font-family: var(--font-mono);
+  font-weight: var(--fw-medium);
+  font-size: var(--fs-eyebrow);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.filter-select {
+  padding: 9px 32px 9px 14px;
+  border-radius: var(--rad-sm);
+  border: var(--bw-hair) solid var(--hair);
+  background-color: var(--off-white);
+  /* Brand-safe chevron — no shadow, no gradient, just a flat SVG. */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%23888780' stroke-width='1.5'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 10px 7px;
+  appearance: none;
+  font-family: var(--font-body);
+  font-weight: var(--fw-medium);
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+  min-width: 200px;
+  max-width: 320px;
+}
+.filter-select:focus {
+  outline: none;
+  border-color: var(--accent-tenant, var(--forest));
+}
+
 
 /* ════════════ DATA TABLE (members, audit) ════════════ */
 .data-table {
