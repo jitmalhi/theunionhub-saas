@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Member · Admin · The Union Hub</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<script>
+  window.__UH_CONFIG__ = {
+    SUPABASE_URL:       'https://frdvhmzbsmczknqtexvx.supabase.co',
+    SUPABASE_ANON_KEY:  'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P',
+    PUBLIC_BASE_DOMAIN: 'theunionhub.com'
+  };
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/admin/admin.css">
+</head>
+
+<body>
+
+<nav class="admin-nav" role="navigation" aria-label="Admin">
+  <div class="admin-nav-brand">
+    <span class="mark" aria-hidden="true" data-tenant-initial>·</span>
+    <div class="admin-nav-brand-stack">
+      <span class="admin-nav-tenant-name" data-tenant-name>—</span>
+      <span class="admin-nav-context">Admin</span>
+    </div>
+  </div>
+  <div class="admin-nav-meta">
+    <span class="admin-nav-email" data-admin-email>…</span>
+    <button class="admin-btn admin-btn-ghost" type="button" data-signout>Sign out</button>
+  </div>
+</nav>
+
+<nav class="admin-subnav" role="navigation" aria-label="Admin sections">
+  <a href="/admin">Dashboard</a>
+  <a href="/admin/members" aria-current="page">Members</a>
+  <a href="/admin/audit">Audit</a>
+  <a href="/admin/settings">Settings</a>
+</nav>
+
+<main class="admin-main" data-member-root>
+  <a href="/admin/members" class="back-link">← All members</a>
+
+  <header class="admin-page-head">
+    <span class="admin-eyebrow">Member · <span data-member-status-eyebrow>—</span></span>
+    <h1 class="admin-page-title" data-member-headline>Loading…</h1>
+    <p class="admin-page-meta">
+      <span data-member-meta>—</span>
+    </p>
+  </header>
+
+  <!-- Quick-read meta block -->
+  <section class="member-meta" aria-label="Member meta" data-member-meta-block hidden>
+    <div class="cell">
+      <div class="label">Member since</div>
+      <div class="value" data-member-since>—</div>
+    </div>
+    <div class="cell">
+      <div class="label">Union name (denormalised)</div>
+      <div class="value" data-member-union>—</div>
+    </div>
+    <div class="cell">
+      <div class="label">Local number</div>
+      <div class="value" data-member-local>—</div>
+    </div>
+    <div class="cell">
+      <div class="label">Member ID</div>
+      <div class="value mono" data-member-id-display>—</div>
+    </div>
+  </section>
+
+  <!-- Edit form -->
+  <form class="admin-form" data-member-form hidden>
+    <label class="admin-form-field">
+      <span class="admin-form-label">Full name</span>
+      <p class="admin-form-help">Shown on the digital card and the verify screen.</p>
+      <input class="admin-form-input" type="text" name="full_name" required data-input-name>
+    </label>
+
+    <div class="admin-form-field">
+      <span class="admin-form-label">Status</span>
+      <p class="admin-form-help">Drives the badge on the card and the verify result.</p>
+      <div class="admin-form-radio-row" role="radiogroup">
+        <label class="admin-form-radio"><input type="radio" name="status" value="active">Active</label>
+        <label class="admin-form-radio"><input type="radio" name="status" value="inactive">Inactive</label>
+        <label class="admin-form-radio"><input type="radio" name="status" value="suspended">Suspended</label>
+        <label class="admin-form-radio"><input type="radio" name="status" value="pending">Pending</label>
+      </div>
+    </div>
+
+    <div class="admin-form-actions">
+      <button type="submit" class="admin-btn admin-btn-primary" data-save>Save changes</button>
+      <a href="/admin/members" class="admin-btn admin-btn-ghost">Cancel</a>
+    </div>
+    <p class="admin-form-status" data-form-status role="status" aria-live="polite"></p>
+  </form>
+
+  <!-- Recent activity for this member -->
+  <section aria-labelledby="verifs-title" data-history-section hidden>
+    <div class="activity-head">
+      <h2 class="activity-title" id="verifs-title">Recent verifications</h2>
+      <span class="activity-meta" data-verifs-meta>—</span>
+    </div>
+    <table class="data-table" aria-label="Verifications for this member">
+      <thead>
+        <tr>
+          <th scope="col">Result</th>
+          <th scope="col">When</th>
+        </tr>
+      </thead>
+      <tbody data-verifs-body>
+        <tr><td colspan="2" class="data-table-empty">No verifications yet.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="activity-head" style="margin-top: 32px;">
+      <h2 class="activity-title">Recent dues collections</h2>
+      <span class="activity-meta" data-dues-meta>—</span>
+    </div>
+    <table class="data-table" aria-label="Dues collections for this member">
+      <thead>
+        <tr>
+          <th scope="col">Collected</th>
+          <th scope="col">Date</th>
+        </tr>
+      </thead>
+      <tbody data-dues-body>
+        <tr><td colspan="2" class="data-table-empty">No dues collections yet.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <p data-not-found hidden style="font-family: var(--font-body); color: var(--muted);">
+    No member with that ID in this tenant.
+  </p>
+</main>
+
+<footer class="admin-foot">
+  <span>The Union Hub · Admin</span>
+  <span>Signed in as <span data-admin-email-foot>…</span></span>
+</footer>
+
+<script type="module">
+  import { requireAuth, watchAuth, signOut } from '/lib/auth-guard.js';
+  import { getTenant, applyTenantTheme } from '/lib/tenant.js';
+  import { getMember, updateMember, getMemberHistory } from '/lib/admin-members.js';
+
+  const session = await requireAuth();
+  if (!session) throw new Error('redirecting');
+
+  let tenant = null;
+  try {
+    tenant = await getTenant();
+    if (tenant) applyTenantTheme(tenant);
+  } catch (e) { console.warn('[uh/admin/member] tenant resolve failed:', e?.message); }
+  if (tenant?.slug) document.querySelector('[data-tenant-initial]').textContent = tenant.slug.charAt(0).toUpperCase();
+
+  const email = session.user?.email || '—';
+  document.querySelector('[data-admin-email]').textContent      = email;
+  document.querySelector('[data-admin-email-foot]').textContent = email;
+  watchAuth();
+  document.querySelector('[data-signout]')?.addEventListener('click', signOut);
+
+  // ─── Resolve member by ?id ────────────────────────────────────────
+  const params = new URLSearchParams(location.search);
+  const memberId = params.get('id');
+  if (!memberId) {
+    document.querySelector('[data-not-found]').hidden = false;
+    document.querySelector('[data-member-headline]').textContent = 'No member ID provided.';
+    throw new Error('no id');
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  const RESULT_LABEL = { verified: 'Verified', already_collected: 'Already collected', invalid: 'Not valid', notfound: 'Not found' };
+  function fmtDateTime(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso); if (isNaN(d)) return '—';
+    return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+  function fmtDate(d) {
+    if (!d) return '—';
+    const dt = new Date(d); if (isNaN(dt)) return '—';
+    return dt.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  // ─── Load member + history concurrently ───────────────────────────
+  let member;
+  try {
+    const [m, hist] = await Promise.all([
+      getMember(memberId),
+      getMemberHistory(memberId),
+    ]);
+    member = m;
+
+    if (!member) {
+      document.querySelector('[data-not-found]').hidden = false;
+      document.querySelector('[data-member-headline]').textContent = 'Member not found.';
+      throw new Error('member not found');
+    }
+
+    paintMember(member);
+    paintHistory(hist);
+  } catch (e) {
+    console.error('[uh/admin/member] load failed:', e);
+    if (!member) return;
+  }
+
+  function paintMember(m) {
+    document.querySelector('[data-member-status-eyebrow]').textContent =
+      m.status ? m.status.charAt(0).toUpperCase() + m.status.slice(1) : '—';
+    document.querySelector('[data-member-headline]').textContent = m.full_name || '—';
+    document.querySelector('[data-member-meta]').innerHTML =
+      `Last updated ${fmtDateTime(m.updated_at || m.created_at)} · ID <code style="font-family:var(--font-mono);font-size:12px;color:var(--muted)">${escapeHtml(m.id)}</code>`;
+
+    document.querySelector('[data-member-meta-block]').hidden = false;
+    document.querySelector('[data-member-since]').textContent       = fmtDate(m.member_since);
+    document.querySelector('[data-member-union]').textContent       = m.union_name || '—';
+    document.querySelector('[data-member-local]').textContent       = m.local_number || '—';
+    document.querySelector('[data-member-id-display]').textContent  = m.id;
+
+    // Form
+    document.querySelector('[data-member-form]').hidden = false;
+    document.querySelector('[data-input-name]').value = m.full_name || '';
+    const r = document.querySelector(`input[name="status"][value="${m.status}"]`);
+    if (r) r.checked = true;
+  }
+
+  function paintHistory({ verifications, duesCollections }) {
+    document.querySelector('[data-history-section]').hidden = false;
+
+    const vBody = document.querySelector('[data-verifs-body]');
+    if (!verifications.length) {
+      vBody.innerHTML = '<tr><td colspan="2" class="data-table-empty">No verifications yet for this member.</td></tr>';
+      document.querySelector('[data-verifs-meta]').textContent = 'None';
+    } else {
+      vBody.innerHTML = verifications.map((v) => `
+        <tr>
+          <td>
+            <span class="result-pill ${escapeHtml(v.result || '')}">
+              <span class="dot" aria-hidden="true"></span>${escapeHtml(RESULT_LABEL[v.result] || v.result || '—')}
+            </span>
+          </td>
+          <td class="col-meta">${escapeHtml(fmtDateTime(v.created_at))}</td>
+        </tr>
+      `).join('');
+      document.querySelector('[data-verifs-meta]').textContent = `Latest ${verifications.length}`;
+    }
+
+    const dBody = document.querySelector('[data-dues-body]');
+    if (!duesCollections.length) {
+      dBody.innerHTML = '<tr><td colspan="2" class="data-table-empty">No dues collected yet for this member.</td></tr>';
+      document.querySelector('[data-dues-meta]').textContent = 'None';
+    } else {
+      dBody.innerHTML = duesCollections.map((d) => `
+        <tr>
+          <td class="col-meta">${escapeHtml(fmtDateTime(d.collected_at))}</td>
+          <td class="col-meta">${escapeHtml(d.collection_date || '—')}</td>
+        </tr>
+      `).join('');
+      document.querySelector('[data-dues-meta]').textContent = `Latest ${duesCollections.length}`;
+    }
+  }
+
+  // ─── Save handler ────────────────────────────────────────────────
+  const form   = document.querySelector('[data-member-form]');
+  const saveBtn = document.querySelector('[data-save]');
+  const status = document.querySelector('[data-form-status]');
+
+  function setStatus(msg, kind) {
+    status.textContent = msg || '';
+    status.classList.remove('is-error', 'is-success');
+    if (kind) status.classList.add('is-' + kind);
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!member) return;
+
+    const fd = new FormData(form);
+    const full_name = (fd.get('full_name') || '').toString().trim();
+    const newStatus = (fd.get('status')    || '').toString().trim();
+    if (!full_name) { setStatus('Full name is required.', 'error'); return; }
+    if (!newStatus) { setStatus('Pick a status.', 'error'); return; }
+
+    saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; setStatus('');
+    try {
+      const patch = {};
+      if (full_name !== member.full_name) patch.full_name = full_name;
+      if (newStatus !== member.status)    patch.status    = newStatus;
+
+      if (!Object.keys(patch).length) {
+        setStatus('Nothing to save.', null);
+      } else {
+        const updated = await updateMember(member.id, patch);
+        member = updated;
+        paintMember(updated);
+        setStatus('Saved.', 'success');
+        setTimeout(() => setStatus(''), 2500);
+      }
+    } catch (err) {
+      console.error(err);
+      setStatus("Couldn't save. Check the values and try again.", 'error');
+    } finally {
+      saveBtn.disabled = false; saveBtn.textContent = 'Save changes';
+    }
+  });
+</script>
+
+</body>
+</html>

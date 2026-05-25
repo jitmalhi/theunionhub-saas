@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Settings · Admin · The Union Hub</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<script>
+  window.__UH_CONFIG__ = {
+    SUPABASE_URL:       'https://frdvhmzbsmczknqtexvx.supabase.co',
+    SUPABASE_ANON_KEY:  'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P',
+    PUBLIC_BASE_DOMAIN: 'theunionhub.com'
+  };
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/admin/admin.css">
+</head>
+
+<body>
+
+<nav class="admin-nav" role="navigation" aria-label="Admin">
+  <div class="admin-nav-brand">
+    <span class="mark" aria-hidden="true" data-tenant-initial>·</span>
+    <div class="admin-nav-brand-stack">
+      <span class="admin-nav-tenant-name" data-tenant-name>—</span>
+      <span class="admin-nav-context">Admin</span>
+    </div>
+  </div>
+  <div class="admin-nav-meta">
+    <span class="admin-nav-email" data-admin-email>…</span>
+    <button class="admin-btn admin-btn-ghost" type="button" data-signout>Sign out</button>
+  </div>
+</nav>
+
+<nav class="admin-subnav" role="navigation" aria-label="Admin sections">
+  <a href="/admin">Dashboard</a>
+  <a href="/admin/members">Members</a>
+  <a href="/admin/audit">Audit</a>
+  <a href="/admin/settings" aria-current="page">Settings</a>
+</nav>
+
+<main class="admin-main">
+  <header class="admin-page-head">
+    <span class="admin-eyebrow"><span data-tenant-name>—</span> · Settings</span>
+    <h1 class="admin-page-title">Settings.</h1>
+    <p class="admin-page-meta">Edit how this tenant appears. Only the admin email on file can save.</p>
+  </header>
+
+  <form class="admin-form" data-settings-form hidden>
+    <label class="admin-form-field">
+      <span class="admin-form-label">Display name</span>
+      <p class="admin-form-help">Shown as the union name on the card and verify pages.</p>
+      <input class="admin-form-input" type="text" name="display_name" required maxlength="120" data-input-display>
+    </label>
+
+    <label class="admin-form-field">
+      <span class="admin-form-label">Local number</span>
+      <p class="admin-form-help">"183", "B-9", whatever your local uses. Text — alphanumeric OK.</p>
+      <input class="admin-form-input" type="text" name="local_number" maxlength="20" data-input-local>
+    </label>
+
+    <label class="admin-form-field">
+      <span class="admin-form-label">Union type</span>
+      <p class="admin-form-help">Parent organisation: IBEW, UA, LIUNA, CUPE, …</p>
+      <input class="admin-form-input" type="text" name="union_type" maxlength="40" data-input-type>
+    </label>
+
+    <div class="admin-form-field">
+      <span class="admin-form-label">Accent colour</span>
+      <p class="admin-form-help">
+        The hex paints the union name on the digital card, the verify-screen background, and admin highlights.
+        Must pass WCAG AA contrast against the off-white page background (#F5F4F1, ≥ 4.5:1) — same rule
+        scripts/new-tenant.mjs enforces at provisioning time.
+      </p>
+      <div class="color-picker-row">
+        <label class="color-swatch" aria-label="Pick colour">
+          <input type="color" name="accent_picker" data-input-accent-picker>
+        </label>
+        <input class="admin-form-input color-hex" type="text" name="accent_hex"
+               maxlength="7" pattern="^#[0-9A-Fa-f]{6}$" required data-input-accent-hex>
+      </div>
+      <p class="contrast-readout" data-contrast-readout>—</p>
+    </div>
+
+    <div class="admin-form-actions">
+      <button type="submit" class="admin-btn admin-btn-primary" data-save>Save changes</button>
+      <button type="button" class="admin-btn admin-btn-ghost" data-revert>Revert</button>
+    </div>
+    <p class="admin-form-status" data-form-status role="status" aria-live="polite"></p>
+  </form>
+
+  <section class="info-block" data-info-block hidden aria-labelledby="readonly-title">
+    <h3 id="readonly-title">Locked fields</h3>
+    <dl>
+      <dt>Slug</dt>            <dd data-info-slug>—</dd>
+      <dt>Contact email</dt>   <dd data-info-email>—</dd>
+      <dt>Status</dt>          <dd data-info-status>—</dd>
+      <dt>Created</dt>         <dd data-info-created>—</dd>
+      <dt>Updated</dt>         <dd data-info-updated>—</dd>
+      <dt>Tenant ID</dt>       <dd data-info-id>—</dd>
+    </dl>
+    <p class="admin-form-help" style="margin-top: 18px;">
+      Slug + contact email changes need ops involvement (they affect routing and admin access).
+      Status flips (active → archived) are intentional destructive actions that don't live in this UI.
+    </p>
+  </section>
+</main>
+
+<footer class="admin-foot">
+  <span>The Union Hub · Admin</span>
+  <span>Signed in as <span data-admin-email-foot>…</span></span>
+</footer>
+
+<script type="module">
+  import { requireAuth, watchAuth, signOut } from '/lib/auth-guard.js';
+  import { getTenant, applyTenantTheme } from '/lib/tenant.js';
+  import { getTenantSettings, updateTenantSettings } from '/lib/admin-settings.js';
+
+  const session = await requireAuth();
+  if (!session) throw new Error('redirecting');
+
+  let tenant = null;
+  try {
+    tenant = await getTenant();
+    if (tenant) applyTenantTheme(tenant);
+  } catch (e) { console.warn('[uh/admin/settings] tenant resolve failed:', e?.message); }
+  if (tenant?.slug) document.querySelector('[data-tenant-initial]').textContent = tenant.slug.charAt(0).toUpperCase();
+
+  const email = session.user?.email || '—';
+  document.querySelector('[data-admin-email]').textContent      = email;
+  document.querySelector('[data-admin-email-foot]').textContent = email;
+  watchAuth();
+  document.querySelector('[data-signout]')?.addEventListener('click', signOut);
+
+  // ─── WCAG contrast helpers (inline — same formula as scripts/new-tenant.mjs)
+  const OFF_WHITE   = '#F5F4F1';
+  const WCAG_AA_MIN = 4.5;
+
+  function hexToRgb(hex) {
+    const m = String(hex || '').match(/^#?([0-9a-fA-F]{6})$/);
+    if (!m) return null;
+    const n = parseInt(m[1], 16);
+    return [(n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff];
+  }
+  function relLum([r, g, b]) {
+    const norm = (v) => { const s = v / 255; return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4); };
+    return 0.2126 * norm(r) + 0.7152 * norm(g) + 0.0722 * norm(b);
+  }
+  function contrastRatio(a, b) {
+    const ra = hexToRgb(a), rb = hexToRgb(b);
+    if (!ra || !rb) return null;
+    const la = relLum(ra), lb = relLum(rb);
+    const lighter = Math.max(la, lb), darker = Math.min(la, lb);
+    return (lighter + 0.05) / (darker + 0.05);
+  }
+
+  function paintContrast(hex) {
+    const el = document.querySelector('[data-contrast-readout]');
+    const ratio = contrastRatio(hex, OFF_WHITE);
+    el.classList.remove('is-pass', 'is-fail');
+    if (ratio === null) {
+      el.textContent = 'Enter a #RRGGBB hex.';
+      return false;
+    }
+    if (ratio >= WCAG_AA_MIN) {
+      el.textContent = `Contrast vs ${OFF_WHITE}: ${ratio.toFixed(2)}:1 · passes WCAG AA`;
+      el.classList.add('is-pass');
+      return true;
+    }
+    el.textContent = `Contrast vs ${OFF_WHITE}: ${ratio.toFixed(2)}:1 · fails WCAG AA (need ≥ ${WCAG_AA_MIN}:1)`;
+    el.classList.add('is-fail');
+    return false;
+  }
+
+  function fmtDateTime(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso); if (isNaN(d)) return '—';
+    return d.toLocaleString();
+  }
+
+  // ─── Load + bind ──────────────────────────────────────────────────
+  const inputDisplay = document.querySelector('[data-input-display]');
+  const inputLocal   = document.querySelector('[data-input-local]');
+  const inputType    = document.querySelector('[data-input-type]');
+  const inputHex     = document.querySelector('[data-input-accent-hex]');
+  const inputPicker  = document.querySelector('[data-input-accent-picker]');
+  const swatch       = document.querySelector('.color-swatch');
+  const status       = document.querySelector('[data-form-status]');
+  const saveBtn      = document.querySelector('[data-save]');
+  const revertBtn    = document.querySelector('[data-revert]');
+
+  let original = null;
+
+  function fillFromRow(t) {
+    inputDisplay.value = t.display_name || '';
+    inputLocal.value   = t.local_number || '';
+    inputType.value    = t.union_type   || '';
+    const hex = (t.accent_hex || '#0F6E56').toUpperCase();
+    inputHex.value    = hex;
+    inputPicker.value = hex;
+    swatch.style.background = hex;
+    paintContrast(hex);
+
+    document.querySelector('[data-info-slug]').textContent     = t.slug || '—';
+    document.querySelector('[data-info-email]').textContent    = t.contact_email || '—';
+    document.querySelector('[data-info-status]').textContent   = t.status || '—';
+    document.querySelector('[data-info-created]').textContent  = fmtDateTime(t.created_at);
+    document.querySelector('[data-info-updated]').textContent  = fmtDateTime(t.updated_at);
+    document.querySelector('[data-info-id]').textContent       = t.id || '—';
+  }
+
+  function setStatus(msg, kind) {
+    status.textContent = msg || '';
+    status.classList.remove('is-error', 'is-success');
+    if (kind) status.classList.add('is-' + kind);
+  }
+
+  try {
+    original = await getTenantSettings();
+    fillFromRow(original);
+    document.querySelector('[data-settings-form]').hidden = false;
+    document.querySelector('[data-info-block]').hidden    = false;
+  } catch (e) {
+    console.error(e);
+    setStatus("Couldn't load the tenant settings. Refresh to try again.", 'error');
+  }
+
+  // Live swatch + contrast as the user types or picks
+  function applyHex(raw) {
+    let hex = String(raw || '').trim();
+    if (hex && !hex.startsWith('#')) hex = '#' + hex;
+    hex = hex.toUpperCase();
+    inputHex.value = hex;
+    if (/^#[0-9A-F]{6}$/.test(hex)) {
+      inputPicker.value = hex;
+      swatch.style.background = hex;
+    }
+    paintContrast(hex);
+  }
+  inputHex.addEventListener('input', (e) => applyHex(e.target.value));
+  inputPicker.addEventListener('input', (e) => applyHex(e.target.value));
+
+  // Revert button — pull values back from `original`.
+  revertBtn?.addEventListener('click', () => {
+    if (original) { fillFromRow(original); setStatus('Reverted.', null); }
+  });
+
+  // ─── Save ────────────────────────────────────────────────────────
+  document.querySelector('[data-settings-form]').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!original) return;
+
+    const hex = (inputHex.value || '').trim().toUpperCase();
+    if (!/^#[0-9A-F]{6}$/.test(hex)) {
+      setStatus('Accent must be a #RRGGBB hex.', 'error'); return;
+    }
+    if (!paintContrast(hex)) {
+      setStatus('Accent fails WCAG AA — pick a darker colour.', 'error'); return;
+    }
+
+    // Only send fields that actually changed.
+    const patch = {};
+    const display = inputDisplay.value.trim();
+    const local   = inputLocal.value.trim();
+    const utype   = inputType.value.trim();
+    if (display !== (original.display_name || ''))   patch.display_name = display;
+    if (local   !== (original.local_number || ''))   patch.local_number = local;
+    if (utype   !== (original.union_type   || ''))   patch.union_type   = utype;
+    if (hex     !== (original.accent_hex   || '').toUpperCase()) patch.accent_hex = hex;
+
+    if (!Object.keys(patch).length) { setStatus('Nothing changed.', null); return; }
+
+    saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; setStatus('');
+    try {
+      const updated = await updateTenantSettings(patch);
+      original = updated;
+      fillFromRow(updated);
+      // Re-apply theme — accent_hex may have changed.
+      applyTenantTheme(updated);
+      setStatus('Saved.', 'success');
+      setTimeout(() => setStatus(''), 2500);
+    } catch (err) {
+      console.error(err);
+      const code = err?.message || '';
+      if      (code === 'not_tenant_admin')    setStatus('Your email is not the admin on file for this tenant. Ask ops to update contact_email.', 'error');
+      else if (code === 'not_authenticated')   setStatus('Sign in again — your session expired.', 'error');
+      else if (code === 'no_tenant_context')   setStatus("Couldn't resolve which tenant to update.", 'error');
+      else                                      setStatus("Couldn't save. Try again in a moment.", 'error');
+    } finally {
+      saveBtn.disabled = false; saveBtn.textContent = 'Save changes';
+    }
+  });
+</script>
+
+</body>
+</html>

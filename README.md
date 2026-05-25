@@ -100,6 +100,10 @@ theunionhub-saas/
 │           ├── signin.html          ← /admin/signin (magic-link request)
 │           ├── callback.html        ← /admin/callback (verifyOtp + redirect)
 │           ├── index.html           ← /admin (dashboard: live tiles + recent verifications)
+│           ├── members.html         ← /admin/members (list + filter + paginate)
+│           ├── member.html          ← /admin/member?id=… (detail + edit + history)
+│           ├── audit.html           ← /admin/audit (audit-log view, paginated)
+│           ├── settings.html        ← /admin/settings (tenant settings form + WCAG check)
 │           └── admin.css            ← shared admin shell (brand-aligned)
 │
 ├── api/                             ← Vercel serverless / edge functions
@@ -118,6 +122,9 @@ theunionhub-saas/
 │   ├── tenant.js                    ← hostname → slug → tenant row + theming ✓ live
 │   ├── auth-guard.js                ← requireAuth + watchAuth + signOut for admin pages ✓ live
 │   ├── admin-stats.js               ← tenant-scoped dashboard counts + recent activity ✓ live
+│   ├── admin-members.js             ← member list/get/update + per-member history ✓ live
+│   ├── admin-audit.js               ← paginated audit-log fetch ✓ live
+│   ├── admin-settings.js            ← tenant settings fetch + update_tenant_settings RPC ✓ live
 │   ├── live.js                      ← refactor of js/live.js, tenant-aware    · planned
 │   └── qrcode.js                    ← migrated from js/qrcode.js              · planned
 │
@@ -126,7 +133,8 @@ theunionhub-saas/
 │   │   ├── 0001_init_tenants.sql           ← tenants table + slug uniqueness ✓ live
 │   │   ├── 0002_members_add_tenant_id.sql  ← evolve existing members table   ✓ live
 │   │   ├── 0003_public_stats.sql           ← SECURITY DEFINER global counts  ✓ live
-│   │   └── 0004_audit_log.sql              ← verifications + dues + audit + RPCs ✓ live
+│   │   ├── 0004_audit_log.sql              ← verifications + dues + audit + RPCs ✓ live
+│   │   └── 0005_tenant_admin_settings.sql  ← update_tenant_settings RPC (admin email gate) ✓ live
 │   ├── seed.sql                            ← demo tenant + 3 demo members    ✓ live
 │   └── config.toml                                                           · planned
 │

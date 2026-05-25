@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Audit log · Admin · The Union Hub</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<script>
+  window.__UH_CONFIG__ = {
+    SUPABASE_URL:       'https://frdvhmzbsmczknqtexvx.supabase.co',
+    SUPABASE_ANON_KEY:  'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P',
+    PUBLIC_BASE_DOMAIN: 'theunionhub.com'
+  };
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/admin/admin.css">
+</head>
+
+<body>
+
+<nav class="admin-nav" role="navigation" aria-label="Admin">
+  <div class="admin-nav-brand">
+    <span class="mark" aria-hidden="true" data-tenant-initial>·</span>
+    <div class="admin-nav-brand-stack">
+      <span class="admin-nav-tenant-name" data-tenant-name>—</span>
+      <span class="admin-nav-context">Admin</span>
+    </div>
+  </div>
+  <div class="admin-nav-meta">
+    <span class="admin-nav-email" data-admin-email>…</span>
+    <button class="admin-btn admin-btn-ghost" type="button" data-signout>Sign out</button>
+  </div>
+</nav>
+
+<nav class="admin-subnav" role="navigation" aria-label="Admin sections">
+  <a href="/admin">Dashboard</a>
+  <a href="/admin/members">Members</a>
+  <a href="/admin/audit" aria-current="page">Audit</a>
+  <a href="/admin/settings">Settings</a>
+</nav>
+
+<main class="admin-main">
+  <header class="admin-page-head">
+    <span class="admin-eyebrow"><span data-tenant-name>—</span> · Trail</span>
+    <h1 class="admin-page-title">Audit <em>log</em>.</h1>
+    <p class="admin-page-meta">Every system action on this tenant. The "who looked, when, what they did" answer.</p>
+  </header>
+
+  <table class="data-table" aria-label="Audit log">
+    <thead>
+      <tr>
+        <th scope="col">When</th>
+        <th scope="col">Actor</th>
+        <th scope="col">Action</th>
+        <th scope="col">Target</th>
+        <th scope="col">Detail</th>
+      </tr>
+    </thead>
+    <tbody data-tbody>
+      <tr><td colspan="5" class="data-table-empty">Loading…</td></tr>
+    </tbody>
+  </table>
+
+  <div class="pagination" data-pagination hidden>
+    <span data-page-label>Page 1 of 1</span>
+    <div class="pagination-controls">
+      <button type="button" data-page-prev>← Prev</button>
+      <button type="button" data-page-next>Next →</button>
+    </div>
+  </div>
+</main>
+
+<footer class="admin-foot">
+  <span>The Union Hub · Admin</span>
+  <span>Signed in as <span data-admin-email-foot>…</span></span>
+</footer>
+
+<script type="module">
+  import { requireAuth, watchAuth, signOut } from '/lib/auth-guard.js';
+  import { getTenant, applyTenantTheme } from '/lib/tenant.js';
+  import { listAuditLog } from '/lib/admin-audit.js';
+
+  const session = await requireAuth();
+  if (!session) throw new Error('redirecting');
+
+  let tenant = null;
+  try {
+    tenant = await getTenant();
+    if (tenant) applyTenantTheme(tenant);
+  } catch (e) { console.warn('[uh/admin/audit] tenant resolve failed:', e?.message); }
+  if (tenant?.slug) document.querySelector('[data-tenant-initial]').textContent = tenant.slug.charAt(0).toUpperCase();
+
+  const email = session.user?.email || '—';
+  document.querySelector('[data-admin-email]').textContent      = email;
+  document.querySelector('[data-admin-email-foot]').textContent = email;
+  watchAuth();
+  document.querySelector('[data-signout]')?.addEventListener('click', signOut);
+
+  // ─── State ─────────────────────────────────────────────────────────
+  const state = (() => {
+    const u = new URL(location.href);
+    return { page: parseInt(u.searchParams.get('page') || '1', 10) || 1 };
+  })();
+
+  function syncUrl() {
+    const u = new URL(location.href);
+    state.page > 1 ? u.searchParams.set('page', String(state.page)) : u.searchParams.delete('page');
+    history.replaceState(null, '', u);
+  }
+
+  document.querySelector('[data-page-prev]').addEventListener('click', () => {
+    if (state.page <= 1) return;
+    state.page -= 1; syncUrl(); refresh();
+  });
+  document.querySelector('[data-page-next]').addEventListener('click', () => {
+    state.page += 1; syncUrl(); refresh();
+  });
+
+  // ─── Rendering ────────────────────────────────────────────────────
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function fmtDateTime(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso); if (isNaN(d)) return '—';
+    return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+  function shortenActor(actor) {
+    if (!actor) return '—';
+    // 'user:<uuid>' → 'user:abc123…'
+    if (actor.startsWith('user:'))   return 'user:' + actor.slice(5, 13) + '…';
+    if (actor.startsWith('system:')) return actor;
+    return actor;
+  }
+  function shortenTarget(type, id) {
+    if (!type && !id) return '—';
+    if (!id) return type;
+    return `${type}:${String(id).slice(0, 8)}…`;
+  }
+  function detailSummary(detail) {
+    if (!detail || typeof detail !== 'object' || !Object.keys(detail).length) return '—';
+    try {
+      return JSON.stringify(detail);
+    } catch { return '—'; }
+  }
+
+  function paint({ rows, total, page, totalPages }) {
+    const tbody = document.querySelector('[data-tbody]');
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="5" class="data-table-empty">No audit entries yet for this tenant.</td></tr>`;
+    } else {
+      tbody.innerHTML = rows.map((r) => `
+        <tr>
+          <td class="col-meta">${escapeHtml(fmtDateTime(r.created_at))}</td>
+          <td class="col-actor" title="${escapeHtml(r.actor || '')}">${escapeHtml(shortenActor(r.actor))}</td>
+          <td class="col-action">${escapeHtml(r.action || '—')}</td>
+          <td class="col-id" title="${escapeHtml(r.target_id || '')}">${escapeHtml(shortenTarget(r.target_type, r.target_id))}</td>
+          <td><span class="audit-detail" title="${escapeHtml(detailSummary(r.detail))}">${escapeHtml(detailSummary(r.detail))}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    const pagEl = document.querySelector('[data-pagination]');
+    if (totalPages > 1) {
+      pagEl.hidden = false;
+      document.querySelector('[data-page-label]').textContent = `Page ${page} of ${totalPages} · ${total.toLocaleString()} entries`;
+      document.querySelector('[data-page-prev]').disabled = page <= 1;
+      document.querySelector('[data-page-next]').disabled = page >= totalPages;
+    } else {
+      pagEl.hidden = true;
+    }
+  }
+
+  async function refresh() {
+    document.querySelector('[data-tbody]').innerHTML =
+      `<tr><td colspan="5" class="data-table-empty">Loading…</td></tr>`;
+    try {
+      const data = await listAuditLog({ page: state.page });
+      paint(data);
+    } catch (e) {
+      console.error('[uh/admin/audit] refresh failed:', e);
+      document.querySelector('[data-tbody]').innerHTML =
+        `<tr><td colspan="5" class="data-table-empty">Couldn't load the audit log. ${
+          e?.message?.includes('401') || e?.message?.includes('403')
+            ? 'Your session may have expired — sign in again.'
+            : 'Refresh to try again.'
+        }</td></tr>`;
+    }
+  }
+
+  refresh();
+</script>
+
+</body>
+</html>
