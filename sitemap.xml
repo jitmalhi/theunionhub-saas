@@ -9,77 +9,63 @@
   </url>
 
   <url>
-    <loc>https://theunionhub.com/about.html</loc>
+    <loc>https://theunionhub.com/about</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://theunionhub.com/contact.html</loc>
+    <loc>https://theunionhub.com/contact</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://theunionhub.com/card.html</loc>
-    <lastmod>2026-05-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://theunionhub.com/verify.html</loc>
-    <lastmod>2026-05-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://theunionhub.com/audit-log.html</loc>
+    <loc>https://theunionhub.com/audit-log</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://theunionhub.com/security.html</loc>
+    <loc>https://theunionhub.com/security</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://theunionhub.com/brandbook.html</loc>
+    <loc>https://theunionhub.com/brandbook</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://theunionhub.com/privacy.html</loc>
+    <loc>https://theunionhub.com/privacy</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
-    <loc>https://theunionhub.com/terms.html</loc>
+    <loc>https://theunionhub.com/terms</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
-    <loc>https://theunionhub.com/data-processing.html</loc>
+    <loc>https://theunionhub.com/data-processing</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
-    <loc>https://theunionhub.com/status.html</loc>
+    <loc>https://theunionhub.com/status</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>

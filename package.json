@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vercel dev",
+    "build": "echo 'No build step needed'",
     "deploy": "vercel deploy --prod",
     "new-tenant": "node scripts/new-tenant.mjs"
   },

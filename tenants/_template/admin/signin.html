@@ -13,13 +13,11 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
 <!-- Runtime config (public; RLS is the boundary, not secrecy). -->
-<script>
-  window.__UH_CONFIG__ = {
-    SUPABASE_URL:       'https://frdvhmzbsmczknqtexvx.supabase.co',
-    SUPABASE_ANON_KEY:  'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P',
-    PUBLIC_BASE_DOMAIN: 'theunionhub.com'
-  };
-</script>
+<!-- Supabase runtime config is centralised in /lib/supabase.js (resolveConfig).
+     The publishable anon key is RLS-safe and intentionally client-visible.
+     A future edge middleware may inject window.__UH_CONFIG__ to override the
+     defaults per environment; when absent, resolveConfig() supplies them.
+     No credentials are hardcoded in this page. -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

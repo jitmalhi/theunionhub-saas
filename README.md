@@ -17,7 +17,7 @@ Brand discipline is non-negotiable. Tokens, type, and layout rules are derived d
 | Tenancy             | Single-tenant prototype              | Multi-tenant, subdomain-routed (`<slug>.theunionhub.com`)              |
 | Backend             | Supabase project `frdvhmzbsmczknqtexvx` (shared) | Supabase with strict RLS per `tenant_id`                        |
 | Frontend            | Hand-rolled HTML + 3 JS files        | Vanilla HTML + ES modules, no build step (deliberate)                  |
-| Secrets             | Anon key hardcoded in `lib/live.js`   | Env-driven Supabase client, public anon key per tenant via API route   |
+| Secrets             | Centralised in `lib/supabase.js` (`resolveConfig`); env / `__UH_CONFIG__` override | Env-driven Supabase client, public anon key per tenant via API route   |
 | Auth                | None                                 | Supabase magic-link, member self-verify only — no passwords            |
 | Deployment surface  | 1 site                               | Marketing site (root) + N tenant apps (subdomain) + shared admin       |
 
@@ -360,8 +360,8 @@ To exercise multi-tenancy locally, `lvh.me` resolves all subdomains to `127.0.0.
 
 The following items from `C:\Theunionhub` are **carried forward** and must be resolved during scaffold:
 
-1. **`lib/live.js`** — currently embeds Supabase URL and anon key as string literals (`frdvhmzbsmczknqtexvx`, `sb_publishable_…`). Migrate to `lib/supabase.js` reading from `import.meta.env` / runtime config injected by the edge middleware.
-2. **`.htaccess`** — Apache-specific. Vercel uses `vercel.json` for rewrites, headers, redirects. The `.htaccess` rules (HTTPS redirect, 404 mapping, security headers) must be translated, not copied.
+1. **`lib/live.js`** — **RESOLVED.** No longer embeds Supabase credentials. Converted from an IIFE to an ES module that imports `resolveConfig()` from `lib/supabase.js`, which is now the single source of truth for the publishable anon key (RLS-safe, intentionally client-visible) with `env` / `window.__UH_CONFIG__` overrides taking precedence. `card.html` and `verify.html` were migrated the same way, and every `<script src="/lib/live.js">` across the site (13 pages) now loads with `type="module"`. The cleanup was then extended project-wide: the hardcoded `window.__UH_CONFIG__` blocks were removed from all 10 `tenants/_template/admin/*.html` pages, `app/status.html`'s inline constants were replaced with `resolveConfig()`, and `lib/admin-logo.js` now reads the central config instead of a page-injected global. No page or module hardcodes the key anymore.
+2. **`.htaccess`** — **RESOLVED.** Apache rules translated to `vercel.json`: HTTPS/HSTS + security headers + CSP, `www → apex` 308 redirect, `cleanUrls` / `trailingSlash`, immutable asset caching, and `no-store` on the live surfaces (`/card`, `/verify`, `/admin/*`). Subdomain → tenant routing intentionally stays in `middleware.js` (edge), which runs before `vercel.json` rewrites — it is not duplicated here.
 3. **`sitemap.xml` & `robots.txt`** — currently single-tenant. Generate per-tenant sitemaps at `/<tenant>/sitemap.xml` via API route.
 4. **Demo member IDs** (`550bc413…`, `21e63983…`, `fd1be966…`) — seed into the `demo` tenant via `supabase/seed.sql`.
 5. **Hardcoded copy** in `card.html`, `verify.html` — extract tenant-specific strings (org name, local number, contact email) into the `tenants` table, render server-side via API route.

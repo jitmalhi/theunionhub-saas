@@ -188,13 +188,17 @@
   </div>
 </footer>
 
-<script>
+<script type="module">
+import { resolveConfig } from '/lib/supabase.js';
 (function () {
   'use strict';
 
-  // Mirrors the configuration used by card.html and verify.html.
-  var SUPABASE_URL = 'https://frdvhmzbsmczknqtexvx.supabase.co';
-  var SUPABASE_KEY = 'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P';
+  // Supabase config from the central runtime config in /lib/supabase.js
+  // (no hardcoded credentials): resolveConfig() resolves the URL +
+  // publishable anon key (env / window.__UH_CONFIG__ / RLS-safe prod fallback).
+  var cfg = resolveConfig();
+  var SUPABASE_URL = cfg.url;
+  var SUPABASE_KEY = cfg.anonKey;
   var ACTIVE_DEMO  = '550bc413-53db-4f83-98e4-7c5c44d721d0';
   var EMPTY_UUID   = '00000000-0000-0000-0000-000000000000';
 
@@ -322,7 +326,7 @@
 })();
 </script>
 
-<script defer src="/lib/live.js"></script>
+<script type="module" src="/lib/live.js"></script>
 
 </body>
 </html>

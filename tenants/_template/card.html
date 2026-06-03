@@ -25,18 +25,11 @@
 <meta name="twitter:description" content="Real-time, verifiable, no app. See what a member sees.">
 <meta name="twitter:image" content="https://theunionhub.com/og-image.png">
 
-<!-- Runtime config (public). Read by /lib/supabase.js and /lib/tenant.js.
-     The anon key is intentionally client-visible — RLS is the boundary,
-     not secrecy. Replace by env-driven injection once the build pipeline
-     supports it; for now the duplicate with the body <script> below is
-     a known cleanup item. -->
-<script>
-  window.__UH_CONFIG__ = {
-    SUPABASE_URL:       'https://frdvhmzbsmczknqtexvx.supabase.co',
-    SUPABASE_ANON_KEY:  'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P',
-    PUBLIC_BASE_DOMAIN: 'theunionhub.com'
-  };
-</script>
+<!-- Supabase runtime config is centralised in /lib/supabase.js (resolveConfig).
+     The publishable anon key is RLS-safe and intentionally client-visible.
+     A future edge middleware may inject window.__UH_CONFIG__ to override the
+     defaults per environment; when absent, resolveConfig() supplies them.
+     No credentials are hardcoded in this page. -->
 
 <!-- Hide live member URLs (?id=...) from search engines for privacy. -->
 <script>
@@ -442,12 +435,13 @@
 <!-- QR generator (Kazuhiko Arase, qrcode-generator@1.4.4) — vendored locally -->
 <script src="/lib/qrcode.js"></script>
 
-<script>
+<script type="module">
   // ─── Supabase ───────────────────────────────────────────
-  // Duplicates window.__UH_CONFIG__ from <head>; kept for backwards
-  // compatibility with the prototype's inline pattern.
-  const SUPABASE_URL = 'https://frdvhmzbsmczknqtexvx.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P';
+  // Credentials come from the central runtime config in /lib/supabase.js.
+  // No hardcoded keys on this page: resolveConfig() resolves the URL +
+  // publishable anon key (env / window.__UH_CONFIG__ / RLS-safe prod fallback).
+  import { resolveConfig } from '/lib/supabase.js';
+  const { url: SUPABASE_URL, anonKey: SUPABASE_KEY } = resolveConfig();
 
   // Set by the boot IIFE after lib/tenant.js resolves. Without this,
   // post-0002 RLS on members returns 0 rows and ?id= renders notfound.
@@ -727,7 +721,7 @@
   })();
 </script>
 
-<script defer src="/lib/live.js"></script>
+<script type="module" src="/lib/live.js"></script>
 
 </body>
 </html>

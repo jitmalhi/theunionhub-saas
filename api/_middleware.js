@@ -11,7 +11,7 @@
 
    Per request, in order:
 
-     1. Skip — static assets, /api/, /css/, /js/, /lib/, /Brand/, /_vercel/
+     1. Skip — static assets, /api/, /css/, /lib/, /Brand/, /_vercel/
         (the matcher excludes most; the body re-checks defensively).
 
      2. Brand book — /brandbook → /Brand/brandbook.html (apex OR tenant).

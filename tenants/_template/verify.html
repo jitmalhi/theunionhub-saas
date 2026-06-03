@@ -29,17 +29,11 @@
   }
 </script>
 
-<!-- Runtime config (public). Read by /lib/supabase.js and /lib/tenant.js.
-     The anon key is intentionally client-visible — RLS is the boundary.
-     Duplicates the constants in the body <script>; both will collapse
-     once env-driven injection lands. -->
-<script>
-  window.__UH_CONFIG__ = {
-    SUPABASE_URL:       'https://frdvhmzbsmczknqtexvx.supabase.co',
-    SUPABASE_ANON_KEY:  'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P',
-    PUBLIC_BASE_DOMAIN: 'theunionhub.com'
-  };
-</script>
+<!-- Supabase runtime config is centralised in /lib/supabase.js (resolveConfig).
+     The publishable anon key is RLS-safe and intentionally client-visible.
+     A future edge middleware may inject window.__UH_CONFIG__ to override the
+     defaults per environment; when absent, resolveConfig() supplies them.
+     No credentials are hardcoded in this page. -->
 
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
@@ -420,13 +414,13 @@
 <!-- ════════════ SCREEN ════════════ -->
 <main id="screen"></main>
 
-<script>
+<script type="module">
   // ─── Supabase ───────────────────────────────────────────
-  // Duplicates window.__UH_CONFIG__ from <head>. Kept here for backwards
-  // compatibility with the prototype's inline pattern; safe to remove
-  // once all fetches route through lib/supabase.js.
-  const SUPABASE_URL = 'https://frdvhmzbsmczknqtexvx.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P';
+  // Credentials come from the central runtime config in /lib/supabase.js.
+  // No hardcoded keys on this page: resolveConfig() resolves the URL +
+  // publishable anon key (env / window.__UH_CONFIG__ / RLS-safe prod fallback).
+  import { resolveConfig } from '/lib/supabase.js';
+  const { url: SUPABASE_URL, anonKey: SUPABASE_KEY } = resolveConfig();
 
   // Set by the boot IIFE after lib/tenant.js resolves. Threaded into every
   // Supabase REST call via sbHeaders() so RLS policies (from migration
@@ -773,7 +767,7 @@
   })();
 </script>
 
-<script defer src="/lib/live.js"></script>
+<script type="module" src="/lib/live.js"></script>
 
 </body>
 </html>
