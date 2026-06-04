@@ -41,7 +41,10 @@
 import { next, rewrite } from '@vercel/edge';
 
 export const config = {
-  matcher: '/((?!api/|_vercel/|css/|lib/|Brand/|.*\\.[a-zA-Z0-9]+$).*)',
+  /* Exclude internal rewrite targets (app/, tenants/) so a cleanUrls
+     308 from /app/about.html → /app/about doesn't re-enter middleware
+     and loop into /app/app/app/... */
+  matcher: '/((?!api/|_vercel/|css/|lib/|Brand/|app/|tenants/|.*\\.[a-zA-Z0-9]+$).*)',
 };
 
 /* ─── Constants ───────────────────────────────────────────────────────── */
@@ -109,6 +112,13 @@ function isStaticOrInternal(pathname) {
     pathname.startsWith('/css/')   ||
     pathname.startsWith('/lib/')   ||
     pathname.startsWith('/Brand/') ||
+    /* Internal rewrite targets — must skip middleware on the second pass
+       when cleanUrls 308s our rewritten URL back into the request loop.
+       Without this, /app/about → middleware → /app/app/about → ... ∞.
+       Include the no-slash form: cleanUrls strips /app/index.html → /app
+       (both .html AND /index get stripped), and /app must not re-enter. */
+    pathname === '/app'   || pathname.startsWith('/app/')   ||
+    pathname === '/tenants' || pathname.startsWith('/tenants/') ||
     /\.[a-zA-Z0-9]+$/.test(pathname)
   );
 }
