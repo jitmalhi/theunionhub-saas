@@ -209,7 +209,7 @@ async function resolveTenant(slug, env) {
 /* ─── Response helpers ───────────────────────────────────────────────── */
 
 function rewriteToPage(target, request, opts = {}) {
-  const response = rewrite(new URL(target, request.url));
+  const response = rewrite(target);
   if (opts.headers) {
     for (const [k, v] of Object.entries(opts.headers)) {
       if (v !== null && v !== undefined) response.headers.set(k, String(v));
@@ -248,7 +248,7 @@ export default async function middleware(request) {
 
   /* 2 · Brand book — exposed at /brandbook on any host. */
   if (pathname === '/brandbook' || pathname === '/brandbook/') {
-    return rewrite(new URL('/Brand/brandbook.html', request.url));
+    return rewrite('/Brand/brandbook.html');
   }
 
   const env  = getEnv();
@@ -259,7 +259,7 @@ export default async function middleware(request) {
 
   /* 3 · Apex (marketing) — no tenant context. */
   if (isApex) {
-    return rewrite(new URL(`/app/${page}.html`, request.url));
+    return rewrite(`/app/${page}.html`);
   }
 
   /* 4 · Tenant subdomain — resolve dataset, then rewrite. */
@@ -269,7 +269,7 @@ export default async function middleware(request) {
           Fail open: route by slug, let the page surface the issue. */
   if (tenant.status === 'error') {
     const target = resolveTenantTemplate(page);
-    const response = rewrite(new URL(target, request.url));
+    const response = rewrite(target);
     response.headers.set('x-tenant-slug', slug);
     response.headers.set('x-tenant-lookup', tenant.reason);
     return response;
@@ -312,7 +312,7 @@ export default async function middleware(request) {
   /* 4e · Happy path — active tenant. Rewrite to the template, inject
           headers so the page renders with zero additional fetches. */
   const target = resolveTenantTemplate(page);
-  const response = rewrite(new URL(target, request.url));
+  const response = rewrite(target);
   return injectTenantHeaders(response, tenant);
 }
 
