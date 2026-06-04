@@ -4,7 +4,7 @@
   "buildCommand": null,
   "installCommand": null,
   "outputDirectory": null,
-  "cleanUrls": true,
+  "cleanUrls": false,
   "trailingSlash": false,
   "redirects": [
     {
