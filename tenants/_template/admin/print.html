@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Print Cards · Admin · The Union Hub</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/admin/admin.css">
+
+<style>
+  /* ── Print roster — screen + paper ─────────────────────────────────
+     Screen: A4 preview, scaled cards in a 2-col grid (10 per page).
+     Print: same grid, no chrome, page-break-inside on each card so
+     they never split across pages. Browser native print → PDF works
+     in every modern browser; no server-side rendering needed.
+     ────────────────────────────────────────────────────────────────── */
+
+  .print-toolbar {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 16px;
+    margin-bottom: 24px; padding: 16px 20px;
+    background: var(--paper, #FAF9F5);
+    border: 0.5px solid var(--hair, rgba(13,31,26,0.12));
+    border-radius: 6px;
+  }
+  .print-toolbar-left  { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .print-toolbar-right { display: flex; gap: 12px; }
+
+  .print-status {
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    color: var(--ink-soft, #555);
+  }
+  .print-status strong { color: var(--ink, #111); font-weight: 700; }
+
+  .print-filters {
+    display: inline-flex; gap: 0;
+    border: 0.5px solid var(--hair, rgba(13,31,26,0.12));
+    border-radius: 4px; overflow: hidden;
+  }
+  .print-filters button {
+    padding: 8px 14px;
+    background: var(--off-white, #F5F4F1);
+    border: none;
+    border-right: 0.5px solid var(--hair, rgba(13,31,26,0.12));
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-soft, #555);
+    cursor: pointer;
+  }
+  .print-filters button:last-child { border-right: none; }
+  .print-filters button[aria-pressed="true"] {
+    background: var(--accent, var(--forest, #0F6E56));
+    color: white;
+  }
+
+  .print-sheet {
+    background: white;
+    padding: 12mm 8mm;
+    margin: 0 auto;
+    max-width: 210mm;
+    box-shadow: 0 0 0 0.5px var(--hair, rgba(13,31,26,0.12));
+  }
+
+  .print-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4mm;
+  }
+
+  /* Each card: business-card sized (≈95×55mm), 2 columns × 5 rows per
+     A4 page = 10 cards/sheet. Tenant accent stripe across the top. */
+  .print-card {
+    width: 95mm; height: 55mm;
+    background: white;
+    border: 0.25mm solid #333;
+    border-radius: 2mm;
+    padding: 4mm;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 1fr 36mm;
+    gap: 3mm;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    position: relative;
+    overflow: hidden;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .print-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2mm;
+    background: var(--accent, var(--forest, #0F6E56));
+  }
+
+  .pc-left {
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding-top: 2mm; min-width: 0;
+  }
+  .pc-org {
+    font-family: 'DM Mono', monospace; font-size: 7pt;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink-soft, #444); line-height: 1.25;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .pc-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 14pt; font-weight: 600;
+    color: var(--ink, #111); line-height: 1.1;
+    margin: 1.5mm 0;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .pc-meta {
+    font-family: 'DM Mono', monospace; font-size: 7pt;
+    color: var(--ink-soft, #666); letter-spacing: 0.06em;
+    margin-bottom: 0.5mm;
+  }
+  .pc-url {
+    font-family: 'DM Mono', monospace; font-size: 6.5pt;
+    color: var(--ink-soft, #666); word-break: break-all; line-height: 1.3;
+  }
+
+  .pc-right {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 1mm; padding-top: 2mm;
+  }
+  .pc-qr { width: 32mm; height: 32mm; }
+  .pc-qr svg { width: 100%; height: 100%; display: block; }
+  .pc-id {
+    font-family: 'DM Mono', monospace; font-size: 6pt;
+    color: var(--ink-soft, #888); letter-spacing: 0.05em;
+  }
+
+  .empty {
+    grid-column: 1 / -1;
+    text-align: center; padding: 80px 20px;
+    color: var(--ink-soft, #666); font-family: 'DM Sans', sans-serif;
+  }
+
+  /* Print-only: hide chrome, full-bleed grid, tighter spacing. */
+  @media print {
+    @page { size: auto; margin: 10mm; }
+    body { background: white; }
+    .admin-nav, .admin-subnav, .admin-foot,
+    .print-toolbar, .admin-page-head { display: none !important; }
+    .admin-main { padding: 0; max-width: none; margin: 0; }
+    .print-sheet { padding: 0; margin: 0; box-shadow: none; max-width: none; }
+    .print-grid { gap: 5mm; }
+    .print-card { border-color: #999; }
+  }
+</style>
+</head>
+
+<body>
+
+<nav class="admin-nav" role="navigation" aria-label="Admin">
+  <div class="admin-nav-brand">
+    <span class="mark" aria-hidden="true" data-tenant-initial>·</span>
+    <div class="admin-nav-brand-stack">
+      <span class="admin-nav-tenant-name" data-tenant-name>—</span>
+      <span class="admin-nav-context">Admin</span>
+    </div>
+  </div>
+  <div class="admin-nav-meta">
+    <span class="admin-nav-email" data-admin-email>…</span>
+    <button class="admin-btn admin-btn-ghost" type="button" data-signout>Sign out</button>
+  </div>
+</nav>
+
+<nav class="admin-subnav" role="navigation" aria-label="Admin sections">
+  <a href="/admin">Dashboard</a>
+  <a href="/admin/members">Members</a>
+  <a href="/admin/team">Team</a>
+  <a href="/admin/audit">Audit</a>
+  <a href="/admin/settings">Settings</a>
+</nav>
+
+<main class="admin-main">
+  <header class="admin-page-head">
+    <div class="admin-page-head-row">
+      <div>
+        <span class="admin-eyebrow"><span data-tenant-name>—</span> · Roster</span>
+        <h1 class="admin-page-title">Print cards.</h1>
+        <p class="admin-page-meta">Generate printable membership cards for distribution. Pick a status filter and your browser handles paper format. 10 cards per A4 / US Letter sheet.</p>
+      </div>
+      <div class="admin-page-head-actions">
+        <a href="/admin/members" class="admin-btn admin-btn-ghost">← Members</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="print-toolbar">
+    <div class="print-toolbar-left">
+      <div class="print-filters" role="group" aria-label="Filter by status">
+        <button type="button" data-filter="active"   aria-pressed="true">Active</button>
+        <button type="button" data-filter="pending"  aria-pressed="false">Pending</button>
+        <button type="button" data-filter="inactive" aria-pressed="false">Inactive</button>
+        <button type="button" data-filter=""         aria-pressed="false">All</button>
+      </div>
+      <span class="print-status" data-status-line>Loading…</span>
+    </div>
+    <div class="print-toolbar-right">
+      <button type="button" class="admin-btn admin-btn-primary" data-print disabled>Print roster</button>
+    </div>
+  </div>
+
+  <div class="print-sheet">
+    <div class="print-grid" data-grid>
+      <div class="empty">Loading members…</div>
+    </div>
+  </div>
+</main>
+
+<footer class="admin-foot">
+  <span>The Union Hub · Admin</span>
+  <span>Signed in as <span data-admin-email-foot>…</span></span>
+</footer>
+
+<!-- QR generator (Kazuhiko Arase, qrcode-generator@1.4.4) — vendored at /lib/qrcode.js -->
+<script src="/lib/qrcode.js"></script>
+
+<script type="module">
+  import { requireAuth, watchAuth, signOut } from '/lib/auth-guard.js';
+  import { getTenant, applyTenantTheme }     from '/lib/tenant.js';
+  import { listMembers }                     from '/lib/admin-members.js';
+
+  /* ── Auth + tenant boot ───────────────────────────────────────────── */
+  const session = await requireAuth();
+  if (!session) throw new Error('redirecting');
+
+  let tenant = null;
+  try {
+    tenant = await getTenant();
+    if (tenant) applyTenantTheme(tenant);
+  } catch (e) {
+    console.warn('[uh/admin/print] tenant resolve failed:', e?.message);
+  }
+  if (tenant?.slug) {
+    document.querySelector('[data-tenant-initial]').textContent =
+      tenant.slug.charAt(0).toUpperCase();
+  }
+
+  const email = session.user?.email || '—';
+  document.querySelector('[data-admin-email]').textContent      = email;
+  document.querySelector('[data-admin-email-foot]').textContent = email;
+  watchAuth();
+  document.querySelector('[data-signout]')?.addEventListener('click', signOut);
+
+  /* ── State ────────────────────────────────────────────────────────── */
+  let currentStatus = 'active';
+
+  const gridEl   = document.querySelector('[data-grid]');
+  const statusEl = document.querySelector('[data-status-line]');
+  const printBtn = document.querySelector('[data-print]');
+
+  /* ── QR generation ────────────────────────────────────────────────── */
+  /* qrcode-generator v1.4.4 — global `qrcode(typeNumber, ecLevel)`.
+     typeNumber=0 → auto-size for the data. ecLevel='H' → ~30% error
+     correction, the right call for printed media: survives smudges,
+     partial obstruction, and budget thermal printers. */
+  function buildQrSvg(value) {
+    const qr = qrcode(0, 'H');
+    qr.addData(value);
+    qr.make();
+    return qr.createSvgTag({ scalable: true, margin: 0 });
+  }
+
+  /* ── Rendering ────────────────────────────────────────────────────── */
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, (c) => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;',
+    }[c]));
+  }
+
+  function renderCard(member) {
+    /* The QR encodes the canonical verify URL using the CURRENT origin
+       — so on local183.theunionhub.com/admin/print the QR points at
+       local183.theunionhub.com/verify?id=…  No cross-tenant accidents. */
+    const verifyUrl  = `${window.location.origin}/verify?id=${encodeURIComponent(member.id)}`;
+    const displayUrl = verifyUrl.replace(/^https?:\/\//, '');
+    const since      = member.member_since
+      ? new Date(member.member_since).getFullYear()
+      : '—';
+    const idShort    = member.id.slice(0, 8);
+    const orgLine    = [
+      member.union_name,
+      member.local_number ? 'Local ' + member.local_number : null,
+    ].filter(Boolean).join(' · ') || (tenant?.display_name || '—');
+
+    return `
+      <div class="print-card">
+        <div class="pc-left">
+          <div class="pc-org">${escapeHtml(orgLine)}</div>
+          <div class="pc-name">${escapeHtml(member.full_name)}</div>
+          <div>
+            <div class="pc-meta">Member since ${escapeHtml(String(since))}</div>
+            <div class="pc-url">${escapeHtml(displayUrl)}</div>
+          </div>
+        </div>
+        <div class="pc-right">
+          <div class="pc-qr">${buildQrSvg(verifyUrl)}</div>
+          <div class="pc-id">${escapeHtml(idShort)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  /* ── Load + render ────────────────────────────────────────────────── */
+  async function load() {
+    statusEl.textContent = 'Loading…';
+    printBtn.disabled    = true;
+
+    try {
+      /* pageSize:1000 covers the 100-member pilot in one fetch and the
+         realistic ceiling for a local. Beyond ~1000 we'd paginate, but
+         that's a problem for later. */
+      const opts = { pageSize: 1000, page: 1 };
+      if (currentStatus) opts.status = currentStatus;
+      const { rows } = await listMembers(opts);
+
+      if (rows.length === 0) {
+        gridEl.innerHTML  = `<div class="empty">No members match this filter.</div>`;
+        statusEl.innerHTML = `<strong>0</strong> cards.`;
+        printBtn.disabled  = true;
+        return;
+      }
+
+      gridEl.innerHTML   = rows.map(renderCard).join('');
+      statusEl.innerHTML = `<strong>${rows.length}</strong> card${rows.length === 1 ? '' : 's'} ready to print.`;
+      printBtn.disabled  = false;
+    } catch (e) {
+      console.error('[uh/admin/print] load failed:', e);
+      gridEl.innerHTML  = `<div class="empty">Couldn't load members. ${escapeHtml(e?.message || '')}</div>`;
+      statusEl.textContent = 'Error.';
+      printBtn.disabled    = true;
+    }
+  }
+
+  /* ── Wire filters ─────────────────────────────────────────────────── */
+  document.querySelectorAll('[data-filter]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const next = btn.dataset.filter;
+      if (next === currentStatus) return;
+      currentStatus = next;
+      document.querySelectorAll('[data-filter]').forEach((b) => {
+        b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+      });
+      load();
+    });
+  });
+
+  /* ── Wire print ───────────────────────────────────────────────────── */
+  printBtn.addEventListener('click', () => window.print());
+
+  await load();
+</script>
+</body>
+</html>

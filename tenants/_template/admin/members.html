@@ -59,6 +59,8 @@
         <p class="admin-page-meta"><span data-total-line>Loading…</span></p>
       </div>
       <div class="admin-page-head-actions">
+        <button type="button" class="admin-btn admin-btn-ghost" data-export>Export CSV</button>
+        <a href="/admin/print"      class="admin-btn admin-btn-ghost">Print cards</a>
         <a href="/admin/import"     class="admin-btn admin-btn-ghost">Import CSV</a>
         <a href="/admin/member-new" class="admin-btn admin-btn-primary">+ Add member</a>
       </div>
@@ -253,6 +255,101 @@
         `<tr><td colspan="4" class="data-table-empty">Couldn't load members. Refresh to try again.</td></tr>`;
     }
   }
+
+  // ─── CSV export ───────────────────────────────────────────────────
+  // Fetches all members matching the CURRENT filter+search (so what you
+  // see is what you export). Client-side Blob download — no backend.
+  // Includes a card_url column so an offline copy still links each row
+  // back to the live digital card.
+  const CSV_COLS = ['id', 'full_name', 'status', 'member_since', 'union_name', 'local_number', 'card_url'];
+  const EXPORT_CEILING = 1000;     // pilot scale; revisit if a tenant ever exceeds this.
+
+  function csvCell(v) {
+    // RFC 4180: quote if the cell contains a quote, comma, CR, or LF.
+    // Double-up internal quotes. Always emit empty cell as "" so the
+    // shape is unambiguous in spreadsheets that auto-detect types.
+    if (v === null || v === undefined) return '';
+    const s = String(v);
+    return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  }
+
+  function buildCsv(rows) {
+    const lines = [CSV_COLS.join(',')];
+    const origin = window.location.origin;
+    for (const m of rows) {
+      const cardUrl = `${origin}/card?id=${encodeURIComponent(m.id)}`;
+      lines.push([
+        m.id, m.full_name, m.status, m.member_since,
+        m.union_name, m.local_number, cardUrl,
+      ].map(csvCell).join(','));
+    }
+    // CRLF row separator: Excel on Windows is strict, everything else
+    // accepts it. Leading BOM so Excel auto-detects UTF-8 for names
+    // with diacritics (Okonkwo, Ñoño, etc.) instead of mangling them.
+    return '﻿' + lines.join('\r\n') + '\r\n';
+  }
+
+  function downloadBlob(filename, content, mime) {
+    const blob = new Blob([content], { type: mime });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    // Revoke after the click has a moment to register; immediate revoke
+    // can race the download dialog on some browsers.
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function exportFilename(tenantSlug, statusFilter) {
+    // YYYY-MM-DD in local time. ISO would carry timezone noise we don't
+    // want in a filename.
+    const d = new Date();
+    const ymd = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const slug = (tenantSlug || 'roster').replace(/[^a-z0-9-]/gi, '');
+    const suffix = statusFilter ? `-${statusFilter}` : '';
+    return `${slug}-roster${suffix}-${ymd}.csv`;
+  }
+
+  const exportBtn = document.querySelector('[data-export]');
+  exportBtn?.addEventListener('click', async () => {
+    if (exportBtn.disabled) return;
+    const originalLabel = exportBtn.textContent;
+    exportBtn.disabled  = true;
+    exportBtn.textContent = 'Preparing…';
+    try {
+      const { rows, total } = await listMembers({
+        status:   state.status || null,
+        search:   state.search || null,
+        page:     1,
+        pageSize: EXPORT_CEILING,
+      });
+      if (!rows.length) {
+        exportBtn.textContent = 'Nothing to export';
+        setTimeout(() => { exportBtn.textContent = originalLabel; exportBtn.disabled = false; }, 1600);
+        return;
+      }
+      if (total > EXPORT_CEILING) {
+        // Don't silently truncate. Tell the admin what they got vs what
+        // exists; they can narrow the filter and re-export the rest.
+        console.warn(`[uh/admin/members] export capped at ${EXPORT_CEILING} of ${total} total rows.`);
+      }
+      const csv = buildCsv(rows);
+      downloadBlob(
+        exportFilename(tenant?.slug, state.status),
+        csv,
+        'text/csv;charset=utf-8',
+      );
+      exportBtn.textContent = `Exported ${rows.length}${total > EXPORT_CEILING ? ` of ${total}` : ''}`;
+    } catch (e) {
+      console.error('[uh/admin/members] export failed:', e);
+      exportBtn.textContent = 'Export failed';
+    } finally {
+      setTimeout(() => { exportBtn.textContent = originalLabel; exportBtn.disabled = false; }, 1800);
+    }
+  });
 
   refresh();
 </script>
