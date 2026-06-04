@@ -5,7 +5,7 @@
   "description": "Multi-tenant SaaS rebuild of theunionhub.com on Vercel + Supabase.",
   "type": "module",
   "scripts": {
-    "dev": "vercel dev",
+    "dev": "npx --yes serve@latest -l 3000",
     "build": "echo 'No build step needed'",
     "deploy": "vercel deploy --prod",
     "new-tenant": "node scripts/new-tenant.mjs"
