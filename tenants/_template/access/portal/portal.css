@@ -1,0 +1,220 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   The Union Hub Access · access/portal/portal.css
+   Shared styles for the representative self-portal (login / callback /
+   dashboard). Brand tokens only — no raw hex. Accent comes from
+   --accent-tenant (set by lib/tenant.js), falling back to --forest.
+   Brand rules: no box-shadow, no gradient, 0.5px hairlines,
+   prefers-reduced-motion respected. Mobile-first.
+   ────────────────────────────────────────────────────────────────────────── */
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+body {
+  margin: 0;
+  font-family: var(--font-body, 'DM Sans', system-ui, sans-serif);
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink, #111);
+  background: var(--off-white, #F5F4F1);
+  display: flex; flex-direction: column; min-height: 100dvh;
+}
+a { color: var(--accent-tenant, var(--forest, #0F6E56)); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { font: inherit; cursor: pointer; }
+em { color: var(--forest, #0F6E56); font-style: italic; }
+
+.portal-wrap {
+  width: 100%;
+  max-width: 520px;
+  margin: auto;
+  padding: clamp(24px, 5vw, 48px) clamp(18px, 5vw, 32px);
+}
+
+.eyebrow {
+  font-family: var(--font-mono, 'DM Mono', monospace);
+  font-weight: 500;
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-tenant, var(--forest, #0F6E56));
+  margin: 0 0 14px;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.eyebrow::before {
+  content: ''; width: 6px; height: 6px; border-radius: 999px;
+  background: var(--accent-tenant, var(--forest, #0F6E56));
+}
+
+h1 {
+  font-family: var(--font-display, 'Playfair Display', serif);
+  font-weight: 700;
+  font-size: clamp(28px, 6vw, 38px);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  margin: 0 0 10px;
+  color: var(--deep-forest, #0D1F1A);
+}
+.lede { color: var(--ink-soft, #2A2A2A); margin: 0 0 26px; }
+.lede strong { font-weight: 500; }
+
+/* Credential tier badge — mirrors access.html so the rep sees the same chip
+   members see. Outlined for steward / unit officer, filled with the tenant
+   accent for executive. Read-only here (admins set the tier). */
+.tier {
+  display: inline-block;
+  margin: 0 0 14px;
+  padding: 5px 13px;
+  border-radius: 999px;
+  border: 0.5px solid var(--accent-tenant, var(--forest, #0F6E56));
+  font-family: var(--font-mono, 'DM Mono', monospace);
+  font-weight: 500;
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-tenant, var(--forest, #0F6E56));
+}
+.tier.tier-executive {
+  background: var(--accent-tenant, var(--forest, #0F6E56));
+  color: #fff;
+  border-color: transparent;
+}
+
+/* ── Card surface ── */
+.card {
+  background: var(--paper, #FAF9F5);
+  border: 0.5px solid var(--hair, rgba(0,0,0,0.15));
+  border-radius: var(--rad, 12px);
+  padding: clamp(22px, 5vw, 36px);
+}
+
+/* ── Form ── */
+.field { display: block; margin: 0 0 18px; }
+.field-label {
+  display: block;
+  font-family: var(--font-mono, 'DM Mono', monospace);
+  font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted, #888780);
+  margin: 0 0 7px;
+}
+.input, .textarea {
+  width: 100%;
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-size: 16px;            /* 16px avoids iOS zoom-on-focus */
+  color: var(--ink, #111);
+  background: var(--off-white, #F5F4F1);
+  border: 0.5px solid var(--hair, rgba(0,0,0,0.15));
+  border-radius: var(--rad-sm, 8px);
+  padding: 13px 14px;
+  min-height: 48px;
+  transition: border-color .15s ease;
+}
+.textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
+.input:focus, .textarea:focus {
+  outline: none;
+  border-color: var(--accent-tenant, var(--forest, #0F6E56));
+}
+.input[readonly] { color: var(--muted, #888780); background: var(--paper, #FAF9F5); cursor: default; }
+.field-hint { font-size: 12.5px; color: var(--muted, #888780); margin: 6px 0 0; }
+
+/* ── Buttons ── */
+.btn {
+  appearance: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 100%;
+  border: 0.5px solid transparent;
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-weight: 500;
+  font-size: 16px;
+  padding: 15px 22px;
+  min-height: 54px;
+  border-radius: 999px;
+  transition: opacity .15s ease, transform .12s ease, background .15s ease, color .15s ease;
+}
+.btn-primary { background: var(--accent-tenant, var(--forest, #0F6E56)); color: #fff; }
+.btn-primary:hover  { opacity: 0.92; }
+.btn-primary:active { transform: translateY(1px); transition-duration: .05s; }
+.btn[disabled] { opacity: 0.5; cursor: default; pointer-events: none; }
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-soft, #2A2A2A);
+  border-color: var(--hair, rgba(0,0,0,0.15));
+}
+.btn-ghost:hover { border-color: var(--accent-tenant, var(--forest, #0F6E56)); color: var(--accent-tenant, var(--forest, #0F6E56)); }
+
+/* ── Status line ── */
+.status {
+  font-size: 14px;
+  margin: 14px 0 0;
+  min-height: 18px;
+  color: var(--ink-soft, #2A2A2A);
+}
+.status.is-error   { color: var(--alert, #E24B4A); }
+.status.is-success { color: var(--accent-tenant, var(--forest, #0F6E56)); }
+
+/* ── Dashboard chrome ── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin: 0 0 22px;
+}
+.topbar .who { min-width: 0; }
+.topbar .who .label {
+  font-family: var(--font-mono, 'DM Mono', monospace);
+  font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted, #888780);
+}
+.topbar .who .email {
+  font-size: 14px; color: var(--ink-soft, #2A2A2A);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.signout {
+  flex: none;
+  font-family: var(--font-mono, 'DM Mono', monospace);
+  font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted, #888780);
+  background: transparent; border: 0; padding: 6px 4px;
+}
+.signout:hover { color: var(--alert, #E24B4A); }
+
+.actions { display: grid; gap: 10px; margin-top: 8px; }
+@media (min-width: 460px) {
+  .actions { grid-template-columns: 1fr 1fr; }
+}
+
+.viewlink {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 18px;
+  font-size: 14px;
+}
+
+/* ── States ── */
+.spinner {
+  width: 22px; height: 22px; margin: 0 auto 16px;
+  border: 2px solid var(--hair, rgba(0,0,0,0.15));
+  border-top-color: var(--accent-tenant, var(--forest, #0F6E56));
+  border-radius: 999px;
+  animation: spin .9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.center { text-align: center; padding: 48px 0; }
+
+.powered {
+  margin: 28px 0 0;
+  text-align: center;
+  font-family: var(--font-mono, 'DM Mono', monospace);
+  font-weight: 500;
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted, #888780);
+}
+
+:focus-visible { outline: 2px solid var(--accent-tenant, var(--forest, #0F6E56)); outline-offset: 3px; border-radius: 6px; }
+
+.card, .center { animation: rise-in .45s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes rise-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+  .card, .center { opacity: 1 !important; transform: none !important; }
+}

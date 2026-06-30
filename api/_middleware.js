@@ -39,6 +39,8 @@
    ────────────────────────────────────────────────────────────────────────── */
 
 import { next, rewrite } from '@vercel/edge';
+import { RESERVED_SLUGS } from '../lib/reserved-slugs.js';
+import { serverConfigForHost } from '../lib/domains.js';
 
 export const config = {
   /* Exclude internal rewrite targets (app/, tenants/) so a cleanUrls
@@ -49,17 +51,14 @@ export const config = {
 
 /* ─── Constants ───────────────────────────────────────────────────────── */
 
-/* Slugs that must never resolve to a tenant. Mirror of the CHECK
-   constraint on tenants.slug — keep these two in sync (and update
-   tenants/README.md too). */
-const RESERVED_SLUGS = new Set([
-  'www', 'app', 'api', 'admin', 'status', 'docs', 'blog',
-  'mail', 'assets', 'cdn', 'static', 'demo-www',
-]);
+/* RESERVED_SLUGS is imported from ../lib/reserved-slugs.js — the single source
+   shared with lib/tenant.js. The CHECK constraint on tenants.slug (migration
+   0001) mirrors it (SQL can't import JS); keep them in sync, and
+   tenants/README.md too. */
 
 /* Pages that live under /tenants/_template. Anything else falls through
    to a 404 via Vercel's normal handling. */
-const TENANT_PAGES = new Set(['card', 'verify', 'index']);
+const TENANT_PAGES = new Set(['card', 'verify', 'index', 'access']);
 
 /* Edge worker-level cache. Survives across requests on the same instance
    for ~30 minutes (Vercel's edge worker lifecycle). On cache miss we hit
@@ -145,15 +144,15 @@ function getEnv() {
  * The "error" path lets the caller decide whether to fail the request
  * or proceed without tenant injection. Default policy: proceed.
  */
-async function resolveTenant(slug, env) {
+async function resolveTenant(slug, cfg) {
   if (!slug) return { status: 'not_found' };
 
   /* Cache check */
   const cached = tenantCache.get(slug);
   if (cached && cached.expiresAt > Date.now()) return cached.data;
 
-  const supabaseUrl = env.SUPABASE_URL;
-  const anonKey     = env.SUPABASE_ANON_KEY;
+  const supabaseUrl = cfg.supabaseUrl;
+  const anonKey     = cfg.anonKey;
 
   /* If Supabase isn't wired up yet (e.g. very early in scaffold), don't
      blow up — return a sentinel so the caller falls through to slug-only. */
@@ -252,8 +251,15 @@ export default async function middleware(request) {
   }
 
   const env  = getEnv();
-  const apex = (env.PUBLIC_BASE_DOMAIN || 'theunionhub.com').toLowerCase();
   const host = request.headers.get('host');
+
+  /* Region-aware config for THIS host (theunionhub.com vs theunionhub.ca): the
+     apex + the Supabase project the middleware queries. env.PUBLIC_BASE_DOMAIN
+     still overrides the apex for local dev (e.g. lvh.me); leave it UNSET in
+     production so the per-host registry drives both domains. */
+  const hostCfg = serverConfigForHost(host, env);
+  const apex = (env.PUBLIC_BASE_DOMAIN || hostCfg.apex).toLowerCase();
+
   const { slug, isApex } = parseHost(host, apex);
   const page = normalisePath(pathname);
 
@@ -262,8 +268,9 @@ export default async function middleware(request) {
     return rewrite(`/app/${page}.html`);
   }
 
-  /* 4 · Tenant subdomain — resolve dataset, then rewrite. */
-  const tenant = await resolveTenant(slug, env);
+  /* 4 · Tenant subdomain — resolve dataset from this host's Supabase project,
+          then rewrite. */
+  const tenant = await resolveTenant(slug, hostCfg);
 
   /* 4a · Tenant lookup failed (Supabase down, table missing, env unset).
           Fail open: route by slug, let the page surface the issue. */
@@ -328,11 +335,29 @@ export default async function middleware(request) {
  *   '<other>'    → /tenants/_template/<other>.html       (Vercel 404s if missing)
  */
 function resolveTenantTemplate(page) {
-  if (page === 'admin') return '/tenants/_template/admin/index.html';
-  if (page.startsWith('admin/')) {
-    const sub = page.slice('admin/'.length);
-    return `/tenants/_template/admin/${sub}.html`;
+  /* Public representative profile. Both /access and the path-style
+     /access/<id> serve the single access.html template; the page reads the
+     id from location.pathname (the browser keeps the pretty URL — this
+     rewrite is internal) or from ?id=. Without this branch, /access/<id>
+     would map to the non-existent /tenants/_template/access/<id>.html.
+     The self-portal (/access/portal/…) is deliberately excluded so it falls
+     through to its own nested templates via the generic mapping below. */
+  if (page === 'access' || (page.startsWith('access/') && !page.startsWith('access/portal'))) {
+    return '/tenants/_template/access.html';
   }
+
+  /* Member View — /meet and the path-style /meet/<steward-id> both serve the
+     single access/meet.html template; the page reads the id from the path.
+     This is where a member lands after scanning a steward's QR. */
+  if (page === 'meet' || page.startsWith('meet/')) {
+    return '/tenants/_template/access/meet.html';
+  }
+
+  /* Home / index → the digital card. */
   if (page === 'index' || page === '') return '/tenants/_template/card.html';
+
+  /* Everything else maps 1:1 to a template file (Vercel 404s if missing):
+     verify → verify.html, access/portal/login → access/portal/login.html, … */
   return `/tenants/_template/${page}.html`;
 }
+

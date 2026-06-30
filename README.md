@@ -53,7 +53,7 @@ The migration is **clean-slate at the file layout**; the Supabase project is **e
 ## 3 · Multi-Tenant Directory Structure
 
 ```
-theunionhub-saas/
+theunionhub-online/
 ├── README.md                        ← you are here
 ├── .gitignore
 ├── .env.local.example               ← committed template; .env.local is gitignored
@@ -332,7 +332,7 @@ Prerequisites: Node 20+, `npm`, [Vercel CLI](https://vercel.com/docs/cli), [Supa
 
 ```bash
 # 1 · clone & install dev deps (no runtime deps)
-git clone <repo> && cd theunionhub-saas
+git clone <repo> && cd theunionhub-online
 npm install
 
 # 2 · environment

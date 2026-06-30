@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Representation Activity · Admin · The Union Hub</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/admin/admin.css">
+
+<style>
+  .gate-state { text-align: center; padding: clamp(48px, 8vw, 96px) 0; max-width: 52ch; margin: 0 auto; }
+  .gate-state .spinner { width: 24px; height: 24px; margin: 0 auto 18px; border: 2px solid var(--hair); border-top-color: var(--accent-tenant, var(--forest)); border-radius: 999px; animation: act-spin .9s linear infinite; }
+  @keyframes act-spin { to { transform: rotate(360deg); } }
+  .gate-state h1 { font-family: var(--font-display); font-weight: var(--fw-bold); font-size: clamp(28px, 3.4vw, 38px); line-height: var(--lh-headline); letter-spacing: var(--ls-headline); color: var(--deep-forest); margin: 0 0 12px; }
+  .gate-state h1 em { font-style: italic; color: var(--accent-tenant, var(--forest)); }
+  .gate-state p { font-family: var(--font-body); font-size: 14.5px; line-height: var(--lh-snug); color: var(--ink-soft); margin: 0 0 24px; }
+  .gate-state .gate-msg { font-family: var(--font-mono); font-size: 11px; letter-spacing: var(--ls-eyebrow); text-transform: uppercase; color: var(--muted); margin: 0; }
+  .gate-actions { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+  .col-when { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .col-topic { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent-tenant, var(--forest)); }
+  .yn { font-family: var(--font-mono); font-size: 12px; }
+  .yn.y { color: var(--forest); }
+  .yn.n { color: var(--muted); }
+</style>
+</head>
+
+<body>
+
+<nav class="admin-nav" role="navigation" aria-label="Admin">
+  <div class="admin-nav-brand">
+    <span class="mark" aria-hidden="true" data-tenant-initial>·</span>
+    <div class="admin-nav-brand-stack">
+      <span class="admin-nav-tenant-name" data-tenant-name>—</span>
+      <span class="admin-nav-context">Admin</span>
+    </div>
+  </div>
+  <div class="admin-nav-meta">
+    <span class="admin-nav-email" data-admin-email>…</span>
+    <button class="admin-btn admin-btn-ghost" type="button" data-signout>Sign out</button>
+  </div>
+</nav>
+
+<nav class="admin-subnav" role="navigation" aria-label="Admin sections">
+  <a href="/admin">Dashboard</a>
+  <a href="/admin/members">Members</a>
+  <a href="/admin/grievances">Grievances</a>
+  <a href="/admin/intelligence">Intelligence</a>
+  <a href="/admin/team">Team</a>
+  <a href="/admin/audit">Audit</a>
+  <a href="/admin/settings">Settings</a>
+  <a href="/admin/access/dashboard" class="subnav-access">Access</a>
+</nav>
+
+<main class="admin-main">
+  <div data-gate>
+    <section class="gate-state" role="status" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <p class="gate-msg">Checking access…</p>
+    </section>
+  </div>
+
+  <div data-app hidden>
+    <a href="/admin/intelligence" class="back-link">← Workplace Intelligence</a>
+    <header class="admin-page-head">
+      <span class="admin-eyebrow"><span data-tenant-name>—</span> · Duty of Fair Representation</span>
+      <h1 class="admin-page-title">Representation <em>Activity</em>.</h1>
+      <p class="admin-page-meta"><span data-total-line>Loading…</span></p>
+    </header>
+
+    <div class="filter-bar">
+      <div class="filter-chips" role="group" aria-label="Filter by topic">
+        <button class="filter-chip" type="button" data-topic="" aria-pressed="true">All <span class="count" data-count="all">—</span></button>
+        <button class="filter-chip" type="button" data-topic="Grievance"        aria-pressed="false">Grievance</button>
+        <button class="filter-chip" type="button" data-topic="Health &amp; Safety"  aria-pressed="false">Health &amp; Safety</button>
+        <button class="filter-chip" type="button" data-topic="General Inquiry"   aria-pressed="false">General Inquiry</button>
+        <button class="filter-chip" type="button" data-topic="Discipline"        aria-pressed="false">Discipline</button>
+        <button class="filter-chip" type="button" data-topic="Scheduling"        aria-pressed="false">Scheduling</button>
+        <button class="filter-chip" type="button" data-topic="Other"             aria-pressed="false">Other</button>
+      </div>
+    </div>
+
+    <table class="data-table" aria-label="Representation activity">
+      <thead>
+        <tr>
+          <th scope="col">When</th>
+          <th scope="col">Representative</th>
+          <th scope="col">Worksite</th>
+          <th scope="col">Topic</th>
+          <th scope="col">Confirmed</th>
+          <th scope="col">Next steps</th>
+        </tr>
+      </thead>
+      <tbody data-tbody>
+        <tr><td colspan="6" class="data-table-empty">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<footer class="admin-foot">
+  <span>The Union Hub · Admin</span>
+  <span>Signed in as <span data-admin-email-foot>…</span></span>
+</footer>
+
+<script type="module">
+  import { requireAuth, watchAuth, signOut } from '/lib/auth-guard.js';
+  import { getTenant, applyTenantTheme } from '/lib/tenant.js';
+  import createClient from '/lib/supabase.js';
+
+  const gate = document.querySelector('[data-gate]');
+  const app  = document.querySelector('[data-app]');
+  const state = { topic: '' };
+  let rows = [];
+
+  function showGate(html) { app.hidden = true; gate.hidden = false; gate.innerHTML = html; }
+  function showApp()      { gate.hidden = true; app.hidden = false; }
+  function esc(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function fmtDateTime(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso); if (isNaN(d)) return '—';
+    return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+
+  function gateDenied(email) {
+    return `<section class="gate-state" role="alert">
+      <h1>Access <em>denied</em>.</h1>
+      <p>Your account (${esc(email)}) isn't an administrator of this union. Representation activity is for verified tenant admins.</p>
+      <div class="gate-actions"><a class="admin-btn admin-btn-primary" href="/admin">Back to dashboard</a>
+        <button class="admin-btn admin-btn-ghost" type="button" data-signout-2>Sign out</button></div></section>`;
+  }
+  function gateWrongAddress() {
+    return `<section class="gate-state" role="alert"><h1>Wrong <em>address</em>.</h1>
+      <p>Open the admin console from your union's web address.</p>
+      <div class="gate-actions"><a class="admin-btn admin-btn-ghost" href="/admin">Admin home</a></div></section>`;
+  }
+  function gateError() {
+    return `<section class="gate-state" role="alert"><h1>Something went <em>wrong</em>.</h1>
+      <p>We couldn't load activity right now. Refresh to try again.</p>
+      <div class="gate-actions"><button class="admin-btn admin-btn-ghost" type="button" data-reload>Refresh</button></div></section>`;
+  }
+
+  let client = null;
+
+  (async () => {
+    const session = await requireAuth();
+    if (!session) return;
+
+    const email = session.user?.email || '—';
+    document.querySelector('[data-admin-email]').textContent      = email;
+    document.querySelector('[data-admin-email-foot]').textContent = email;
+    watchAuth();
+    document.querySelector('[data-signout]')?.addEventListener('click', signOut);
+
+    let tenant = null;
+    try { tenant = await getTenant(); if (tenant) applyTenantTheme(tenant); }
+    catch (e) { console.warn('[uh/admin/activity] tenant resolve failed:', e?.message); }
+    if (!tenant) { showGate(gateWrongAddress()); return; }
+    document.querySelector('[data-tenant-initial]').textContent = (tenant.slug || '·').charAt(0).toUpperCase();
+    client = createClient({ tenantId: tenant.id });
+
+    // Admin gate — list_tenant_admins() RAISES not_tenant_admin for non-admins.
+    try {
+      const res = await client.raw('/rest/v1/rpc/list_tenant_admins', { method: 'POST', body: '{}' });
+      if (!res.ok) {
+        const body = await res.text().catch(() => '');
+        let code = 'admin_check_failed';
+        try { const p = JSON.parse(body); if (p.message) code = p.message; } catch {}
+        throw new Error(code);
+      }
+    } catch (err) {
+      const code = err?.message || '';
+      if (code === 'not_authenticated')  { location.replace('/admin/signin'); return; }
+      if (code === 'no_tenant_context')  { showGate(gateWrongAddress()); return; }
+      if (code === 'not_tenant_admin')   {
+        showGate(gateDenied(email));
+        gate.querySelector('[data-signout-2]')?.addEventListener('click', signOut);
+        return;
+      }
+      console.error('[uh/admin/activity] admin check failed:', err);
+      showGate(gateError());
+      gate.querySelector('[data-reload]')?.addEventListener('click', () => location.reload());
+      return;
+    }
+
+    showApp();
+    wire();
+    await load();
+  })();
+
+  function wire() {
+    document.querySelectorAll('.filter-chip').forEach((c) => {
+      c.addEventListener('click', () => {
+        state.topic = c.dataset.topic;
+        document.querySelectorAll('.filter-chip').forEach((x) => x.setAttribute('aria-pressed', String(x === c)));
+        paint();
+      });
+    });
+  }
+
+  async function load() {
+    const tbody = document.querySelector('[data-tbody]');
+    tbody.innerHTML = `<tr><td colspan="6" class="data-table-empty">Loading…</td></tr>`;
+    try {
+      // Embed the steward (name + worksite) in one trip. RLS lets an admin read
+      // all interactions in the tenant; the steward embed is tenant-scoped too.
+      const cols = 'id,confirmed,topic,understood_next_steps,created_at,steward:stewards(full_name,worksite)';
+      const res = await client.raw(`/rest/v1/member_interactions?select=${encodeURIComponent(cols)}&order=created_at.desc&limit=200`);
+      if (!res.ok) throw new Error(`list_${res.status}`);
+      rows = await res.json();
+      paint();
+    } catch (e) {
+      console.error('[uh/admin/activity] load failed:', e);
+      tbody.innerHTML = `<tr><td colspan="6" class="data-table-empty">Couldn't load activity. Refresh to try again.</td></tr>`;
+    }
+  }
+
+  function paint() {
+    document.querySelector('[data-count="all"]').textContent = rows.length;
+    const list = state.topic ? rows.filter((r) => (r.topic || '') === state.topic) : rows;
+
+    document.querySelector('[data-total-line]').textContent =
+      `${rows.length.toLocaleString()} interaction${rows.length === 1 ? '' : 's'} logged · last 200`;
+
+    const tbody = document.querySelector('[data-tbody]');
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="6" class="data-table-empty">${
+        state.topic ? `No ${esc(state.topic)} interactions.` : 'No representation activity logged yet.'
+      }</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = list.map((r) => {
+      const s = r.steward || {};
+      return `<tr>
+        <td class="col-when">${esc(fmtDateTime(r.created_at))}</td>
+        <td class="col-name">${esc(s.full_name || '—')}</td>
+        <td class="col-meta">${esc(s.worksite || '—')}</td>
+        <td class="col-topic">${esc(r.topic || 'Unspecified')}</td>
+        <td><span class="yn ${r.confirmed ? 'y' : 'n'}">${r.confirmed ? 'Yes' : 'No'}</span></td>
+        <td><span class="yn ${r.understood_next_steps ? 'y' : 'n'}">${r.understood_next_steps ? '✓ Understood' : '—'}</span></td>
+      </tr>`;
+    }).join('');
+  }
+</script>
+
+</body>
+</html>

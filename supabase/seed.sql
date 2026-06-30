@@ -117,18 +117,18 @@ BEGIN
   END IF;
 
   -- Upsert the three carry-over members. We INSERT only the columns we
-  -- can be certain exist (id, tenant_id, name, status). If the local
+  -- can be certain exist (id, tenant_id, full_name, status). If the local
   -- schema has additional NOT NULL columns without defaults, this block
   -- will fail loudly — the right fix is to give those columns defaults
   -- in migration 0002, not to special-case them here.
-  INSERT INTO public.members (id, tenant_id, name, status)
+  INSERT INTO public.members (id, tenant_id, full_name, status)
   VALUES
     ('550bc413-53db-4f83-98e4-7c5c44d721d0'::uuid, v_tenant_id, 'Demo Member · Active',    'active'),
     ('21e63983-9b15-4cd6-99e4-179e28cd001e'::uuid, v_tenant_id, 'Demo Member · Inactive',  'inactive'),
     ('fd1be966-ca25-4e64-8a6a-d3402f1fdb58'::uuid, v_tenant_id, 'Demo Member · Suspended', 'suspended')
   ON CONFLICT (id) DO UPDATE
     SET tenant_id = EXCLUDED.tenant_id,
-        name      = EXCLUDED.name,
+        full_name = EXCLUDED.full_name,
         status    = EXCLUDED.status;
 
   GET DIAGNOSTICS v_rows_affected = ROW_COUNT;
@@ -136,16 +136,97 @@ BEGIN
 END $$;
 
 
--- ─── C · Smoke check ─────────────────────────────────────────────────────
+-- ─── C · Demo steward ────────────────────────────────────────────────────
+-- Guarded: only runs once migration 0013 has created public.stewards.
+-- Skipping is harmless (NOTICE in seed output). The id is pinned to a fixed
+-- uuid so the demo scan URL is stable and copy-pasteable:
+--
+--   demo.theunionhub.com/access/a57e0a00-0000-4000-8000-000000000001
+--   demo.lvh.me:3000/access/a57e0a00-0000-4000-8000-000000000001   (local dev)
+--
+-- user_id is left NULL on purpose — this mirrors the launch reality where an
+-- admin pre-creates a steward and prints the permanent QR before that person
+-- has ever signed in (self-edit activates later, once they log in). member_id
+-- is linked best-effort to the active demo member if Section B seeded it.
+
+DO $$
+DECLARE
+  v_tenant_id  uuid;
+  v_has_stew   boolean;
+  v_member_id  uuid;
+  v_steward_id uuid := 'a57e0a00-0000-4000-8000-000000000001'::uuid;
+BEGIN
+  SELECT id INTO v_tenant_id FROM public.tenants WHERE slug = 'demo';
+  IF v_tenant_id IS NULL THEN
+    RAISE EXCEPTION '[seed] demo tenant missing — aborting steward seed';
+  END IF;
+
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'stewards'
+  ) INTO v_has_stew;
+
+  IF NOT v_has_stew THEN
+    RAISE NOTICE '[seed] public.stewards does not exist yet — skipping steward seed. '
+                 'Apply 0013_stewards.sql first.';
+    RETURN;
+  END IF;
+
+  -- Best-effort link to the active demo member (NULL if Section B skipped).
+  SELECT id INTO v_member_id
+    FROM public.members
+   WHERE id = '550bc413-53db-4f83-98e4-7c5c44d721d0'::uuid
+     AND tenant_id = v_tenant_id;
+
+  INSERT INTO public.stewards (
+    id, tenant_id, user_id, member_id,
+    full_name, title, role, email, phone, worksite, bio,
+    status, appointed_at
+  )
+  VALUES (
+    v_steward_id, v_tenant_id, NULL, v_member_id,
+    'Maya Okonkwo',
+    'Chief Shop Steward',
+    'steward',                                   -- credential tier (0015)
+    'maya.okonkwo@demo.theunionhub.com',
+    '+1-555-0100',
+    'Plant 2 · Day Shift',
+    'Day-shift steward at Plant 2. Reach out about scheduling, grievances, or health-and-safety concerns — I am here to help.',
+    'active',
+    '2019-04-12'
+  )
+  ON CONFLICT (id) DO UPDATE
+    SET tenant_id    = EXCLUDED.tenant_id,
+        member_id    = EXCLUDED.member_id,
+        full_name    = EXCLUDED.full_name,
+        title        = EXCLUDED.title,
+        role         = EXCLUDED.role,
+        email        = EXCLUDED.email,
+        phone        = EXCLUDED.phone,
+        worksite     = EXCLUDED.worksite,
+        bio          = EXCLUDED.bio,
+        status       = EXCLUDED.status,
+        appointed_at = EXCLUDED.appointed_at;
+
+  RAISE NOTICE '[seed] demo steward: % (id=%, tenant=%, member=%)',
+               'Maya Okonkwo', v_steward_id, v_tenant_id, COALESCE(v_member_id::text, 'none');
+END $$;
+
+
+-- ─── D · Smoke check ─────────────────────────────────────────────────────
 -- After seeding, the routing pipeline should resolve:
 --
 --   demo.theunionhub.com           →  card.html  · status=active
 --   demo.theunionhub.com/verify    →  verify.html
+--   demo.theunionhub.com/access/a57e0a00-0000-4000-8000-000000000001
+--                                  →  access.html · Maya Okonkwo
 --
 -- Quick verifications (run in psql or the Supabase SQL editor):
 --
 --   SELECT slug, display_name, status FROM public.tenants WHERE slug='demo';
---   SELECT id, name, status, tenant_id FROM public.members
+--   SELECT id, full_name, status, tenant_id FROM public.members
+--     WHERE tenant_id = (SELECT id FROM public.tenants WHERE slug='demo');
+--   SELECT id, full_name, title, status FROM public.stewards
 --     WHERE tenant_id = (SELECT id FROM public.tenants WHERE slug='demo');
 --
 -- And on the wire (after deploy):

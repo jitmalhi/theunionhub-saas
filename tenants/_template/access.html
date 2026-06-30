@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The Union Hub Access</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Verified official representative — The Union Hub Access.">
+<meta name="theme-color" content="#0F6E56" media="(prefers-color-scheme: light)">
+
+<!-- Social / semantic title tags. Updated to '[Rep Name] | The Union Hub
+     Access' once the representative resolves (see renderProfile). -->
+<meta property="og:type" content="profile">
+<meta property="og:site_name" content="The Union Hub Access">
+<meta property="og:title" content="The Union Hub Access">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="The Union Hub Access">
+
+<!-- Access URLs carry a representative id; keep them out of search indexes. -->
+<script>
+  (function () {
+    var hasId = /\/access\/[^/?#]+/.test(location.pathname) ||
+                new URLSearchParams(location.search).get('id');
+    if (hasId) {
+      var m = document.createElement('meta');
+      m.name = 'robots'; m.content = 'noindex,nofollow';
+      document.head.appendChild(m);
+    }
+  })();
+</script>
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="alternate icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Brand tokens first (canonical colour / type / spacing). Component styles
+     below reference tokens only — no raw hex. Tenant override sheet last. -->
+<link rel="stylesheet" href="/css/tokens.css">
+<style>
+  /* ──────────────────────────────────────────────────────────────
+     /access/[id] — The Union Hub Access · representative profile + vCard
+     Brand rules held: no box-shadow, no gradient, 0.5px hairlines,
+     italic <em> shifts to --forest, prefers-reduced-motion respected.
+     The tenant accent paints the avatar + primary action via
+     --accent-tenant (set by lib/tenant.js), falling back to --forest.
+     ────────────────────────────────────────────────────────────── */
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  body {
+    margin: 0;
+    font-family: var(--font-body, 'DM Sans', system-ui, sans-serif);
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--ink, #111);
+    background: var(--off-white, #F5F4F1);
+    display: flex; flex-direction: column; min-height: 100dvh;
+  }
+  a { color: var(--accent-tenant, var(--forest, #0F6E56)); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  button { font: inherit; cursor: pointer; }
+  em { color: var(--forest, #0F6E56); font-style: italic; }
+
+  .wrap {
+    width: 100%;
+    max-width: 460px;
+    margin: auto;
+    padding: clamp(28px, 6vw, 56px) clamp(20px, 5vw, 32px);
+  }
+
+  /* ── Profile card ── */
+  .card {
+    background: var(--paper, #FAF9F5);
+    border: 0.5px solid var(--hair, rgba(0,0,0,0.15));
+    border-radius: var(--rad, 12px);
+    padding: clamp(24px, 5vw, 40px);
+    text-align: center;
+  }
+
+  .avatar {
+    width: 96px; height: 96px;
+    margin: 0 auto 22px;
+    border-radius: 999px;
+    display: grid; place-items: center;
+    overflow: hidden;
+    background: var(--accent-tenant, var(--forest, #0F6E56));
+    color: #fff;
+    font-family: var(--font-display, 'Playfair Display', serif);
+    font-weight: 700;
+    font-size: 38px;
+    line-height: 1;
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .eyebrow {
+    font-family: var(--font-mono, 'DM Mono', monospace);
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent-tenant, var(--forest, #0F6E56));
+    margin: 0 0 14px;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .eyebrow::before {
+    content: ''; width: 6px; height: 6px; border-radius: 999px;
+    background: var(--accent-tenant, var(--forest, #0F6E56));
+  }
+
+  h1.name {
+    font-family: var(--font-display, 'Playfair Display', serif);
+    font-weight: 700;
+    font-size: clamp(26px, 6vw, 34px);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+    color: var(--deep-forest, #0D1F1A);
+  }
+  .title {
+    font-family: var(--font-body, 'DM Sans', sans-serif);
+    font-weight: 500;
+    font-size: 16px;
+    color: var(--accent-tenant, var(--forest, #0F6E56));
+    margin: 0 0 4px;
+  }
+  .org {
+    font-size: 15px;
+    color: var(--ink-soft, #2A2A2A);
+    margin: 0 0 2px;
+  }
+  .worksite {
+    font-size: 14px;
+    color: var(--muted, #888780);
+    margin: 0 0 22px;
+  }
+
+  /* Credential tier — the rank badge. Outlined for steward / unit officer,
+     filled with the tenant accent for executive so seniority reads at a
+     glance. Brand: 0.5px hairline, mono uppercase, no shadow / gradient. */
+  .tier {
+    display: inline-block;
+    margin: 0 0 14px;
+    padding: 5px 13px;
+    border-radius: 999px;
+    border: 0.5px solid var(--accent-tenant, var(--forest, #0F6E56));
+    font-family: var(--font-mono, 'DM Mono', monospace);
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-tenant, var(--forest, #0F6E56));
+  }
+  .tier.tier-executive {
+    background: var(--accent-tenant, var(--forest, #0F6E56));
+    color: #fff;
+    border-color: transparent;
+  }
+
+  .divider { height: 0; border: 0; border-top: 0.5px solid var(--hair, rgba(0,0,0,0.15)); margin: 22px 0; }
+
+  .contact { list-style: none; padding: 0; margin: 0 0 26px; text-align: left; }
+  .contact li {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 0;
+    border-bottom: 0.5px solid var(--hair, rgba(0,0,0,0.15));
+    font-size: 15px;
+  }
+  .contact li:last-child { border-bottom: 0; }
+  .contact .k {
+    font-family: var(--font-mono, 'DM Mono', monospace);
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--muted, #888780);
+    min-width: 56px;
+  }
+  .contact .v { word-break: break-word; }
+
+  .bio {
+    text-align: left;
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--ink-soft, #2A2A2A);
+    margin: 0 0 28px;
+  }
+
+  .vcard-btn {
+    appearance: none;
+    width: 100%;
+    border: 0;
+    background: var(--accent-tenant, var(--forest, #0F6E56));
+    color: #fff;
+    font-family: var(--font-body, 'DM Sans', sans-serif);
+    font-weight: 500;
+    font-size: 16px;
+    letter-spacing: 0.01em;
+    padding: 16px 24px;
+    min-height: 56px;
+    border-radius: 999px;
+    transition: opacity .15s ease, transform .12s ease;
+  }
+  .vcard-btn:hover  { opacity: 0.92; }
+  .vcard-btn:active { transform: translateY(1px); transition-duration: .05s; }
+  .vcard-btn[disabled] { opacity: 0.5; cursor: default; }
+
+  .powered {
+    margin: 30px 0 0;
+    text-align: center;
+    font-family: var(--font-mono, 'DM Mono', monospace);
+    font-weight: 500;
+    font-size: 9.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted, #888780);
+  }
+  .powered .mark { display: inline-block; vertical-align: -3px; margin-right: 8px; }
+
+  /* ── Loading + empty states ── */
+  .state { text-align: center; padding: 60px 0; }
+  .state .spinner {
+    width: 22px; height: 22px; margin: 0 auto 16px;
+    border: 2px solid var(--hair, rgba(0,0,0,0.15));
+    border-top-color: var(--accent-tenant, var(--forest, #0F6E56));
+    border-radius: 999px;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .state .msg {
+    font-family: var(--font-mono, 'DM Mono', monospace);
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--muted, #888780);
+  }
+  .state h1 {
+    font-family: var(--font-display, 'Playfair Display', serif);
+    font-weight: 700; font-style: italic;
+    font-size: 32px; color: var(--deep-forest, #0D1F1A); margin: 0 0 10px;
+  }
+  .state p { color: var(--ink-soft, #2A2A2A); max-width: 32ch; margin: 0 auto; }
+
+  :focus-visible { outline: 2px solid var(--accent-tenant, var(--forest, #0F6E56)); outline-offset: 3px; border-radius: 6px; }
+
+  .card, .state { animation: rise-in .5s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes rise-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+    .card, .state { opacity: 1 !important; transform: none !important; }
+  }
+</style>
+
+<!-- Per-tenant override surface (sets/scopes --accent-tenant). Loaded last. -->
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+</head>
+<body>
+  <main class="wrap" id="root">
+    <section class="state" role="status" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <div class="msg">Loading…</div>
+    </section>
+  </main>
+
+<script type="module">
+  // ─── Config ─────────────────────────────────────────────
+  // Credentials resolve through the central runtime config (env /
+  // window.__UH_CONFIG__ / RLS-safe publishable fallback). No keys here.
+  import { resolveConfig } from '/lib/supabase.js';
+  const { url: SUPABASE_URL, anonKey: SUPABASE_KEY } = resolveConfig();
+
+  const BRAND = 'The Union Hub Access';
+
+  let currentTenant   = null;
+  let currentTenantId = null;
+
+  function sbHeaders(extra) {
+    const h = { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` };
+    if (currentTenantId) h['x-tenant-id'] = currentTenantId;   // RLS tenant scope
+    if (extra) Object.assign(h, extra);
+    return h;
+  }
+
+  // The id lives in the pretty path /access/<id> (browser keeps it; the
+  // middleware rewrite to access.html is internal). Fall back to ?id=.
+  function representativeIdFromLocation() {
+    const m = location.pathname.match(/\/access\/([^/?#]+)/i);
+    if (m && m[1]) return decodeURIComponent(m[1]);
+    return new URLSearchParams(location.search).get('id');
+  }
+
+  async function fetchRepresentative(id) {
+    // Direct, tenant-scoped anon SELECT (migration 0013 stewards_public_read).
+    // x-tenant-id is supplied by sbHeaders(); cross-tenant ids return [].
+    // Note: the live table/column are still stewards / steward_id; the
+    // network-facing vocabulary is "representative".
+    // Bounded by an AbortController so a hung connection can't strand the page
+    // on the spinner — on timeout the fetch aborts, catch fires, we return null.
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 5000);   // matches STEP_TIMEOUT_MS
+    try {
+      const cols = 'id,full_name,title,role,email,phone,worksite,bio,photo_url,status';
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/stewards?id=eq.${encodeURIComponent(id)}&select=${cols}&limit=1`,
+        { headers: sbHeaders(), signal: ctrl.signal }
+      );
+      if (!res.ok) return null;
+      const rows = await res.json();
+      return (Array.isArray(rows) ? rows[0] : rows) || null;
+    } catch (e) {
+      console.warn('[uh/access] fetchRepresentative failed:', e && e.message ? e.message : e);
+      return null;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  // Fire-and-forget Access Event. Writes go server-side via /api/access-event
+  // (service_role) — never a direct client insert (no anon INSERT policy).
+  function logAccessEvent(id) {
+    try {
+      fetch('/api/access-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ representative_id: id, device_type: coarseDevice() }),
+        keepalive: true,
+      }).catch(() => {});
+    } catch {}
+  }
+
+  function coarseDevice() {
+    const ua = (navigator.userAgent || '').toLowerCase();
+    if (/ipad|tablet|playbook|silk|kindle|(android(?!.*mobile))/.test(ua)) return 'tablet';
+    if (/mobi|iphone|ipod|android.*mobile|windows phone/.test(ua)) return 'mobile';
+    return 'desktop';
+  }
+
+  // ─── vCard ──────────────────────────────────────────────
+  function vcfEscape(s) {
+    return String(s == null ? '' : s)
+      .replace(/\\/g, '\\\\')
+      .replace(/\n/g, '\\n')
+      .replace(/,/g, '\\,')
+      .replace(/;/g, '\\;');
+  }
+
+  function buildVCard(s, orgName) {
+    const parts = String(s.full_name || '').trim().split(/\s+/);
+    const last  = parts.length > 1 ? parts.pop() : '';
+    const first = parts.join(' ');
+
+    // Network identity strings (per product spec).
+    const org = orgName
+      ? `${orgName} — The Union Hub Access Network`
+      : 'The Union Hub Access Network';
+    const note = 'Verified Official Representative. Secured by The Union Hub Access. '
+               + 'Every representative. One scan away.';
+
+    const lines = [
+      'BEGIN:VCARD',
+      'VERSION:3.0',
+      `N:${vcfEscape(last)};${vcfEscape(first)};;;`,
+      `FN:${vcfEscape(s.full_name)}`,
+      `ORG:${vcfEscape(org)}`,
+    ];
+    if (s.title) lines.push(`TITLE:${vcfEscape(s.title)}`);
+    // vCard ROLE carries the credential tier (steward / unit officer /
+    // executive) — distinct from the free-text TITLE above.
+    const tierLabel = (roleMeta(s.role) || {}).label;
+    if (tierLabel) lines.push(`ROLE:${vcfEscape(tierLabel)}`);
+    if (s.phone) lines.push(`TEL;TYPE=CELL:${vcfEscape(s.phone)}`);
+    if (s.email) lines.push(`EMAIL;TYPE=INTERNET:${vcfEscape(s.email)}`);
+    lines.push(`NOTE:${vcfEscape(note)}`);
+    lines.push(`URL:${vcfEscape(location.href)}`);
+    lines.push('END:VCARD');
+    return lines.join('\r\n');
+  }
+
+  function downloadVCard(s, orgName) {
+    const blob = new Blob([buildVCard(s, orgName)], { type: 'text/vcard;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    const safe = String(s.full_name || 'representative').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase();
+    a.href = url;
+    a.download = `${safe || 'representative'}.vcf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  // ─── Render ─────────────────────────────────────────────
+  const root = document.getElementById('root');
+
+  const markSvg = `
+    <svg width="13" height="13" viewBox="0 0 552.18 532.22" fill="currentColor" aria-hidden="true" class="mark">
+      <path d="M294.51,82.88c-8.68-4.36-16.87-8.05-24.61-12.53-4.49-2.6-7.94-2.22-12.39.04-44.73,22.63-89.64,44.91-134.36,67.56-28.42,14.39-49.35,35.84-59.05,66.69-2.82,8.97-4.65,18.66-4.71,28.04-.41,63.23-.22,126.47-.22,189.7,0,1.1,0,2.2,0,3.54,0,2.11-2.3,3.43-4.12,2.35-6.56-3.88-12.45-7.12-17.77-11.11C13,398.94.06,374.78.08,344.07c.04-53.51.27-107.01-.08-160.52-.26-39.82,18.24-68.14,52.77-85.82,57.38-29.39,115.19-57.95,172.99-86.53C248.92-.24,273.54-2.17,298.87,2.05c19.59,3.26,36.38,13.21,53.72,21.86,64.71,32.29,129.36,64.68,194.02,97.06h0c2,1.01,1.99,3.86-.01,4.86-17.57,8.78-34.26,17.09-50.91,25.46-51.26,25.78-102.49,51.63-153.77,77.38-14.73,7.4-29.69,14.35-41.88,25.86-20.9,19.75-33,43.64-33.1,72.67-.24,66.71-.08,133.42-.11,200.12,0,.77-.05,1.54-.12,2.38-.16,1.92-2.21,3.08-3.94,2.23-4.9-2.41-9.36-4.6-13.81-6.83-18.15-9.09-36.26-18.26-54.46-27.24-3.39-1.67-4.62-3.71-4.62-7.59.12-71.75-.09-143.49.15-215.24.11-31.39,16.62-53.26,43.45-67.08,49.28-25.38,99.07-49.77,148.64-74.59.62-.31,1.22-.64,1.88-1.01,1.82-1.03,1.86-3.63.07-4.72-.4-.24-.79-.46-1.18-.66-6.97-3.52-14.03-6.84-20.92-10.5"/>
+    </svg>`;
+
+  function initials(name) {
+    const p = String(name || '').trim().split(/\s+/);
+    return ((p[0] || '')[0] || '') + (p.length > 1 ? (p[p.length - 1][0] || '') : '');
+  }
+
+  // Credential tier → display label + chip class. Returns null for an unknown
+  // or missing value so the chip (and vCard ROLE) are simply omitted rather
+  // than showing a raw token — the column is NOT NULL DEFAULT 'steward', so in
+  // practice one of the three always matches.
+  function roleMeta(role) {
+    switch (role) {
+      case 'executive':    return { label: 'Executive',    cls: 'tier-executive' };
+      case 'unit_officer': return { label: 'Unit Officer',  cls: 'tier-officer' };
+      case 'steward':      return { label: 'Steward',       cls: 'tier-steward' };
+      default:             return null;
+    }
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function setMeta(name, content, attr = 'name') {
+    const el = document.head.querySelector(`meta[${attr}="${name}"]`);
+    if (el) el.setAttribute('content', content);
+  }
+
+  function renderProfile(s) {
+    const orgName  = (currentTenant && currentTenant.display_name) || '';
+    const localNo  = (currentTenant && currentTenant.local_number) || '';
+    const orgLine  = [orgName, localNo ? `Local ${localNo}` : ''].filter(Boolean).join(' · ');
+
+    // Semantic title tags: '[Rep Name] | The Union Hub Access'.
+    const docTitle = `${s.full_name} | ${BRAND}`;
+    document.title = docTitle;
+    setMeta('og:title', docTitle, 'property');
+    setMeta('twitter:title', docTitle);
+
+    const avatar = s.photo_url
+      ? `<span class="avatar"><img src="${esc(s.photo_url)}" alt="${esc(s.full_name)}"></span>`
+      : `<span class="avatar" aria-hidden="true">${esc(initials(s.full_name).toUpperCase())}</span>`;
+
+    const contact = [];
+    if (s.email) contact.push(`<li><span class="k">Email</span><span class="v"><a href="mailto:${esc(s.email)}">${esc(s.email)}</a></span></li>`);
+    if (s.phone) contact.push(`<li><span class="k">Phone</span><span class="v"><a href="tel:${esc(s.phone)}">${esc(s.phone)}</a></span></li>`);
+
+    const tier      = roleMeta(s.role);
+    const tierChip  = tier ? `<p class="tier ${tier.cls}">${esc(tier.label)}</p>` : '';
+
+    root.innerHTML = `
+      <section class="card">
+        ${avatar}
+        <p class="eyebrow">Verified Representative</p>
+        <h1 class="name">${esc(s.full_name)}</h1>
+        ${tierChip}
+        ${s.title ? `<p class="title">${esc(s.title)}</p>` : ''}
+        ${orgLine ? `<p class="org">${esc(orgLine)}</p>` : ''}
+        ${s.worksite ? `<p class="worksite">${esc(s.worksite)}</p>` : ''}
+        ${contact.length ? `<hr class="divider"><ul class="contact">${contact.join('')}</ul>` : ''}
+        ${s.bio ? `<p class="bio">${esc(s.bio)}</p>` : ''}
+        <button class="vcard-btn" type="button" data-vcard>Add to Contacts</button>
+        <p class="powered">${markSvg}Secured by The Union Hub Access</p>
+      </section>`;
+
+    root.querySelector('[data-vcard]')?.addEventListener('click', () => downloadVCard(s, orgName));
+  }
+
+  function renderUnavailable(kind) {
+    const isNotFound = kind === 'not_found';
+    document.title = `${isNotFound ? 'Not found' : 'Unavailable'} | ${BRAND}`;
+    root.innerHTML = `
+      <section class="state" role="alert" aria-live="assertive">
+        <h1>${isNotFound ? 'Not&nbsp;found.' : 'Unavailable.'}</h1>
+        <p>${isNotFound
+            ? 'This representative could not be found. The link may be mistyped or no longer active.'
+            : 'This representative profile isn’t currently available.'}</p>
+        <p class="powered">${markSvg}Secured by The Union Hub Access</p>
+      </section>`;
+  }
+
+  // ─── Tenant context (must resolve BEFORE any data fetch) ─
+  // Every steward read is tenant-scoped by RLS (migration 0013
+  // stewards_public_read: tenant_id = get_request_tenant_id()). A query fired
+  // before x-tenant-id is set comes back [] and the page wrongly shows
+  // "Not found". Force-resolve to bypass any stale / negative tenant cache
+  // (the diagnosed failure mode), and retry once to ride out a transient blip.
+  // Returns the tenant row, or null if it genuinely cannot be resolved.
+  async function resolveTenantContext(tenantMod) {
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      const t = await tenantMod.getTenant({ force: true });
+      if (t && t.id) return t;
+      console.warn(`[uh/access] tenant resolve attempt ${attempt} returned null`);
+    }
+    return null;
+  }
+
+  // ─── Boot ───────────────────────────────────────────────
+  // One-shot, linear, and fail-safe: every async step is time-boxed and EVERY
+  // exit path renders something. The page must never sit on "Loading…" — if a
+  // step hangs or throws, we fall through to not_found.
+  let booted = false;
+  const STEP_TIMEOUT_MS = 5000;   // each async step must settle within 5s
+
+  // Reject if `promise` hasn't settled within `ms`, so a hung call (e.g. a
+  // tenant lookup with no internal timeout) can't strand the spinner.
+  function withTimeout(promise, ms, label) {
+    let timer;
+    const timeout = new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error(`timeout after ${ms}ms (${label})`)), ms);
+    });
+    return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+  }
+
+  async function boot() {
+    if (booted) { console.warn('[uh/access] boot() re-entry ignored'); return; }
+    booted = true;
+
+    let rendered = false;
+    const render = (fn) => { fn(); rendered = true; };
+
+    try {
+      console.log('[uh/access] 1/4 boot start');
+
+      const id = representativeIdFromLocation();
+      console.log('[uh/access] 1/4 id =', id);
+      if (!id) { render(() => renderUnavailable('not_found')); return; }
+
+      // 1b · Config sanity. The BROWSER resolves Supabase config from
+      //      lib/supabase.js (env / window.__UH_CONFIG__ / RLS-safe fallback),
+      //      NOT from server env — so this should be the cloud URL, never blank.
+      //      (A terminal log showing SUPABASE_URL=undefined is the *middleware's*
+      //      server env, unrelated to this.) If it IS missing, fail loudly
+      //      instead of firing a fetch that hangs.
+      console.log('[uh/access] 1/4 config: SUPABASE_URL =', SUPABASE_URL, '| key present =', !!SUPABASE_KEY);
+      if (!SUPABASE_URL || !SUPABASE_KEY) {
+        console.error('[uh/access] FATAL: Supabase config missing (url/key). Aborting boot.');
+        render(() => renderUnavailable('not_found'));
+        return;
+      }
+
+      // 2 · Tenant context — forced, and time-boxed so getTenant can't hang.
+      console.log('[uh/access] 2/4 resolving tenant…');
+      let tenantMod = null;
+      try {
+        tenantMod = await import('/lib/tenant.js');
+        currentTenant = await withTimeout(resolveTenantContext(tenantMod), STEP_TIMEOUT_MS, 'getTenant');
+      } catch (e) {
+        console.error('[uh/access] 2/4 tenant resolve failed:', e && e.message ? e.message : e);
+        currentTenant = null;
+      }
+      console.log('[uh/access] 2/4 tenant =', currentTenant && currentTenant.id ? currentTenant.id : null);
+
+      // THE GATE: no tenant → cannot scope the read → bail before fetching.
+      if (!currentTenant || !currentTenant.id) {
+        console.error('[uh/access] 2/4 no tenant context — aborting before unscoped read.');
+        render(() => renderUnavailable('not_found'));
+        return;
+      }
+      currentTenantId = currentTenant.id;
+      try { tenantMod.applyTenantTheme(currentTenant); }
+      catch (e) { console.warn('[uh/access] theme apply failed (non-fatal):', e && e.message ? e.message : e); }
+
+      // 3 · Steward fetch — time-boxed; null OR timeout both → not_found.
+      console.log('[uh/access] 3/4 fetching representative…');
+      let rep = null;
+      try {
+        rep = await withTimeout(fetchRepresentative(id), STEP_TIMEOUT_MS, 'fetchRepresentative');
+      } catch (e) {
+        console.error('[uh/access] 3/4 representative fetch failed/timed out:', e && e.message ? e.message : e);
+        rep = null;
+      }
+      console.log('[uh/access] 3/4 rep =', rep ? rep.id : null);
+
+      if (!rep) { render(() => renderUnavailable('not_found')); return; }
+      if (rep.status && rep.status !== 'active') { render(() => renderUnavailable('inactive')); return; }
+
+      // 4 · Render the verified profile + tier badge.
+      console.log('[uh/access] 4/4 rendering profile');
+      render(() => renderProfile(rep));
+      logAccessEvent(rep.id);   // fire-and-forget, after a successful render
+      console.log('[uh/access] 4/4 done');
+    } catch (e) {
+      console.error('[uh/access] boot crashed:', e);
+    } finally {
+      // Absolute backstop: if no branch rendered (an unexpected throw
+      // mid-flight), never leave the spinner up.
+      if (!rendered) {
+        console.warn('[uh/access] boot fell through without rendering — showing not_found.');
+        renderUnavailable('not_found');
+      }
+    }
+  }
+
+  boot();
+</script>
+
+<script type="module" src="/lib/live.js"></script>
+</body>
+</html>

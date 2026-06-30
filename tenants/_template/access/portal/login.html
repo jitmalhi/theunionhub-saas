@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sign in · The Union Hub Access</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Claim and manage your representative profile — The Union Hub Access.">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/access/portal/portal.css">
+</head>
+<body>
+  <main class="portal-wrap">
+    <section class="card" aria-labelledby="login-title">
+      <span class="eyebrow"><span data-tenant-name>The Union Hub Access</span></span>
+      <h1 id="login-title">Claim your <em>profile</em>.</h1>
+      <p class="lede">Enter the email your union has on file. We'll send a one-time sign-in link — no password required.</p>
+
+      <form data-form novalidate>
+        <label class="field">
+          <span class="field-label">Email address</span>
+          <input type="email" name="email" autocomplete="email" inputmode="email"
+                 required autofocus placeholder="you@your-local.org"
+                 class="input" data-email>
+        </label>
+        <button type="submit" class="btn btn-primary" data-submit>Send sign-in link</button>
+      </form>
+
+      <p class="status" data-status role="status" aria-live="polite"></p>
+
+      <p class="powered">The Union Hub Access</p>
+    </section>
+  </main>
+
+<script type="module">
+  import { getTenant, applyTenantTheme } from '/lib/tenant.js';
+  import createClient from '/lib/supabase.js';
+
+  const PORTAL_HOME = '/access/portal';
+
+  // Restrict post-login redirects to the portal to avoid open-redirects.
+  function safeNext(raw) {
+    return (raw && raw.startsWith('/access/portal')) ? raw : PORTAL_HOME;
+  }
+
+  // Paint the tenant accent + name as early as possible.
+  try {
+    const tenant = await getTenant();
+    if (tenant) applyTenantTheme(tenant);
+  } catch (e) { console.warn('[uh/access/portal/login] tenant resolve failed:', e?.message); }
+
+  const next = safeNext(new URLSearchParams(location.search).get('next'));
+
+  // Already signed in? Skip straight to the portal.
+  const supabase = createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) { location.replace(next); }
+
+  const form   = document.querySelector('[data-form]');
+  const input  = document.querySelector('[data-email]');
+  const button = document.querySelector('[data-submit]');
+  const status = document.querySelector('[data-status]');
+
+  function setStatus(msg, kind) {
+    status.textContent = msg || '';
+    status.classList.remove('is-error', 'is-success');
+    if (kind) status.classList.add('is-' + kind);
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = (input.value || '').trim();
+    if (!email) { setStatus('Enter your email address.', 'error'); return; }
+
+    button.disabled = true;
+    button.textContent = 'Sending…';
+    setStatus('');
+
+    const redirectTo =
+      `${location.origin}/access/portal/callback?next=${encodeURIComponent(next)}`;
+
+    try {
+      await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } });
+      form.style.display = 'none';
+      setStatus(`Check your inbox at ${email} for a sign-in link.`, 'success');
+    } catch (err) {
+      console.error(err);
+      setStatus("Couldn't send the link. Check the email and try again.", 'error');
+      button.disabled = false;
+      button.textContent = 'Send sign-in link';
+    }
+  });
+</script>
+</body>
+</html>

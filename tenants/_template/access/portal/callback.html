@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Signing you in · The Union Hub Access</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/access/portal/portal.css">
+</head>
+<body>
+  <main class="portal-wrap">
+    <section class="card center">
+      <div class="spinner" data-spinner aria-hidden="true"></div>
+      <h1 data-title>Signing you <em>in</em>…</h1>
+      <p class="lede" data-message>One moment.</p>
+      <p class="status" data-status role="status" aria-live="polite"></p>
+      <p data-foot hidden><a href="/access/portal/login">← Back to sign-in</a></p>
+    </section>
+  </main>
+
+<script type="module">
+  import { getTenant, applyTenantTheme } from '/lib/tenant.js';
+  import createClient from '/lib/supabase.js';
+
+  const PORTAL_HOME = '/access/portal';
+  function safeNext(raw) {
+    return (raw && raw.startsWith('/access/portal')) ? raw : PORTAL_HOME;
+  }
+
+  try {
+    const tenant = await getTenant();
+    if (tenant) applyTenantTheme(tenant);
+  } catch (e) { console.warn('[uh/access/portal/callback] tenant resolve failed:', e?.message); }
+
+  const title   = document.querySelector('[data-title]');
+  const message = document.querySelector('[data-message]');
+  const status  = document.querySelector('[data-status]');
+  const spinner = document.querySelector('[data-spinner]');
+  const foot    = document.querySelector('[data-foot]');
+
+  function fail(reason) {
+    if (spinner) spinner.style.display = 'none';
+    title.innerHTML = "Couldn't <em>sign you in</em>.";
+    message.textContent = reason || 'The sign-in link is invalid or has expired.';
+    status.textContent = '';
+    foot.hidden = false;
+  }
+
+  const params     = new URLSearchParams(location.search);
+  const token_hash = params.get('token_hash');
+  const type       = params.get('type') || 'magiclink';
+  const next       = safeNext(params.get('next'));
+
+  if (!token_hash) {
+    fail('Missing sign-in token. Open the link from your email again.');
+  } else {
+    try {
+      const supabase = createClient();
+      await supabase.auth.verifyOtp({ token_hash, type });
+
+      title.innerHTML = "You're <em>in</em>.";
+      message.textContent = '';
+      status.textContent = 'Redirecting…';
+      status.classList.add('is-success');
+      location.replace(next);
+    } catch (err) {
+      console.error(err);
+      fail('The sign-in link is invalid or has expired. Request a new one.');
+    }
+  }
+</script>
+</body>
+</html>

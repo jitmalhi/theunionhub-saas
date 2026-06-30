@@ -159,10 +159,16 @@ CREATE POLICY verifications_tenant_isolated_insert
    collection_date is what gives mark_member_paid() its "already
    collected" answer even under concurrent scans.
 
-   collection_date is a GENERATED column from collected_at::date, so the
-   constraint and the indexes derive from the actual collection time
-   automatically. UTC is assumed; locals operating across timezone
-   boundaries would want to override the date derivation (out of scope).
+   collection_date is a GENERATED column derived from collected_at in
+   UTC, so the constraint and the indexes derive from the actual
+   collection time automatically. Must be expressed as
+   `(collected_at AT TIME ZONE 'UTC')::date` rather than
+   `collected_at::date` — the latter is STABLE (depends on session
+   TimeZone) and PostgreSQL rejects it from GENERATED expressions
+   with 42P17 "generation expression is not immutable". Anchoring on
+   UTC is intentional anyway: locals operating across timezone
+   boundaries should not see different cycle boundaries based on the
+   verifier's browser locale.
    ════════════════════════════════════════════════════════════════════════ */
 
 CREATE TABLE IF NOT EXISTS public.dues_collections (
@@ -171,7 +177,7 @@ CREATE TABLE IF NOT EXISTS public.dues_collections (
   member_id       uuid        NOT NULL REFERENCES public.members(id) ON DELETE RESTRICT,
   collected_at    timestamptz NOT NULL DEFAULT NOW(),
   collected_by    uuid,                              -- auth.users(id) when known; nullable for anon
-  collection_date date        GENERATED ALWAYS AS (collected_at::date) STORED,
+  collection_date date        GENERATED ALWAYS AS ((collected_at AT TIME ZONE 'UTC')::date) STORED,
   notes           text,
 
   CONSTRAINT dues_one_per_member_per_day

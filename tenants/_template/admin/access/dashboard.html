@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Network · The Union Hub Access</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Access network analytics — The Union Hub Access.">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/admin/admin.css">
+<style>
+  /* Scans-by-day bar chart — scoped to this page (no shared admin.css edits). */
+  .bars {
+    display: grid;
+    grid-template-columns: repeat(var(--n, 14), 1fr);
+    align-items: end;
+    gap: 6px;
+    height: 160px;
+    padding: 16px;
+    border: var(--bw-hair) solid var(--hair);
+    border-radius: var(--rad);
+    background: var(--paper);
+  }
+  .bar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 8px; min-width: 0; }
+  .bar .fill {
+    width: 100%;
+    max-width: 34px;
+    background: var(--accent-tenant, var(--forest));
+    border-radius: 4px 4px 0 0;
+    min-height: 2px;
+    transition: height var(--dur-base, .3s) var(--ease-out, ease);
+  }
+  .bar .fill.is-zero { background: var(--hair); }
+  .bar .day {
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: .04em;
+    color: var(--muted); white-space: nowrap;
+  }
+  .bar .n {
+    font-family: var(--font-mono); font-size: 10px; color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .chart-head { display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin: 0 0 16px; flex-wrap: wrap; }
+  .not-authd { max-width: 560px; }
+</style>
+</head>
+<body>
+
+<nav class="admin-nav" role="navigation" aria-label="Admin">
+  <div class="admin-nav-brand">
+    <span class="mark" aria-hidden="true" data-tenant-initial>·</span>
+    <div class="admin-nav-brand-stack">
+      <span class="admin-nav-tenant-name" data-tenant-name>—</span>
+      <span class="admin-nav-context">Access Network</span>
+    </div>
+  </div>
+  <div class="admin-nav-meta">
+    <span class="admin-nav-email" data-admin-email>…</span>
+    <button class="admin-btn admin-btn-ghost" type="button" data-signout>Sign out</button>
+  </div>
+</nav>
+
+<nav class="admin-subnav" role="navigation" aria-label="Access sections">
+  <a href="/admin">← Admin</a>
+  <a href="/admin/access/dashboard" aria-current="page">Network</a>
+  <a href="/admin/access/representatives">Representatives</a>
+</nav>
+
+<main class="admin-main">
+  <header class="admin-page-head">
+    <span class="admin-eyebrow"><span data-tenant-name>—</span> · Access Network</span>
+    <h1 class="admin-page-title">Network <em>analytics</em>.</h1>
+    <p class="admin-page-meta">
+      <span data-today-date></span>
+      <span aria-hidden="true"> · </span>
+      <span>Scan activity across your representatives</span>
+    </p>
+  </header>
+
+  <div data-app hidden>
+    <section class="stats-grid" aria-label="Network totals">
+      <div class="stat-cell">
+        <div class="stat-label">Total Access Events <span class="live-dot" aria-hidden="true"></span></div>
+        <div class="stat-num skel" data-stat="totalEvents">&nbsp;</div>
+        <div class="stat-sub skel" data-stat-sub="totalEvents">&nbsp;</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Scans today</div>
+        <div class="stat-num skel" data-stat="scansToday">&nbsp;</div>
+        <div class="stat-sub skel" data-stat-sub="scansToday">&nbsp;</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Active representatives</div>
+        <div class="stat-num skel" data-stat="activeReps">&nbsp;</div>
+        <div class="stat-sub skel" data-stat-sub="activeReps">&nbsp;</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Claimed profiles</div>
+        <div class="stat-num skel" data-stat="claimed">&nbsp;</div>
+        <div class="stat-sub skel" data-stat-sub="claimed">&nbsp;</div>
+      </div>
+    </section>
+
+    <section aria-labelledby="chart-title">
+      <div class="chart-head">
+        <h2 class="activity-title" id="chart-title">Scans by day</h2>
+        <span class="activity-meta" data-chart-meta>Last 14 days</span>
+      </div>
+      <div class="bars" data-bars aria-label="Scans per day, last 14 days"></div>
+    </section>
+  </div>
+
+  <div class="admin-banner is-alert not-authd" data-denied hidden>
+    <div class="admin-banner-body">
+      <h3>Not authorized</h3>
+      <p>This area is for organization administrators of this union. Your account isn't an admin here. If that's wrong, ask an existing admin to add you.</p>
+    </div>
+  </div>
+</main>
+
+<footer class="admin-foot">
+  <span>The Union Hub Access · Admin</span>
+  <span>Signed in as <span data-admin-email-foot>…</span></span>
+</footer>
+
+<script type="module">
+  import { requireAuth, watchAuth, signOut } from '/lib/auth-guard.js';
+  import { getTenant, applyTenantTheme } from '/lib/tenant.js';
+  import createClient from '/lib/supabase.js';
+
+  // ─── 1 · Session gate (UX). RLS is the real boundary on every query. ──
+  const session = await requireAuth();
+  if (!session) throw new Error('redirecting to sign-in');
+
+  // ─── 2 · Tenant context + theme. ─────────────────────────────────────
+  let tenant = null;
+  try { tenant = await getTenant(); if (tenant) applyTenantTheme(tenant); }
+  catch (e) { console.warn('[uh/access/admin] tenant resolve failed:', e?.message); }
+
+  if (tenant?.slug) {
+    document.querySelector('[data-tenant-initial]').textContent = tenant.slug.charAt(0).toUpperCase();
+  }
+  const email = session.user?.email || '—';
+  document.querySelector('[data-admin-email]').textContent      = email;
+  document.querySelector('[data-admin-email-foot]').textContent = email;
+
+  watchAuth();
+  document.querySelector('[data-signout]')?.addEventListener('click', signOut);
+
+  const dateEl = document.querySelector('[data-today-date]');
+  if (dateEl) dateEl.textContent = new Date().toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' });
+
+  if (!tenant) { showDenied(); throw new Error('no tenant'); }
+
+  // Tenant-bound client: x-tenant-id rides on every request so RLS scopes us.
+  const client = createClient({ tenantId: tenant.id });
+
+  // ─── 3 · Admin gate. is_request_tenant_admin() reads x-tenant-id +
+  //        auth.uid() server-side; only true for admins of THIS tenant. ──
+  let isAdmin = false;
+  try {
+    const { data } = await client.rpc('is_request_tenant_admin', {});
+    isAdmin = data === true;
+  } catch (e) { console.warn('[uh/access/admin] admin check failed:', e?.message); }
+
+  if (!isAdmin) { showDenied(); throw new Error('not authorized'); }
+  document.querySelector('[data-app]').hidden = false;
+
+  // ─── 4 · Data ────────────────────────────────────────────────────────
+  function todayStartIso() { const d = new Date(); d.setHours(0,0,0,0); return d.toISOString(); }
+
+  async function countRows(table, filters = []) {
+    const p = new URLSearchParams();
+    p.set('select', 'id'); p.set('limit', '0');
+    for (const f of filters) p.append(f.col, f.op);
+    const res = await client.raw(`/rest/v1/${table}?${p}`, { headers: { Prefer: 'count=exact' } });
+    if (!res.ok) return 0;
+    const m = (res.headers.get('content-range') || '').match(/\/(\d+)$/);
+    return m ? parseInt(m[1], 10) : 0;
+  }
+
+  async function fetchScansSince(sinceIso) {
+    const url = `/rest/v1/steward_analytics?select=scanned_at&scanned_at=gte.${sinceIso}&order=scanned_at.asc&limit=10000`;
+    const res = await client.raw(url);
+    if (!res.ok) return [];
+    return res.json();
+  }
+
+  function fmtNum(n) { return Number(n).toLocaleString(undefined); }
+
+  function setTile(key, value, sub) {
+    const el = document.querySelector(`[data-stat="${key}"]`);
+    const se = document.querySelector(`[data-stat-sub="${key}"]`);
+    el.classList.remove('skel'); el.textContent = fmtNum(value);
+    se.classList.remove('skel'); se.textContent = sub;
+  }
+
+  // Build last-14-day buckets keyed by local YYYY-MM-DD.
+  function dayKey(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+  function lastNDays(n) {
+    const days = [];
+    const base = new Date(); base.setHours(0,0,0,0);
+    for (let i = n - 1; i >= 0; i--) {
+      const d = new Date(base); d.setDate(base.getDate() - i);
+      days.push({ key: dayKey(d), label: d.toLocaleDateString(undefined, { day: 'numeric' }), count: 0 });
+    }
+    return days;
+  }
+
+  function renderBars(days) {
+    const wrap = document.querySelector('[data-bars]');
+    wrap.style.setProperty('--n', days.length);
+    const max = Math.max(1, ...days.map(d => d.count));
+    wrap.innerHTML = days.map(d => {
+      const pct = Math.round((d.count / max) * 100);
+      const zero = d.count === 0 ? ' is-zero' : '';
+      return `<div class="bar" title="${d.count} on ${d.key}">
+        <span class="n">${d.count || ''}</span>
+        <span class="fill${zero}" style="height:${d.count ? Math.max(pct,3) : 2}%"></span>
+        <span class="day">${d.label}</span>
+      </div>`;
+    }).join('');
+  }
+
+  async function refresh() {
+    const since14 = (() => { const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - 13); return d.toISOString(); })();
+    const [totalEvents, scansToday, activeReps, claimed, scans] = await Promise.all([
+      countRows('steward_analytics'),
+      countRows('steward_analytics', [{ col: 'scanned_at', op: `gte.${todayStartIso()}` }]),
+      countRows('stewards',          [{ col: 'status',     op: 'eq.active' }]),
+      countRows('stewards',          [{ col: 'user_id',    op: 'not.is.null' }]),
+      fetchScansSince(since14),
+    ]);
+
+    setTile('totalEvents', totalEvents, 'scans, all time');
+    setTile('scansToday',  scansToday,  'since midnight');
+    setTile('activeReps',  activeReps,  'currently active');
+    setTile('claimed',     claimed,     'linked to an account');
+
+    const days = lastNDays(14);
+    const index = new Map(days.map(d => [d.key, d]));
+    for (const row of scans) {
+      const d = new Date(row.scanned_at);
+      const bucket = index.get(dayKey(d));
+      if (bucket) bucket.count += 1;
+    }
+    renderBars(days);
+    document.querySelector('[data-chart-meta]').textContent =
+      `Last 14 days · ${fmtNum(scans.length)} scans`;
+  }
+
+  try { await refresh(); }
+  catch (e) { console.error('[uh/access/admin] dashboard fetch failed:', e); }
+
+  // Light polling, paused while the tab is hidden.
+  let timer = setInterval(() => refresh().catch(() => {}), 30_000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { clearInterval(timer); timer = null; }
+    else if (!timer) { refresh().catch(() => {}); timer = setInterval(() => refresh().catch(() => {}), 30_000); }
+  });
+
+  function showDenied() {
+    document.querySelector('[data-app]').hidden = true;
+    document.querySelector('[data-denied]').hidden = false;
+  }
+</script>
+</body>
+</html>

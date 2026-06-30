@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Representation Meeting · The Union Hub Access</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Confirm and log your representation meeting.">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/access/portal/portal.css">
+
+<style>
+  /* ── Member View · built for a noisy, high-stress workplace: big targets,
+        high contrast, one clear action. Brand: hairlines, no shadow/gradient. ── */
+  .verify {
+    border: 0.5px solid var(--hair, rgba(0,0,0,0.15));
+    border-left: 3px solid var(--accent-tenant, var(--forest, #0F6E56));
+    border-radius: var(--rad, 12px);
+    background: var(--paper, #FAF9F5);
+    padding: clamp(20px, 5vw, 28px);
+    margin: 0 0 24px;
+  }
+  .verify-eyebrow {
+    font-family: var(--font-mono, 'DM Mono', monospace); font-weight: 500;
+    font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--accent-tenant, var(--forest, #0F6E56));
+    display: inline-flex; align-items: center; gap: 7px; margin: 0 0 12px;
+  }
+  .verify-eyebrow .check { width: 16px; height: 16px; border-radius: 999px; background: var(--accent-tenant, var(--forest, #0F6E56)); color: #fff; display: grid; place-items: center; font-size: 10px; }
+  .verify h1 {
+    font-family: var(--font-display, 'Playfair Display', serif); font-weight: 700;
+    font-size: clamp(22px, 5.5vw, 28px); line-height: 1.18; letter-spacing: -0.01em;
+    color: var(--deep-forest, #0D1F1A); margin: 0;
+  }
+  .verify h1 em { font-style: normal; color: var(--accent-tenant, var(--forest, #0F6E56)); }
+  .verify .sub { font-size: 14px; color: var(--ink-soft, #2A2A2A); margin: 8px 0 0; }
+
+  .mstep { margin: 0 0 22px; }
+  .mstep-q {
+    display: flex; gap: 10px; align-items: baseline;
+    font-family: var(--font-body, 'DM Sans', sans-serif); font-weight: 500;
+    font-size: 16px; line-height: 1.4; color: var(--ink, #111); margin: 0 0 12px;
+  }
+  .mstep-n {
+    flex: none; font-family: var(--font-mono, 'DM Mono', monospace);
+    font-size: 11px; font-weight: 500; color: var(--accent-tenant, var(--forest, #0F6E56));
+    border: 0.5px solid var(--accent-tenant, var(--forest, #0F6E56)); border-radius: 999px;
+    width: 22px; height: 22px; display: inline-grid; place-items: center; margin-top: 1px;
+  }
+
+  /* Yes / No — big segmented control. */
+  .yesno { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .yesno button {
+    appearance: none; cursor: pointer;
+    min-height: 64px; border-radius: var(--rad, 12px);
+    border: 0.5px solid var(--hair, rgba(0,0,0,0.15)); background: var(--off-white, #F5F4F1);
+    font-family: var(--font-body, 'DM Sans', sans-serif); font-weight: 500; font-size: 17px;
+    color: var(--ink, #111); transition: all .15s ease;
+  }
+  .yesno button[aria-pressed="true"] { background: var(--accent-tenant, var(--forest, #0F6E56)); border-color: var(--accent-tenant, var(--forest, #0F6E56)); color: #fff; }
+  .yesno button.no[aria-pressed="true"] { background: var(--ink, #111); border-color: var(--ink, #111); }
+
+  /* Topic select — large. */
+  .mselect {
+    width: 100%; min-height: 60px; padding: 14px 44px 14px 16px;
+    border-radius: var(--rad, 12px); border: 0.5px solid var(--hair, rgba(0,0,0,0.15));
+    background-color: var(--off-white, #F5F4F1);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%23888780' stroke-width='1.5'/></svg>");
+    background-repeat: no-repeat; background-position: right 16px center; background-size: 12px 8px;
+    appearance: none; font-family: var(--font-body, 'DM Sans', sans-serif); font-size: 16px; color: var(--ink, #111);
+  }
+  .mselect:focus { outline: none; border-color: var(--accent-tenant, var(--forest, #0F6E56)); }
+
+  /* Big checkbox affirmation. */
+  .affirm {
+    display: flex; gap: 14px; align-items: flex-start; cursor: pointer;
+    padding: 16px; border: 0.5px solid var(--hair, rgba(0,0,0,0.15)); border-radius: var(--rad, 12px);
+    background: var(--off-white, #F5F4F1);
+  }
+  .affirm input { position: absolute; opacity: 0; pointer-events: none; }
+  .affirm .box {
+    flex: none; width: 28px; height: 28px; border-radius: 7px;
+    border: 1.5px solid var(--hair, rgba(0,0,0,0.25)); background: #fff;
+    display: grid; place-items: center; color: #fff; font-size: 16px; transition: all .15s ease;
+  }
+  .affirm input:checked + .box { background: var(--accent-tenant, var(--forest, #0F6E56)); border-color: var(--accent-tenant, var(--forest, #0F6E56)); }
+  .affirm input:checked + .box::after { content: '✓'; }
+  .affirm:has(input:checked) { border-color: var(--accent-tenant, var(--forest, #0F6E56)); }
+  .affirm .txt { font-size: 15px; line-height: 1.45; color: var(--ink, #111); }
+
+  .submit-btn { width: 100%; min-height: 64px; font-size: 18px; margin-top: 6px; }
+  .mstatus { font-size: 14px; margin: 14px 0 0; min-height: 1.2em; text-align: center; }
+  .mstatus.is-error { color: var(--alert, #E24B4A); }
+
+  /* Success */
+  .done { text-align: center; padding: 30px 0; }
+  .done .seal {
+    width: 76px; height: 76px; margin: 0 auto 22px; border-radius: 999px;
+    background: var(--accent-tenant, var(--forest, #0F6E56)); color: #fff;
+    display: grid; place-items: center; font-size: 38px;
+  }
+  .done h1 { font-family: var(--font-display, 'Playfair Display', serif); font-weight: 700; font-size: clamp(24px, 6vw, 30px); color: var(--deep-forest, #0D1F1A); margin: 0 0 12px; }
+  .done p { font-size: 15.5px; line-height: 1.6; color: var(--ink-soft, #2A2A2A); max-width: 34ch; margin: 0 auto 8px; }
+  .done .ts { font-family: var(--font-mono, 'DM Mono', monospace); font-size: 11px; letter-spacing: 0.08em; color: var(--muted, #888780); margin-top: 16px; }
+</style>
+</head>
+
+<body>
+  <main class="portal-wrap" id="root">
+    <section class="card center">
+      <div class="spinner" aria-hidden="true"></div>
+      <p class="status">Loading…</p>
+    </section>
+  </main>
+
+<script type="module">
+  import { resolveConfig } from '/lib/supabase.js';
+  const { url: SUPABASE_URL, anonKey: SUPABASE_KEY } = resolveConfig();
+  const root = document.getElementById('root');
+
+  let tenantId = null, tenant = null, steward = null;
+  const state = { confirmed: null, topic: '', understood: false };
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function sbHeaders() {
+    const h = { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` };
+    if (tenantId) h['x-tenant-id'] = tenantId;
+    return h;
+  }
+  function stewardIdFromLocation() {
+    const m = location.pathname.match(/\/meet\/([^/?#]+)/i);
+    if (m && m[1]) return decodeURIComponent(m[1]);
+    return new URLSearchParams(location.search).get('id');
+  }
+  function coarseDevice() {
+    const ua = (navigator.userAgent || '').toLowerCase();
+    if (/ipad|tablet|playbook|silk|kindle|(android(?!.*mobile))/.test(ua)) return 'tablet';
+    if (/mobi|iphone|ipod|android.*mobile|windows phone/.test(ua)) return 'mobile';
+    return 'desktop';
+  }
+  function showState(html) { root.innerHTML = `<section class="card center" role="alert">${html}</section>`; }
+
+  async function fetchSteward(id) {
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/stewards?id=eq.${encodeURIComponent(id)}&select=id,full_name,title,role,worksite,status&limit=1`,
+        { headers: sbHeaders() }
+      );
+      if (!res.ok) return null;
+      const rows = await res.json();
+      return (Array.isArray(rows) ? rows[0] : rows) || null;
+    } catch { return null; }
+  }
+
+  const TOPICS = ['Grievance', 'Health & Safety', 'General Inquiry', 'Discipline', 'Scheduling', 'Other'];
+
+  // ── Boot ────────────────────────────────────────────────
+  (async () => {
+    const id = stewardIdFromLocation();
+    if (!id) { showState(`<h1>Not <em>found</em>.</h1><p class="lede">This link is missing a representative.</p>`); return; }
+
+    try {
+      const tenantMod = await import('/lib/tenant.js');
+      tenant = await tenantMod.getTenant({ force: true });
+      if (tenant) { tenantId = tenant.id; tenantMod.applyTenantTheme(tenant); }
+    } catch (e) { console.warn('[uh/meet] tenant resolve failed:', e?.message); }
+
+    if (!tenantId) { showState(`<h1>Unavailable.</h1><p class="lede">Open this from your union's web address.</p>`); return; }
+
+    steward = await fetchSteward(id);
+    if (!steward) { showState(`<h1>Not <em>found</em>.</h1><p class="lede">This representative could not be verified.</p>`); return; }
+    if (steward.status && steward.status !== 'active') { showState(`<h1>Unavailable.</h1><p class="lede">This representative isn't currently active.</p>`); return; }
+
+    renderForm();
+  })();
+
+  function renderForm() {
+    const name = esc(steward.full_name);
+    const local = (tenant && tenant.display_name) ? esc(tenant.display_name) : 'your Local';
+
+    root.innerHTML = `
+      <section class="verify">
+        <span class="verify-eyebrow"><span class="check" aria-hidden="true">✓</span> Verified Representative</span>
+        <h1>You are meeting with <em>${name}</em>,<br>Authorized Steward of ${local}.</h1>
+        ${steward.worksite ? `<p class="sub">${esc(steward.worksite)}</p>` : ''}
+      </section>
+
+      <form data-form novalidate>
+        <div class="mstep">
+          <p class="mstep-q"><span class="mstep-n">1</span> Are you currently with ${name} discussing a workplace concern?</p>
+          <div class="yesno" role="group" aria-label="Confirm meeting">
+            <button class="yes" type="button" data-confirm="yes" aria-pressed="false">Yes</button>
+            <button class="no" type="button" data-confirm="no" aria-pressed="false">No</button>
+          </div>
+        </div>
+
+        <div class="mstep">
+          <p class="mstep-q"><span class="mstep-n">2</span> Topic</p>
+          <select class="mselect" data-topic aria-label="Topic">
+            <option value="" selected disabled>Choose a topic…</option>
+            ${TOPICS.map((t) => `<option value="${esc(t)}">${esc(t)}</option>`).join('')}
+          </select>
+        </div>
+
+        <div class="mstep">
+          <p class="mstep-q"><span class="mstep-n">3</span> Next steps</p>
+          <label class="affirm">
+            <input type="checkbox" data-understood>
+            <span class="box" aria-hidden="true"></span>
+            <span class="txt">I understand ${name} has explained the next steps regarding my concern.</span>
+          </label>
+        </div>
+
+        <button class="btn btn-primary submit-btn" type="button" data-submit>Submit</button>
+        <p class="mstatus" data-status role="status" aria-live="polite"></p>
+      </form>
+
+      <p class="powered">Secured by The Union Hub Access · Confidential record</p>`;
+
+    root.querySelectorAll('[data-confirm]').forEach((b) => b.addEventListener('click', () => {
+      state.confirmed = b.dataset.confirm === 'yes';
+      root.querySelectorAll('[data-confirm]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      setStatus('');
+    }));
+    root.querySelector('[data-topic]').addEventListener('change', (e) => { state.topic = e.target.value; });
+    root.querySelector('[data-understood]').addEventListener('change', (e) => { state.understood = e.target.checked; });
+    root.querySelector('[data-submit]').addEventListener('click', submit);
+  }
+
+  function setStatus(msg, kind) {
+    const el = root.querySelector('[data-status]');
+    if (!el) return;
+    el.textContent = msg || '';
+    el.classList.toggle('is-error', kind === 'error');
+  }
+
+  async function submit() {
+    if (state.confirmed === null) { setStatus('Please answer the first question.', 'error'); return; }
+    const btn = root.querySelector('[data-submit]');
+    btn.disabled = true; btn.textContent = 'Submitting…'; setStatus('');
+    try {
+      const res = await fetch('/api/log-interaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          steward_id: steward.id,
+          confirmed: state.confirmed,
+          topic: state.topic || null,
+          understood_next_steps: state.understood,
+          device_type: coarseDevice(),
+        }),
+        keepalive: true,
+      });
+      if (!res.ok) throw new Error(`log_failed_${res.status}`);
+      renderDone();
+    } catch (e) {
+      console.error('[uh/meet] submit failed:', e);
+      btn.disabled = false; btn.textContent = 'Submit';
+      setStatus("Couldn't log this right now. Please try again.", 'error');
+    }
+  }
+
+  function renderDone() {
+    const when = new Date().toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    root.innerHTML = `
+      <section class="done" role="status" aria-live="assertive">
+        <div class="seal" aria-hidden="true">✓</div>
+        <h1>Interaction logged.</h1>
+        <p>This is now on record for your union representative — a confidential, time-stamped entry that protects both you and ${esc(steward.full_name)}.</p>
+        <p class="ts">Recorded ${esc(when)}</p>
+      </section>`;
+  }
+</script>
+</body>
+</html>

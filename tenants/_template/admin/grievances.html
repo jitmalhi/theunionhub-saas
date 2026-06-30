@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Grievances · Admin · The Union Hub</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<!-- Supabase runtime config is centralised in /lib/supabase.js (resolveConfig).
+     The publishable anon key is RLS-safe and intentionally client-visible.
+     No credentials are hardcoded in this page. -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/admin/admin.css">
+
+<style>
+  /* Page-scoped additions only — everything else reuses admin.css. */
+
+  /* Gate states (loading / access-denied / wrong-address / error). The app
+     never renders until the admin check passes; the gate always shows a
+     definite state, never an endless spinner. */
+  .gate-state { text-align: center; padding: clamp(48px, 8vw, 96px) 0; max-width: 52ch; margin: 0 auto; }
+  .gate-state .spinner {
+    width: 24px; height: 24px; margin: 0 auto 18px;
+    border: 2px solid var(--hair);
+    border-top-color: var(--accent-tenant, var(--forest));
+    border-radius: 999px;
+    animation: uh-gate-spin 0.9s linear infinite;
+  }
+  @keyframes uh-gate-spin { to { transform: rotate(360deg); } }
+  .gate-state h1 {
+    font-family: var(--font-display); font-weight: var(--fw-bold);
+    font-size: clamp(28px, 3.4vw, 38px); line-height: var(--lh-headline);
+    letter-spacing: var(--ls-headline); color: var(--deep-forest); margin: 0 0 12px;
+  }
+  .gate-state h1 em { font-style: italic; color: var(--accent-tenant, var(--forest)); }
+  .gate-state p { font-family: var(--font-body); font-size: 14.5px; line-height: var(--lh-snug); color: var(--ink-soft); margin: 0 0 24px; }
+  .gate-state .gate-msg {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase; color: var(--muted); margin: 0;
+  }
+  .gate-actions { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+  /* Grievance status pills — mirror .status-pill (admin.css) with the
+     grievance vocabulary. Class = status slugged (In Progress → in-progress). */
+  .status-pill.open        { background: #FBF1DC;       color: var(--warn); }
+  .status-pill.in-progress { background: var(--mint);   color: var(--forest); }
+  .status-pill.resolved    { background: #ECEBE7;       color: #5C5B57; }
+
+  /* New-grievance panel (the "section" create surface). */
+  .new-panel {
+    border: var(--bw-hair) solid var(--hair);
+    border-radius: var(--rad);
+    background: var(--paper);
+    padding: clamp(20px, 3vw, 28px);
+    margin-bottom: 32px;
+  }
+  .new-panel h2 {
+    font-family: var(--font-display); font-weight: var(--fw-semibold);
+    font-size: 20px; letter-spacing: var(--ls-headline);
+    color: var(--deep-forest); margin: 0 0 4px;
+  }
+  .new-panel .panel-lede { font-family: var(--font-body); font-size: 13.5px; color: var(--muted); margin: 0 0 8px; }
+  .new-panel .admin-form { margin-bottom: 0; }
+
+  textarea.admin-form-input { min-height: 96px; resize: vertical; line-height: 1.5; }
+</style>
+</head>
+
+<body>
+
+<nav class="admin-nav" role="navigation" aria-label="Admin">
+  <div class="admin-nav-brand">
+    <span class="mark" aria-hidden="true" data-tenant-initial>·</span>
+    <div class="admin-nav-brand-stack">
+      <span class="admin-nav-tenant-name" data-tenant-name>—</span>
+      <span class="admin-nav-context">Admin</span>
+    </div>
+  </div>
+  <div class="admin-nav-meta">
+    <span class="admin-nav-email" data-admin-email>…</span>
+    <button class="admin-btn admin-btn-ghost" type="button" data-signout>Sign out</button>
+  </div>
+</nav>
+
+<nav class="admin-subnav" role="navigation" aria-label="Admin sections">
+  <a href="/admin">Dashboard</a>
+  <a href="/admin/members">Members</a>
+  <a href="/admin/grievances" aria-current="page">Grievances</a>
+  <a href="/admin/intelligence">Intelligence</a>
+  <a href="/admin/team">Team</a>
+  <a href="/admin/audit">Audit</a>
+  <a href="/admin/settings">Settings</a>
+  <a href="/admin/access/dashboard" class="subnav-access">Access</a>
+</nav>
+
+<main class="admin-main">
+  <!-- Gate: shown until the admin check resolves; carries loading / denied /
+       wrong-address / error states. -->
+  <div data-gate>
+    <section class="gate-state" role="status" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <p class="gate-msg">Checking access…</p>
+    </section>
+  </div>
+
+  <!-- App: revealed only after a verified tenant admin is confirmed. -->
+  <div data-app hidden>
+    <header class="admin-page-head">
+      <div class="admin-page-head-row">
+        <div>
+          <span class="admin-eyebrow"><span data-tenant-name>—</span> · Casework</span>
+          <h1 class="admin-page-title">Grievances.</h1>
+          <p class="admin-page-meta"><span data-total-line>Loading…</span></p>
+        </div>
+        <div class="admin-page-head-actions">
+          <button type="button" class="admin-btn admin-btn-primary" data-new-toggle>+ New grievance</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Create surface (toggled by + New grievance). -->
+    <section class="new-panel" data-new-panel hidden aria-label="New grievance">
+      <h2>New grievance</h2>
+      <p class="panel-lede">Filed against this local. Visible only to this union's admins.</p>
+      <form class="admin-form" data-new-form novalidate>
+        <div class="admin-form-field">
+          <label class="admin-form-label" for="g-member">Member name</label>
+          <input class="admin-form-input" id="g-member" name="member_name" type="text" required placeholder="Jordan Rivera" autocomplete="off">
+        </div>
+        <div class="admin-form-field">
+          <label class="admin-form-label" for="g-type">Grievance type</label>
+          <input class="admin-form-input" id="g-type" name="grievance_type" type="text" placeholder="Scheduling · Discipline · Health &amp; Safety…" autocomplete="off">
+        </div>
+        <div class="admin-form-field">
+          <span class="admin-form-label">Status</span>
+          <div class="admin-form-radio-row" role="radiogroup" aria-label="Status">
+            <label class="admin-form-radio"><input type="radio" name="status" value="Open" checked>Open</label>
+            <label class="admin-form-radio"><input type="radio" name="status" value="In Progress">In Progress</label>
+            <label class="admin-form-radio"><input type="radio" name="status" value="Resolved">Resolved</label>
+          </div>
+        </div>
+        <div class="admin-form-field">
+          <label class="admin-form-label" for="g-desc">Description</label>
+          <textarea class="admin-form-input" id="g-desc" name="description" rows="4" placeholder="What happened, who's involved, dates…"></textarea>
+        </div>
+        <div class="admin-form-actions">
+          <button type="submit" class="admin-btn admin-btn-primary" data-save>Create grievance</button>
+          <button type="button" class="admin-btn admin-btn-ghost" data-cancel>Cancel</button>
+        </div>
+        <p class="admin-form-status" data-form-status role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <!-- Filter (by status) + sort. -->
+    <div class="filter-bar">
+      <div class="filter-chips" role="group" aria-label="Filter by status">
+        <button class="filter-chip" type="button" data-status=""            aria-pressed="true">All <span class="count" data-count="all">—</span></button>
+        <button class="filter-chip" type="button" data-status="Open"        aria-pressed="false">Open <span class="count" data-count="Open">—</span></button>
+        <button class="filter-chip" type="button" data-status="In Progress" aria-pressed="false">In Progress <span class="count" data-count="In Progress">—</span></button>
+        <button class="filter-chip" type="button" data-status="Resolved"    aria-pressed="false">Resolved <span class="count" data-count="Resolved">—</span></button>
+      </div>
+      <div class="filter-controls">
+        <div class="filter-select-wrap">
+          <span class="filter-select-label">Sort</span>
+          <select class="filter-select" data-sort aria-label="Sort by date filed">
+            <option value="desc">Newest first</option>
+            <option value="asc">Oldest first</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <table class="data-table" aria-label="Grievances">
+      <thead>
+        <tr>
+          <th scope="col">Member</th>
+          <th scope="col">Type</th>
+          <th scope="col">Status</th>
+          <th scope="col">Filed</th>
+        </tr>
+      </thead>
+      <tbody data-tbody>
+        <tr><td colspan="4" class="data-table-empty">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<footer class="admin-foot">
+  <span>The Union Hub · Admin</span>
+  <span>Signed in as <span data-admin-email-foot>…</span></span>
+</footer>
+
+<script type="module">
+  import { requireAuth, watchAuth, signOut } from '/lib/auth-guard.js';
+  import { getTenant, applyTenantTheme } from '/lib/tenant.js';
+  import { verifyTenantAdmin, listGrievances, createGrievance } from '/lib/admin-grievances.js';
+
+  const gate = document.querySelector('[data-gate]');
+  const app  = document.querySelector('[data-app]');
+
+  const state = { status: '', sort: 'desc' };
+  let allRows = [];
+
+  // ─── Gate helpers ─────────────────────────────────────────────────
+  function showGate(html) { app.hidden = true; gate.hidden = false; gate.innerHTML = html; }
+  function showApp()      { gate.hidden = true; app.hidden = false; }
+
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function gateDenied(email) {
+    return `
+      <section class="gate-state" role="alert">
+        <h1>Access <em>denied</em>.</h1>
+        <p>Your account (${escapeHtml(email)}) isn't an administrator of this union.
+           Grievances are restricted to verified tenant admins. If this is a mistake,
+           ask an existing admin to add you on the Team page.</p>
+        <div class="gate-actions">
+          <a class="admin-btn admin-btn-primary" href="/admin">Back to dashboard</a>
+          <button class="admin-btn admin-btn-ghost" type="button" data-signout-2>Sign out</button>
+        </div>
+      </section>`;
+  }
+  function gateWrongAddress() {
+    return `
+      <section class="gate-state" role="alert">
+        <h1>Wrong <em>address</em>.</h1>
+        <p>Open the admin console from your union's web address to manage grievances.</p>
+        <div class="gate-actions"><a class="admin-btn admin-btn-ghost" href="/admin">Admin home</a></div>
+      </section>`;
+  }
+  function gateError() {
+    return `
+      <section class="gate-state" role="alert">
+        <h1>Something went <em>wrong</em>.</h1>
+        <p>We couldn't verify your access right now. Refresh to try again.</p>
+        <div class="gate-actions"><button class="admin-btn admin-btn-ghost" type="button" data-reload>Refresh</button></div>
+      </section>`;
+  }
+
+  // ─── Boot — one-shot, always resolves to a definite state ─────────
+  (async () => {
+    const session = await requireAuth();
+    if (!session) return;   // requireAuth() is redirecting to /admin/signin
+
+    const email = session.user?.email || '—';
+    document.querySelector('[data-admin-email]').textContent      = email;
+    document.querySelector('[data-admin-email-foot]').textContent = email;
+    watchAuth();
+    document.querySelector('[data-signout]')?.addEventListener('click', signOut);
+
+    // Tenant context.
+    let tenant = null;
+    try { tenant = await getTenant(); }
+    catch (e) { console.warn('[uh/admin/grievances] tenant resolve failed:', e?.message); }
+    if (!tenant) { showGate(gateWrongAddress()); return; }
+    applyTenantTheme(tenant);
+    document.querySelector('[data-tenant-initial]').textContent = (tenant.slug || '·').charAt(0).toUpperCase();
+
+    // Admin gate — verify BEFORE revealing the UI, so a non-admin gets a clear
+    // "Access denied" rather than an empty grid or a spinner.
+    try {
+      await verifyTenantAdmin();
+    } catch (err) {
+      const code = err?.message || '';
+      console.warn('[uh/admin/grievances] admin check:', code);
+      if (code === 'not_authenticated')  { location.replace('/admin/signin'); return; }
+      if (code === 'no_tenant_context')  { showGate(gateWrongAddress()); return; }
+      if (code === 'not_tenant_admin')   {
+        showGate(gateDenied(email));
+        gate.querySelector('[data-signout-2]')?.addEventListener('click', signOut);
+        return;
+      }
+      console.error('[uh/admin/grievances] admin check failed:', err);
+      showGate(gateError());
+      gate.querySelector('[data-reload]')?.addEventListener('click', () => location.reload());
+      return;
+    }
+
+    // Verified admin → reveal app, wire interactions, load data.
+    showApp();
+    wireApp();
+    await loadAll();
+  })();
+
+  // ─── App wiring ───────────────────────────────────────────────────
+  function wireApp() {
+    document.querySelectorAll('.filter-chip').forEach((c) => {
+      c.addEventListener('click', () => {
+        state.status = c.dataset.status;
+        document.querySelectorAll('.filter-chip').forEach((x) => x.setAttribute('aria-pressed', String(x === c)));
+        renderFromState();
+      });
+    });
+
+    document.querySelector('[data-sort]').addEventListener('change', (e) => {
+      state.sort = e.target.value === 'asc' ? 'asc' : 'desc';
+      renderFromState();
+    });
+
+    const panel = document.querySelector('[data-new-panel]');
+    document.querySelector('[data-new-toggle]').addEventListener('click', () => {
+      panel.hidden = !panel.hidden;
+      if (!panel.hidden) panel.querySelector('#g-member')?.focus();
+    });
+    document.querySelector('[data-cancel]').addEventListener('click', () => { panel.hidden = true; });
+    document.querySelector('[data-new-form]').addEventListener('submit', onCreate);
+  }
+
+  // ─── Create ───────────────────────────────────────────────────────
+  async function onCreate(e) {
+    e.preventDefault();
+    const form    = e.currentTarget;
+    const statusEl = form.querySelector('[data-form-status]');
+    const saveBtn  = form.querySelector('[data-save]');
+    const fd = new FormData(form);
+    const input = {
+      member_name:    (fd.get('member_name')    || '').toString(),
+      grievance_type: (fd.get('grievance_type') || '').toString(),
+      status:         (fd.get('status')         || 'Open').toString(),
+      description:    (fd.get('description')     || '').toString(),
+    };
+
+    if (!input.member_name.trim()) { setStatus(statusEl, 'Member name is required.', 'error'); return; }
+
+    saveBtn.disabled = true; saveBtn.textContent = 'Creating…'; setStatus(statusEl, '');
+    try {
+      await createGrievance(input);
+      form.reset();
+      document.querySelector('[data-new-panel]').hidden = true;
+      await loadAll();
+    } catch (err) {
+      console.error('[uh/admin/grievances] create failed:', err);
+      const msg =
+        (err?.status === 403 || err?.message === 'not_tenant_admin')
+          ? "You don't have permission to file grievances for this local."
+          : (err?.message === 'member_name_required')
+            ? 'Member name is required.'
+            : "Couldn't create the grievance. Please try again.";
+      setStatus(statusEl, msg, 'error');
+    } finally {
+      saveBtn.disabled = false; saveBtn.textContent = 'Create grievance';
+    }
+  }
+
+  // ─── Load + render ────────────────────────────────────────────────
+  async function loadAll() {
+    const tbody = document.querySelector('[data-tbody]');
+    tbody.innerHTML = `<tr><td colspan="4" class="data-table-empty">Loading…</td></tr>`;
+    try {
+      // Fetch the full set once; filter + count + sort happen client-side.
+      allRows = await listGrievances({ status: null, sort: 'desc' });
+      renderFromState();
+    } catch (err) {
+      console.error('[uh/admin/grievances] load failed:', err);
+      tbody.innerHTML = `<tr><td colspan="4" class="data-table-empty">Couldn't load grievances. Refresh to try again.</td></tr>`;
+    }
+  }
+
+  function renderFromState() {
+    const rows = allRows
+      .filter((g) => !state.status || g.status === state.status)
+      .slice()
+      .sort((a, b) => {
+        const da = new Date(a.created_at).getTime();
+        const db = new Date(b.created_at).getTime();
+        return state.sort === 'asc' ? da - db : db - da;
+      });
+    paintCounts();
+    paintTable(rows);
+    const n = allRows.length;
+    document.querySelector('[data-total-line]').textContent =
+      `${n.toLocaleString()} grievance${n === 1 ? '' : 's'} total`;
+  }
+
+  function paintCounts() {
+    const counts = { all: allRows.length, 'Open': 0, 'In Progress': 0, 'Resolved': 0 };
+    for (const g of allRows) if (counts[g.status] !== undefined) counts[g.status]++;
+    for (const k of ['all', 'Open', 'In Progress', 'Resolved']) {
+      const el = document.querySelector(`[data-count="${k}"]`);
+      if (el) el.textContent = counts[k];
+    }
+  }
+
+  function paintTable(rows) {
+    const tbody = document.querySelector('[data-tbody]');
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="4" class="data-table-empty">${
+        state.status ? `No ${escapeHtml(state.status)} grievances.` : 'No grievances filed yet. Use “+ New grievance” to add one.'
+      }</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map((g) => {
+      const slug = String(g.status || '').toLowerCase().replace(/\s+/g, '-');
+      return `
+        <tr${g.description ? ` title="${escapeHtml(g.description)}"` : ''}>
+          <td class="col-name">${escapeHtml(g.member_name || '—')}</td>
+          <td class="col-meta">${escapeHtml(g.grievance_type || '—')}</td>
+          <td><span class="status-pill ${slug}"><span class="dot" aria-hidden="true"></span>${escapeHtml(g.status || '—')}</span></td>
+          <td class="col-meta">${fmtDateTime(g.created_at)}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  // ─── Small helpers ────────────────────────────────────────────────
+  function fmtDateTime(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (isNaN(d)) return '—';
+    return d.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+
+  function setStatus(el, msg, kind) {
+    el.textContent = msg || '';
+    el.classList.remove('is-error', 'is-success');
+    if (kind) el.classList.add('is-' + kind);
+  }
+</script>
+
+</body>
+</html>

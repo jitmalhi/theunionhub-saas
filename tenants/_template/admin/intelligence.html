@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Workplace Intelligence · Admin · The Union Hub</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/admin/admin.css">
+
+<style>
+  /* Page-scoped only; everything else reuses admin.css. Strictly institutional. */
+  .gate-state { text-align: center; padding: clamp(48px, 8vw, 96px) 0; max-width: 52ch; margin: 0 auto; }
+  .gate-state .spinner { width: 24px; height: 24px; margin: 0 auto 18px; border: 2px solid var(--hair); border-top-color: var(--accent-tenant, var(--forest)); border-radius: 999px; animation: wi-spin .9s linear infinite; }
+  @keyframes wi-spin { to { transform: rotate(360deg); } }
+  .gate-state h1 { font-family: var(--font-display); font-weight: var(--fw-bold); font-size: clamp(28px, 3.4vw, 38px); line-height: var(--lh-headline); letter-spacing: var(--ls-headline); color: var(--deep-forest); margin: 0 0 12px; }
+  .gate-state h1 em { font-style: italic; color: var(--accent-tenant, var(--forest)); }
+  .gate-state p { font-family: var(--font-body); font-size: 14.5px; line-height: var(--lh-snug); color: var(--ink-soft); margin: 0 0 24px; }
+  .gate-state .gate-msg { font-family: var(--font-mono); font-size: 11px; letter-spacing: var(--ls-eyebrow); text-transform: uppercase; color: var(--muted); margin: 0; }
+  .gate-actions { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+  /* Tickers */
+  .ticker-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); border: var(--bw-hair) solid var(--hair); border-radius: var(--rad); background: var(--paper); overflow: hidden; margin-bottom: clamp(32px, 4vw, 48px); }
+  .ticker { padding: 26px 30px; border-right: var(--bw-hair) solid var(--hair); }
+  .ticker:last-child { border-right: 0; }
+  .ticker .label { font-family: var(--font-mono); font-weight: var(--fw-medium); font-size: var(--fs-eyebrow); letter-spacing: var(--ls-eyebrow); text-transform: uppercase; color: var(--accent-tenant, var(--forest)); margin-bottom: 12px; }
+  .ticker .num { font-family: var(--font-display); font-weight: var(--fw-bold); font-size: clamp(38px, 5vw, 52px); line-height: 1; letter-spacing: var(--ls-headline); color: var(--deep-forest); font-variant-numeric: tabular-nums; }
+  .ticker .sub { font-family: var(--font-body); font-size: var(--fs-small); color: var(--muted); margin-top: 8px; }
+
+  /* Section heads */
+  .panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin: 0 0 18px; flex-wrap: wrap; }
+  .panel-title { font-family: var(--font-display); font-weight: var(--fw-semibold); font-size: 22px; letter-spacing: var(--ls-headline); color: var(--deep-forest); margin: 0; }
+  .panel-meta { font-family: var(--font-mono); font-weight: var(--fw-medium); font-size: var(--fs-eyebrow); letter-spacing: var(--ls-eyebrow); text-transform: uppercase; color: var(--muted); }
+  .panel { margin-bottom: clamp(40px, 5vw, 60px); }
+
+  /* CSS bar chart — no library. */
+  .bars { display: flex; flex-direction: column; gap: 16px; border-top: var(--bw-hair) solid var(--hair); padding-top: 22px; }
+  .bar-row { display: grid; grid-template-columns: minmax(96px, 168px) 1fr auto; gap: 16px; align-items: center; }
+  .bar-label { font-family: var(--font-body); font-weight: var(--fw-medium); font-size: 14px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar-track { height: 12px; background: var(--off-white); border: var(--bw-hair) solid var(--hair); border-radius: 999px; overflow: hidden; }
+  .bar-fill { height: 100%; width: 0; background: var(--accent-tenant, var(--forest)); border-radius: 999px; transition: width .7s cubic-bezier(.2,.7,.2,1); }
+  .bar-count { font-family: var(--font-mono); font-weight: var(--fw-medium); font-size: 13px; color: var(--ink-soft); font-variant-numeric: tabular-nums; min-width: 3ch; text-align: right; }
+
+  /* Heatmap table — heat via accent opacity on a share bar. */
+  .heat-share { position: relative; min-width: 120px; }
+  .heat-bar { height: 8px; border-radius: 999px; background: var(--accent-tenant, var(--forest)); }
+  .data-table td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink); text-align: right; width: 1%; white-space: nowrap; }
+
+  .empty-note { font-family: var(--font-body); color: var(--muted); padding: 28px 0; border-top: var(--bw-hair) solid var(--hair); }
+
+  /* Window switcher (7 / 30 / 90 days) */
+  .window-switch { display: inline-flex; gap: 6px; margin: 0 0 22px; }
+  .win-btn {
+    appearance: none; cursor: pointer; padding: 8px 16px; border-radius: var(--rad-pill);
+    border: var(--bw-hair) solid var(--hair); background: var(--off-white);
+    font-family: var(--font-body); font-weight: var(--fw-medium); font-size: 13px; color: var(--ink-soft);
+    transition: background var(--dur-fast) var(--ease-standard), color var(--dur-fast) var(--ease-standard), border-color var(--dur-fast) var(--ease-standard);
+  }
+  .win-btn:hover { border-color: var(--accent-tenant, var(--forest)); color: var(--accent-tenant, var(--forest)); }
+  .win-btn[aria-pressed="true"] { background: var(--accent-tenant, var(--forest)); border-color: var(--accent-tenant, var(--forest)); color: var(--off-white); }
+  .win-btn[disabled] { opacity: 0.55; cursor: default; pointer-events: none; }
+
+  /* Busy state while a window reloads — dim the data, keep it in place. */
+  [data-content] { transition: opacity .2s ease; }
+  [data-content].is-busy { opacity: 0.45; pointer-events: none; }
+  .win-error { font-family: var(--font-body); font-size: 13.5px; color: var(--alert); margin: 0 0 20px; }
+
+  @media (prefers-reduced-motion: reduce) { .bar-fill, [data-content] { transition: none; } }
+</style>
+</head>
+
+<body>
+
+<nav class="admin-nav" role="navigation" aria-label="Admin">
+  <div class="admin-nav-brand">
+    <span class="mark" aria-hidden="true" data-tenant-initial>·</span>
+    <div class="admin-nav-brand-stack">
+      <span class="admin-nav-tenant-name" data-tenant-name>—</span>
+      <span class="admin-nav-context">Admin</span>
+    </div>
+  </div>
+  <div class="admin-nav-meta">
+    <span class="admin-nav-email" data-admin-email>…</span>
+    <button class="admin-btn admin-btn-ghost" type="button" data-signout>Sign out</button>
+  </div>
+</nav>
+
+<nav class="admin-subnav" role="navigation" aria-label="Admin sections">
+  <a href="/admin">Dashboard</a>
+  <a href="/admin/members">Members</a>
+  <a href="/admin/grievances">Grievances</a>
+  <a href="/admin/intelligence" aria-current="page">Intelligence</a>
+  <a href="/admin/team">Team</a>
+  <a href="/admin/audit">Audit</a>
+  <a href="/admin/settings">Settings</a>
+  <a href="/admin/access/dashboard" class="subnav-access">Access</a>
+</nav>
+
+<main class="admin-main">
+  <div data-gate>
+    <section class="gate-state" role="status" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <p class="gate-msg">Checking access…</p>
+    </section>
+  </div>
+
+  <div data-app hidden>
+    <div class="window-switch" role="group" aria-label="Time window" data-window-switch>
+      <button class="win-btn" type="button" data-days="7"  aria-pressed="false">7 Days</button>
+      <button class="win-btn" type="button" data-days="30" aria-pressed="true">30 Days</button>
+      <button class="win-btn" type="button" data-days="90" aria-pressed="false">90 Days</button>
+    </div>
+
+    <header class="admin-page-head">
+      <span class="admin-eyebrow"><span data-tenant-name>—</span> · Leadership</span>
+      <h1 class="admin-page-title">Workplace <em>Intelligence</em>.</h1>
+      <p class="admin-page-meta"><span data-window>Last 30 days</span> · <a href="/admin/activity" style="color:var(--accent-tenant,var(--forest))">View full activity log →</a></p>
+    </header>
+
+    <p class="win-error" data-win-error hidden></p>
+
+    <div data-content>
+    <section class="ticker-grid">
+      <div class="ticker">
+        <div class="label">Total interactions</div>
+        <div class="num" data-total>—</div>
+        <div class="sub" data-total-sub>representation meetings logged</div>
+      </div>
+      <div class="ticker">
+        <div class="label">Confirmed meetings</div>
+        <div class="num" data-confirmed>—</div>
+        <div class="sub" data-confirmed-sub>member-confirmed concerns</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Top friction topics</h2>
+        <span class="panel-meta">by volume</span>
+      </div>
+      <div data-topics></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Worksite heatmap</h2>
+        <span class="panel-meta">interactions by worksite</span>
+      </div>
+      <div data-worksites></div>
+    </section>
+    </div>
+  </div>
+</main>
+
+<footer class="admin-foot">
+  <span>The Union Hub · Admin</span>
+  <span>Signed in as <span data-admin-email-foot>…</span></span>
+</footer>
+
+<script type="module">
+  import { requireAuth, watchAuth, signOut } from '/lib/auth-guard.js';
+  import { getTenant, applyTenantTheme } from '/lib/tenant.js';
+  import { fetchWorkplaceIntelligence } from '/lib/admin-intelligence.js';
+
+  const gate = document.querySelector('[data-gate]');
+  const app  = document.querySelector('[data-app]');
+
+  const DEFAULT_DAYS = 30;
+  let currentEmail = '—';
+  let currentDays  = DEFAULT_DAYS;   // the window currently SHOWN (for graceful revert)
+  let loading      = false;
+
+  function showGate(html) { app.hidden = true; gate.hidden = false; gate.innerHTML = html; }
+  function showApp()      { gate.hidden = true; app.hidden = false; }
+  function esc(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function gateDenied(email) {
+    return `<section class="gate-state" role="alert">
+      <h1>Access <em>denied</em>.</h1>
+      <p>Your account (${esc(email)}) isn't an administrator of this union. The Workplace Intelligence dashboard is for verified tenant admins.</p>
+      <div class="gate-actions"><a class="admin-btn admin-btn-primary" href="/admin">Back to dashboard</a>
+        <button class="admin-btn admin-btn-ghost" type="button" data-signout-2>Sign out</button></div>
+    </section>`;
+  }
+  function gateWrongAddress() {
+    return `<section class="gate-state" role="alert"><h1>Wrong <em>address</em>.</h1>
+      <p>Open the admin console from your union's web address.</p>
+      <div class="gate-actions"><a class="admin-btn admin-btn-ghost" href="/admin">Admin home</a></div></section>`;
+  }
+  function gateError() {
+    return `<section class="gate-state" role="alert"><h1>Something went <em>wrong</em>.</h1>
+      <p>We couldn't load the dashboard right now. Refresh to try again.</p>
+      <div class="gate-actions"><button class="admin-btn admin-btn-ghost" type="button" data-reload>Refresh</button></div></section>`;
+  }
+
+  (async () => {
+    const session = await requireAuth();
+    if (!session) return;
+
+    const email = session.user?.email || '—';
+    document.querySelector('[data-admin-email]').textContent      = email;
+    document.querySelector('[data-admin-email-foot]').textContent = email;
+    watchAuth();
+    document.querySelector('[data-signout]')?.addEventListener('click', signOut);
+
+    let tenant = null;
+    try { tenant = await getTenant(); if (tenant) applyTenantTheme(tenant); }
+    catch (e) { console.warn('[uh/admin/intelligence] tenant resolve failed:', e?.message); }
+    if (!tenant) { showGate(gateWrongAddress()); return; }
+    document.querySelector('[data-tenant-initial]').textContent = (tenant.slug || '·').charAt(0).toUpperCase();
+
+    currentEmail = email;
+    wireSwitcher();
+    // First load ALSO establishes role-based access: the RPC RAISES
+    // not_tenant_admin for non-admins → loadWindow routes that to the gate.
+    await loadWindow(DEFAULT_DAYS, true);
+  })();
+
+  // ── Window loading — shared by the first load and the switcher, so the
+  //    loading / error / denied states are handled identically. ──────────
+  function wireSwitcher() {
+    document.querySelectorAll('[data-window-switch] .win-btn').forEach((b) =>
+      b.addEventListener('click', () => loadWindow(parseInt(b.dataset.days, 10) || DEFAULT_DAYS)));
+  }
+  function setActiveButton(days) {
+    document.querySelectorAll('[data-window-switch] .win-btn').forEach((b) =>
+      b.setAttribute('aria-pressed', String((parseInt(b.dataset.days, 10) || 0) === days)));
+  }
+  function setButtonsDisabled(on) {
+    document.querySelectorAll('[data-window-switch] .win-btn').forEach((b) => { b.disabled = !!on; });
+  }
+
+  async function loadWindow(days, initial = false) {
+    if (loading) return;
+    loading = true;
+    setActiveButton(days);
+    setButtonsDisabled(true);
+
+    const content = document.querySelector('[data-content]');
+    const errEl   = document.querySelector('[data-win-error]');
+    if (errEl) errEl.hidden = true;
+    if (!initial) {
+      content?.classList.add('is-busy');                                  // dim current data, keep it visible
+      const w = document.querySelector('[data-window]'); if (w) w.textContent = 'Loading…';
+    }
+
+    try {
+      const data = await fetchWorkplaceIntelligence(days);
+      currentDays = days;
+      if (initial) showApp();
+      render(data);
+    } catch (err) {
+      const code = err?.message || '';
+      console.warn('[uh/admin/intelligence] window load:', code);
+      if (code === 'not_authenticated') { location.replace('/admin/signin'); return; }
+      if (code === 'no_tenant_context') { showGate(gateWrongAddress()); return; }
+      if (code === 'not_tenant_admin')  {
+        showGate(gateDenied(currentEmail));
+        gate.querySelector('[data-signout-2]')?.addEventListener('click', signOut);
+        return;
+      }
+      if (initial) {                                                      // nothing on screen yet → full error gate
+        console.error('[uh/admin/intelligence] failed:', err);
+        showGate(gateError());
+        gate.querySelector('[data-reload]')?.addEventListener('click', () => location.reload());
+        return;
+      }
+      // Transient failure mid-session → keep the data already shown, revert label.
+      const w = document.querySelector('[data-window]'); if (w) w.textContent = `Last ${currentDays} days`;
+      setActiveButton(currentDays);
+      if (errEl) { errEl.textContent = `Couldn't load the ${days}-day window — still showing the last ${currentDays} days.`; errEl.hidden = false; }
+    } finally {
+      content?.classList.remove('is-busy');
+      setButtonsDisabled(false);
+      loading = false;
+    }
+  }
+
+  function render(d) {
+    document.querySelector('[data-window]').textContent = `Last ${d.days} days`;
+
+    countUp(document.querySelector('[data-total]'), d.total || 0);
+    countUp(document.querySelector('[data-confirmed]'), d.confirmed || 0);
+    const rate = d.total ? Math.round((d.confirmed / d.total) * 100) : 0;
+    document.querySelector('[data-confirmed-sub]').textContent =
+      d.total ? `${rate}% of interactions confirmed` : 'member-confirmed concerns';
+
+    // Top 5 friction topics — CSS bars.
+    const topics = (d.by_topic || []).slice(0, 5);
+    const topicsEl = document.querySelector('[data-topics]');
+    if (!topics.length) {
+      topicsEl.innerHTML = `<p class="empty-note">No interactions logged in this window yet.</p>`;
+    } else {
+      const max = topics[0].count || 1;
+      topicsEl.innerHTML = `<div class="bars">${topics.map((t) => `
+        <div class="bar-row">
+          <span class="bar-label">${esc(t.topic)}</span>
+          <span class="bar-track"><span class="bar-fill" data-w="${Math.max(2, Math.round((t.count / max) * 100))}"></span></span>
+          <span class="bar-count">${t.count}</span>
+        </div>`).join('')}</div>`;
+      // Animate fills after paint.
+      requestAnimationFrame(() => topicsEl.querySelectorAll('.bar-fill').forEach((f) => { f.style.width = f.dataset.w + '%'; }));
+    }
+
+    // Worksite heatmap — table with a share bar (heat = share of the busiest).
+    const sites = d.by_worksite || [];
+    const wEl = document.querySelector('[data-worksites]');
+    if (!sites.length) {
+      wEl.innerHTML = `<p class="empty-note">No worksite activity in this window yet.</p>`;
+    } else {
+      const max = sites[0].count || 1;
+      const total = sites.reduce((a, s) => a + (s.count || 0), 0) || 1;
+      wEl.innerHTML = `
+        <table class="data-table" aria-label="Interactions by worksite">
+          <thead><tr><th scope="col">Worksite</th><th scope="col">Share</th><th scope="col" class="num">Interactions</th></tr></thead>
+          <tbody>${sites.map((s) => {
+            const pct = Math.max(4, Math.round((s.count / max) * 100));
+            const share = Math.round((s.count / total) * 100);
+            return `<tr>
+              <td class="col-name">${esc(s.worksite)}</td>
+              <td><div class="heat-share"><div class="heat-bar" style="width:${pct}%;opacity:${(0.35 + 0.65 * (s.count / max)).toFixed(2)}"></div></div></td>
+              <td class="num">${s.count}<span style="color:var(--muted);font-size:11px"> · ${share}%</span></td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>`;
+    }
+  }
+
+  // Subtle count-up ticker (respects reduced motion).
+  function countUp(el, target) {
+    if (!el) return;
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || target <= 0) { el.textContent = String(target); return; }
+    const dur = 600, start = performance.now();
+    function tick(now) {
+      const p = Math.min(1, (now - start) / dur);
+      el.textContent = String(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+</script>
+
+</body>
+</html>

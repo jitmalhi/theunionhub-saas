@@ -1,0 +1,709 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Knowledge Capture · The Union Hub Access</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Capture institutional knowledge so the next steward isn't starting from zero.">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/access/portal/portal.css">
+
+<style>
+  /* ── Knowledge Capture · prototype-only styles (everything else is portal.css) ── */
+
+  .lede-strong { color: var(--ink, #111); font-weight: 500; }
+
+  /* Readiness meter — a live "is this a usable handoff yet?" signal. */
+  .readiness { display: flex; align-items: center; gap: 12px; margin: 2px 0 26px; }
+  .meter { display: inline-flex; gap: 5px; }
+  .meter .seg { width: 36px; height: 5px; border-radius: 999px; background: var(--hair, rgba(0,0,0,0.15)); transition: background .2s ease; }
+  .meter .seg.on { background: var(--accent-tenant, var(--forest, #0F6E56)); }
+  .readiness .label {
+    font-family: var(--font-mono, 'DM Mono', monospace);
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--muted, #888780);
+  }
+  .readiness.is-ready .label { color: var(--accent-tenant, var(--forest, #0F6E56)); }
+
+  /* Each prompt is its own card — a deliberate step, not a field in a wall. */
+  .prompt {
+    border: 0.5px solid var(--hair, rgba(0,0,0,0.15));
+    border-left: 2px solid var(--accent-tenant, var(--forest, #0F6E56));
+    border-radius: var(--rad, 12px);
+    background: var(--paper, #FAF9F5);
+    padding: clamp(18px, 4vw, 26px);
+    margin-bottom: 16px;
+  }
+  .prompt.is-filled { border-left-color: var(--forest, #0F6E56); }
+  .prompt-step {
+    font-family: var(--font-mono, 'DM Mono', monospace);
+    font-weight: 500; font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--accent-tenant, var(--forest, #0F6E56));
+    display: inline-flex; align-items: center; gap: 8px; margin: 0 0 10px;
+  }
+  .prompt-step .tick { opacity: 0; transition: opacity .2s ease; }
+  .prompt.is-filled .prompt-step .tick { opacity: 1; }
+  .prompt-q {
+    font-family: var(--font-display, 'Playfair Display', serif);
+    font-weight: 700; font-size: clamp(20px, 4.5vw, 25px); line-height: 1.15;
+    letter-spacing: -0.01em; color: var(--deep-forest, #0D1F1A); margin: 0 0 8px;
+  }
+  .prompt-help { font-size: 13.5px; line-height: 1.55; color: var(--muted, #888780); margin: 0 0 16px; max-width: 60ch; }
+
+  /* Scaffolding chips — tap to seed a structured line instead of staring at a blank box. */
+  .scaffold { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+  .scaffold-chip {
+    appearance: none; cursor: pointer;
+    border: 0.5px solid var(--hair, rgba(0,0,0,0.15));
+    background: var(--off-white, #F5F4F1);
+    border-radius: 999px; padding: 6px 12px;
+    font-family: var(--font-body, 'DM Sans', sans-serif);
+    font-weight: 500; font-size: 12px; color: var(--ink-soft, #2A2A2A);
+    transition: border-color .15s ease, color .15s ease;
+  }
+  .scaffold-chip::before { content: '+ '; color: var(--accent-tenant, var(--forest, #0F6E56)); }
+  .scaffold-chip:hover { border-color: var(--accent-tenant, var(--forest, #0F6E56)); color: var(--accent-tenant, var(--forest, #0F6E56)); }
+
+  .issue-types { margin-bottom: 14px; }
+
+  /* Action row (prototype controls). */
+  .kc-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+  .kc-actions .btn { width: auto; flex: 1 1 auto; min-width: 140px; }
+  .save-state {
+    font-family: var(--font-mono, 'DM Mono', monospace);
+    font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted, #888780); margin: 14px 0 0; min-height: 1.2em;
+  }
+  .save-state.is-saved { color: var(--accent-tenant, var(--forest, #0F6E56)); }
+
+  /* Compiled "Handoff Brief" preview — what the next steward would actually read. */
+  .brief {
+    border: 0.5px solid var(--hair, rgba(0,0,0,0.15));
+    border-radius: var(--rad, 12px);
+    background: var(--off-white, #F5F4F1);
+    padding: clamp(20px, 4vw, 30px);
+    margin-top: 20px;
+  }
+  .brief-title { font-family: var(--font-display, 'Playfair Display', serif); font-weight: 700; font-size: 22px; color: var(--deep-forest, #0D1F1A); margin: 0 0 2px; }
+  .brief-meta { font-family: var(--font-mono, 'DM Mono', monospace); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted, #888780); margin: 0 0 18px; }
+  .brief-sec { margin: 0 0 16px; }
+  .brief-sec:last-child { margin-bottom: 0; }
+  .brief-label { font-family: var(--font-mono, 'DM Mono', monospace); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent-tenant, var(--forest, #0F6E56)); margin: 0 0 6px; }
+  .brief-body { font-size: 14.5px; line-height: 1.6; color: var(--ink, #111); white-space: pre-wrap; word-break: break-word; }
+  .brief-body.empty { color: var(--muted, #888780); font-style: italic; }
+
+  /* ── My Captures list + editing bar (added with the cloud-persistence step) ── */
+  .captures { margin: 0 0 30px; }
+  .captures-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0 0 12px; }
+  .captures-title { font-family: var(--font-mono, 'DM Mono', monospace); font-weight: 500; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted, #888780); }
+  .captures-new { appearance: none; background: none; border: 0; cursor: pointer; font-family: var(--font-mono, 'DM Mono', monospace); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-tenant, var(--forest, #0F6E56)); padding: 4px; }
+  .captures-state { font-size: 13.5px; line-height: 1.55; color: var(--muted, #888780); padding: 12px 0; margin: 0; }
+  .captures-state a { color: var(--accent-tenant, var(--forest, #0F6E56)); }
+  .capture-list { display: flex; flex-direction: column; border: 0.5px solid var(--hair, rgba(0,0,0,0.15)); border-radius: var(--rad, 12px); overflow: hidden; background: var(--paper, #FAF9F5); }
+  .capture-row { appearance: none; text-align: left; background: none; border: 0; border-bottom: 0.5px solid var(--hair, rgba(0,0,0,0.15)); cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 14px 16px; width: 100%; transition: background .15s ease; }
+  .capture-row:last-child { border-bottom: 0; }
+  .capture-row:hover, .capture-row.is-editing { background: var(--off-white, #F5F4F1); }
+  .capture-row-main { flex: 1; min-width: 0; }
+  .capture-row-title { display: block; font-family: var(--font-body, 'DM Sans', sans-serif); font-weight: 500; font-size: 15px; color: var(--ink, #111); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .capture-row.is-editing .capture-row-title::before { content: '● '; color: var(--accent-tenant, var(--forest, #0F6E56)); }
+  .capture-row-meta { display: block; font-family: var(--font-mono, 'DM Mono', monospace); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted, #888780); margin-top: 3px; }
+  .capture-row-go { color: var(--muted, #888780); flex: none; }
+
+  .editing-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 10px 14px; margin: 0 0 14px; border: 0.5px solid var(--hair, rgba(0,0,0,0.15)); border-left: 2px solid var(--accent-tenant, var(--forest, #0F6E56)); border-radius: var(--rad-sm, 8px); background: var(--paper, #FAF9F5); font-size: 13px; }
+  .editing-bar [data-editing-label] { color: var(--ink-soft, #2A2A2A); }
+  .editing-actions { display: inline-flex; gap: 14px; flex-wrap: wrap; }
+  .linkbtn { appearance: none; background: none; border: 0; cursor: pointer; font: inherit; font-size: 12.5px; color: var(--accent-tenant, var(--forest, #0F6E56)); padding: 0; }
+  .linkbtn:hover { text-decoration: underline; }
+  .linkbtn[disabled] { color: var(--muted, #888780); cursor: default; text-decoration: none; opacity: 0.7; }
+  .transfer-note { margin: 0 0 14px; padding: 12px 14px; border: 0.5px dashed var(--hair, rgba(0,0,0,0.15)); border-radius: var(--rad-sm, 8px); background: var(--off-white, #F5F4F1); font-size: 13px; line-height: 1.55; color: var(--ink-soft, #2A2A2A); }
+  .transfer-note strong { color: var(--deep-forest, #0D1F1A); font-weight: 500; }
+  .transfer-note p { margin: 6px 0 10px; }
+  .transfer-form .input { margin: 0 0 10px; }
+  .transfer-actions { display: flex; align-items: center; gap: 14px; }
+  .transfer-actions .btn { width: auto; min-height: 44px; padding: 10px 20px; }
+  .transfer-status { margin: 10px 0 0; font-size: 12.5px; min-height: 1.1em; }
+</style>
+</head>
+
+<body>
+  <main class="portal-wrap" id="root">
+
+    <div class="topbar" data-topbar hidden>
+      <div class="who">
+        <div class="label">Steward</div>
+        <div class="email" data-email>—</div>
+      </div>
+      <a class="signout" href="/access/portal" style="text-decoration:none">← Back to profile</a>
+    </div>
+
+    <span class="eyebrow"><span data-tenant-name>The Union Hub Access</span> · Knowledge Capture</span>
+    <h1>Capture what you <em>know</em>.</h1>
+    <p class="lede">A case lives in your head until you write it down. <span class="lede-strong">If you were unavailable tomorrow</span>, this is what the next steward would need — captured as three quick prompts, not a blank notes box.</p>
+
+    <!-- My Captures: proof it's in the cloud + resume / transfer surface -->
+    <section class="captures" data-captures>
+      <div class="captures-head">
+        <span class="captures-title" data-captures-title>Your captures</span>
+        <button class="captures-new" type="button" data-new>+ New capture</button>
+      </div>
+      <div data-captures-body>
+        <p class="captures-state">Loading…</p>
+      </div>
+    </section>
+
+    <!-- Live readiness signal -->
+    <div class="readiness" data-readiness>
+      <span class="meter" aria-hidden="true">
+        <span class="seg" data-seg="1"></span>
+        <span class="seg" data-seg="2"></span>
+        <span class="seg" data-seg="3"></span>
+      </span>
+      <span class="label" data-readiness-label>Not started</span>
+    </div>
+
+    <div class="editing-bar" data-editing-bar>
+      <span data-editing-label>New capture</span>
+      <span class="editing-actions">
+        <button type="button" class="linkbtn" data-transfer disabled>Transfer to another steward</button>
+        <button type="button" class="linkbtn" data-new-inline>Start new</button>
+      </span>
+    </div>
+    <div class="transfer-note" data-transfer-note hidden></div>
+
+    <form data-form novalidate>
+      <!-- Case title + type (light metadata that makes the brief usable) -->
+      <label class="field">
+        <span class="field-label">Case name</span>
+        <input class="input" type="text" name="title" placeholder="e.g. Plant 2 overtime dispute — J. Rivera" autocomplete="off">
+      </label>
+      <div class="field issue-types">
+        <span class="field-label">Type</span>
+        <div class="scaffold" data-issue-types>
+          <button class="scaffold-chip" type="button" data-issue="Grievance">Grievance</button>
+          <button class="scaffold-chip" type="button" data-issue="Scheduling">Scheduling</button>
+          <button class="scaffold-chip" type="button" data-issue="Health &amp; Safety">Health &amp; Safety</button>
+          <button class="scaffold-chip" type="button" data-issue="Discipline">Discipline</button>
+          <button class="scaffold-chip" type="button" data-issue="Contract">Contract</button>
+          <button class="scaffold-chip" type="button" data-issue="Other">Other</button>
+        </div>
+        <input type="hidden" name="issue_type" value="">
+      </div>
+
+      <!-- 1 · The Current State -->
+      <section class="prompt" data-prompt="current">
+        <p class="prompt-step">01 · Current State <span class="tick" aria-hidden="true">✓</span></p>
+        <h2 class="prompt-q">What is the issue?</h2>
+        <p class="prompt-help">Describe it as it stands <em>right now</em> — who's affected, what's at stake, and what makes it urgent. Write it for someone who's never heard of this case.</p>
+        <textarea class="textarea" name="current" rows="4" placeholder="Three day-shift members at Plant 2 were denied overtime that the contract entitles them to…"></textarea>
+        <p class="field-hint" data-hint="current"></p>
+      </section>
+
+      <!-- 2 · The Timeline -->
+      <section class="prompt" data-prompt="timeline">
+        <p class="prompt-step">02 · The Timeline <span class="tick" aria-hidden="true">✓</span></p>
+        <h2 class="prompt-q">What have you tried so far?</h2>
+        <p class="prompt-help">Walk through the steps you've taken and how each one landed. Tap a step below to scaffold a dated line, then fill in the detail.</p>
+        <div class="scaffold" data-scaffold>
+          <button class="scaffold-chip" type="button" data-line="Spoke with the member(s)">Spoke with member</button>
+          <button class="scaffold-chip" type="button" data-line="Raised it with management">Raised with management</button>
+          <button class="scaffold-chip" type="button" data-line="Checked contract language">Checked contract</button>
+          <button class="scaffold-chip" type="button" data-line="Filed a grievance">Filed grievance</button>
+          <button class="scaffold-chip" type="button" data-line="Escalated to a unit officer">Escalated to officer</button>
+        </div>
+        <textarea class="textarea" name="timeline" rows="5" placeholder="• 2026-06-19 — Spoke with the member(s): …"></textarea>
+        <p class="field-hint" data-hint="timeline"></p>
+      </section>
+
+      <!-- 3 · The Handoff -->
+      <section class="prompt" data-prompt="handoff">
+        <p class="prompt-step">03 · The Handoff <span class="tick" aria-hidden="true">✓</span></p>
+        <h2 class="prompt-q">What would the next person need to know if you were unavailable tomorrow?</h2>
+        <p class="prompt-help">The part that lives <em>only</em> in your head. Deadlines, the right person to call, the landmines, the “whatever you do, don't…”. Be blunt.</p>
+        <textarea class="textarea" name="handoff" rows="4" placeholder="Grievance deadline is 2026-06-26 — do NOT miss it. Talk to Marcus (unit chair) before management; he has the email thread…"></textarea>
+        <p class="field-hint" data-hint="handoff"></p>
+      </section>
+
+      <div class="kc-actions">
+        <button class="btn btn-primary" type="button" data-save>Save</button>
+        <button class="btn btn-ghost" type="button" data-preview>Preview brief</button>
+        <button class="btn btn-ghost" type="button" data-copy>Copy brief</button>
+      </div>
+      <p class="save-state" data-save-state role="status" aria-live="polite"></p>
+    </form>
+
+    <!-- Compiled handoff brief (toggled) -->
+    <section class="brief" data-brief hidden aria-label="Compiled handoff brief"></section>
+
+    <p class="powered">Knowledge Capture · Prototype · Secured by The Union Hub Access</p>
+  </main>
+
+<script type="module">
+  import { getTenant, applyTenantTheme } from '/lib/tenant.js';
+  import createClient from '/lib/supabase.js';
+
+  const root = document.getElementById('root');
+  const form = root.querySelector('[data-form]');
+  const FIELDS = ['title', 'issue_type', 'current', 'timeline', 'handoff'];
+  const SUBSTANCE = 40;                    // chars before a prompt counts as "answered"
+
+  let tenant = null;          // resolved at boot; needed for the tenant-bound client
+  let currentEntryId = null;  // set after the first DB insert → later saves UPDATE that row
+  let captures = [];          // the steward's saved entries, for the My Captures list
+
+  // Draft key is namespaced by tenant + signed-in email so two stewards on one
+  // device don't trample each other. PROTOTYPE: persistence is localStorage —
+  // production would write to a tenant-scoped knowledge table under RLS.
+  let draftKey = 'uh:knowledge:draft:v1:_:anon';
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function today() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+  function val(name) { return (form.elements[name]?.value || '').trim(); }
+
+  // ── Boot: tenant theme + (optional) signed-in identity ──────────────
+  (async () => {
+    try {
+      tenant = await getTenant({ force: true });
+      if (tenant) { applyTenantTheme(tenant); root.querySelector('[data-tenant-name]').textContent = tenant.display_name || 'The Union Hub Access'; }
+    } catch (e) { console.warn('[uh/knowledge] tenant resolve failed:', e?.message); }
+
+    let email = '';
+    try {
+      const sb = createClient(tenant ? { tenantId: tenant.id } : {});
+      const { data: { session } } = await sb.auth.getSession();
+      email = session?.user?.email || '';
+    } catch { /* prototype works signed-out too */ }
+
+    if (email) {
+      root.querySelector('[data-email]').textContent = email;
+      root.querySelector('[data-topbar]').hidden = false;
+    }
+
+    draftKey = `uh:knowledge:draft:v1:${(tenant && tenant.slug) || '_'}:${email || 'anon'}`;
+    loadDraft();
+    wire();
+    recompute();
+    await refreshCaptures();   // load the steward's saved entries into the list
+
+    // Deep-link from the Steward Card's "Active Representation" — open that entry.
+    const wantId = new URLSearchParams(location.search).get('entry');
+    if (wantId) { const row = captures.find((r) => r.id === wantId); if (row) applyEntry(row); }
+  })();
+
+  // ── Persistence (prototype: localStorage) ───────────────────────────
+  function snapshot() {
+    // entryId rides along so a reload resumes EDITING the same DB row (not a
+    // fresh insert). It's local-only metadata; the DB payload is built explicitly.
+    const o = { updatedAt: new Date().toISOString(), entryId: currentEntryId };
+    for (const f of FIELDS) o[f] = val(f);
+    return o;
+  }
+  function saveDraft(explicit) {
+    try { localStorage.setItem(draftKey, JSON.stringify(snapshot())); }
+    catch { /* private mode / quota — non-fatal for a prototype */ }
+    const el = root.querySelector('[data-save-state]');
+    el.textContent = explicit ? 'Draft saved locally ✓' : 'Saved';
+    el.classList.toggle('is-saved', true);
+    if (!explicit) { clearTimeout(saveDraft._t); saveDraft._t = setTimeout(() => { el.textContent = ''; el.classList.remove('is-saved'); }, 1400); }
+  }
+  function loadDraft() {
+    let data = null;
+    try { data = JSON.parse(localStorage.getItem(draftKey) || 'null'); } catch {}
+    if (!data) return;
+    for (const f of FIELDS) if (form.elements[f] && data[f] != null) form.elements[f].value = data[f];
+    syncIssueChips(data.issue_type || '');
+    if (data.entryId) currentEntryId = data.entryId;   // resume editing the same row
+  }
+
+  // ── Persist to Supabase (the real save) ─────────────────────────────
+  // Adapted to lib/supabase.js, which has NO .upsert() and THROWS on failure
+  // (no { error } return like supabase-js). So: INSERT the first time (capturing
+  // the id), then UPDATE by id thereafter — all inside try/catch. localStorage
+  // stays as an offline / signed-out / pre-migration fallback so a steward's
+  // work is never lost.
+  function persistLocal() {
+    try { localStorage.setItem(draftKey, JSON.stringify(snapshot())); } catch { /* private mode / quota */ }
+  }
+  function setSave(msg, ok) {
+    const el = root.querySelector('[data-save-state]');
+    el.textContent = msg || '';
+    el.classList.toggle('is-saved', !!ok);
+  }
+  function showSaveSuccess() { setSave('Saved to your union ✓', true); }
+
+  async function saveToDatabase() {
+    if (!tenant) { persistLocal(); setSave('No union context — saved locally only.', true); return; }
+
+    let client, session;
+    try {
+      client = createClient({ tenantId: tenant.id });            // sends x-tenant-id for RLS
+      ({ data: { session } } = await client.auth.getSession());
+    } catch (e) { console.warn('[uh/knowledge] session check failed:', e?.message); }
+
+    if (!session) { persistLocal(); setSave('Sign in to publish — saved locally for now.', false); return; }
+
+    const d = snapshot();
+    const payload = {
+      tenant_id:     tenant.id,            // RLS WITH CHECK; user_id defaults to auth.uid() server-side
+      title:         d.title      || null,
+      issue_type:    d.issue_type || null,
+      current_state: d.current    || null,
+      timeline:      d.timeline   || null,
+      handoff_notes: d.handoff    || null,
+    };
+
+    setSave('Saving…', false);
+    try {
+      let row;
+      if (currentEntryId) {
+        const { data } = await client.from('knowledge_entries').update(payload).eq('id', currentEntryId);
+        row = Array.isArray(data) ? data[0] : data;
+      } else {
+        const { data } = await client.from('knowledge_entries').insert(payload);
+        row = Array.isArray(data) ? data[0] : data;
+        if (row && row.id) currentEntryId = row.id;             // next save updates this row, not a new one
+      }
+      persistLocal();              // mirror locally too
+      showSaveSuccess();
+      refreshCaptures();           // reflect the new / updated entry in the list
+    } catch (e) {
+      console.error('[uh/knowledge] DB save failed:', e);
+      persistLocal();              // never lose the steward's work
+      setSave("Couldn't reach the server — kept locally. Try again.", false);
+    }
+  }
+
+  // ── My Captures (list + resume + transfer surface) ──────────────────
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso); if (isNaN(d)) return '—';
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  async function fetchCaptures() {
+    if (!tenant) return { state: 'no-tenant' };
+    let client, session;
+    try {
+      client = createClient({ tenantId: tenant.id });
+      ({ data: { session } } = await client.auth.getSession());
+    } catch { return { state: 'error' }; }
+    if (!session) return { state: 'signed-out' };
+    try {
+      // RLS scopes this to the steward's own rows (+ admins see the tenant's).
+      const cols = 'id,title,issue_type,current_state,timeline,handoff_notes,updated_at';
+      const { data } = await client.from('knowledge_entries')
+        .select(cols).order('updated_at', { ascending: false }).limit(50);
+      return { state: 'ok', rows: Array.isArray(data) ? data : [] };
+    } catch (e) {
+      console.error('[uh/knowledge] list failed:', e);
+      return { state: 'error' };
+    }
+  }
+
+  async function refreshCaptures() {
+    const body  = root.querySelector('[data-captures-body]');
+    const titleEl = root.querySelector('[data-captures-title]');
+    const res = await fetchCaptures();
+
+    if (res.state === 'no-tenant') {
+      titleEl.textContent = 'Your captures';
+      body.innerHTML = `<p class="captures-state">Open this from your union's address to sync captures.</p>`;
+      return;
+    }
+    if (res.state === 'signed-out') {
+      titleEl.textContent = 'Your captures';
+      const next = encodeURIComponent('/access/portal/knowledge');
+      body.innerHTML = `<p class="captures-state">Drafts are saved on this device. <a href="/access/portal/login?next=${next}">Sign in</a> to store them in your union's cloud and see them here.</p>`;
+      return;
+    }
+    if (res.state === 'error') {
+      titleEl.textContent = 'Your captures';
+      body.innerHTML = `<p class="captures-state">Couldn't load your captures right now. Refresh to try again.</p>`;
+      return;
+    }
+
+    captures = res.rows;
+    titleEl.textContent = captures.length
+      ? `${captures.length} capture${captures.length === 1 ? '' : 's'} · saved to your union`
+      : 'Your captures';
+    if (!captures.length) {
+      body.innerHTML = `<p class="captures-state">No saved captures yet. Fill the prompts below and press Save — it'll appear here, safe in the cloud.</p>`;
+      return;
+    }
+    body.innerHTML = `<div class="capture-list">${captures.map((r) => {
+      const editing = r.id === currentEntryId ? ' is-editing' : '';
+      const type = r.issue_type ? esc(r.issue_type) + ' · ' : '';
+      return `<button class="capture-row${editing}" type="button" data-capture="${esc(r.id)}">
+        <span class="capture-row-main">
+          <span class="capture-row-title">${esc(r.title || 'Untitled case')}</span>
+          <span class="capture-row-meta">${type}Updated ${esc(fmtDate(r.updated_at))}</span>
+        </span>
+        <span class="capture-row-go" aria-hidden="true">→</span>
+      </button>`;
+    }).join('')}</div>`;
+  }
+
+  function applyEntry(row) {
+    form.elements['title'].value    = row.title || '';
+    form.elements['current'].value  = row.current_state || '';
+    form.elements['timeline'].value = row.timeline || '';
+    form.elements['handoff'].value  = row.handoff_notes || '';
+    syncIssueChips(row.issue_type || '');
+    currentEntryId = row.id;
+    persistLocal();
+    recompute();                 // also refreshes the editing label
+    root.querySelector('[data-transfer-note]').hidden = true;
+    root.querySelectorAll('[data-capture]').forEach((b) => b.classList.toggle('is-editing', b.dataset.capture === row.id));
+    root.querySelector('[data-form]').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function newCapture() {
+    for (const f of FIELDS) if (form.elements[f]) form.elements[f].value = '';
+    syncIssueChips('');
+    currentEntryId = null;
+    persistLocal();
+    recompute();
+    root.querySelector('[data-transfer-note]').hidden = true;
+    root.querySelector('[data-brief]').hidden = true;
+    root.querySelector('[data-preview]').textContent = 'Preview brief';
+    root.querySelectorAll('[data-capture]').forEach((b) => b.classList.remove('is-editing'));
+    setSave('', false);
+    form.elements['title'].focus();
+  }
+
+  function updateEditingState() {
+    const editing = !!currentEntryId;
+    root.querySelector('[data-editing-label]').textContent =
+      editing ? `Editing: ${val('title') || 'Untitled case'}` : 'New capture';
+    const transfer = root.querySelector('[data-transfer]');
+    transfer.disabled = !editing;
+    if (!editing) root.querySelector('[data-transfer-note]').hidden = true;
+  }
+
+  // ── Transfer (powered by the transfer_knowledge_entry RPC, migration 0019) ──
+  function showTransferNote() {
+    if (!currentEntryId) return;
+    const note = root.querySelector('[data-transfer-note]');
+    note.hidden = false;
+    note.innerHTML = `
+      <strong>Transfer this capture to another steward.</strong>
+      <p>They must be a representative in your union who has signed in at least once. They become the owner — it leaves your list and appears in theirs.</p>
+      <div class="transfer-form">
+        <input class="input" type="email" data-transfer-email placeholder="steward@email" autocomplete="off" inputmode="email">
+        <div class="transfer-actions">
+          <button class="btn btn-primary" type="button" data-transfer-go>Transfer</button>
+          <button class="linkbtn" type="button" data-transfer-cancel>Cancel</button>
+        </div>
+        <p class="transfer-status" data-transfer-status role="status" aria-live="polite"></p>
+      </div>`;
+    note.querySelector('[data-transfer-go]').addEventListener('click', doTransfer);
+    note.querySelector('[data-transfer-cancel]').addEventListener('click', () => { note.hidden = true; });
+    const emailEl = note.querySelector('[data-transfer-email]');
+    emailEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); doTransfer(); } });
+    emailEl.focus();
+  }
+
+  async function doTransfer() {
+    const note     = root.querySelector('[data-transfer-note]');
+    const statusEl = note.querySelector('[data-transfer-status]');
+    const goBtn    = note.querySelector('[data-transfer-go]');
+    const email    = (note.querySelector('[data-transfer-email]').value || '').trim();
+
+    if (!currentEntryId) { setTransferStatus(statusEl, 'Save this capture before transferring.', 'error'); return; }
+    if (!email)  { setTransferStatus(statusEl, 'Enter the recipient’s email.', 'error'); return; }
+    if (!tenant) { setTransferStatus(statusEl, 'No union context.', 'error'); return; }
+
+    goBtn.disabled = true; goBtn.textContent = 'Transferring…'; setTransferStatus(statusEl, '');
+    try {
+      const sb = createClient({ tenantId: tenant.id });           // x-tenant-id for the RPC's tenant scope
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) { setTransferStatus(statusEl, 'Sign in to transfer.', 'error'); return; }
+
+      // Custom client's rpc(): POSTs to /rest/v1/rpc/<fn>; throws on non-2xx.
+      await sb.rpc('transfer_knowledge_entry', { p_entry_id: currentEntryId, p_target_email: email });
+
+      // Success — the entry now belongs to someone else. Clear our editor and
+      // refresh the list so it disappears from this steward's captures.
+      setTransferStatus(statusEl, `Transferred to ${email} ✓`, 'success');
+      setTimeout(() => { note.hidden = true; newCapture(); refreshCaptures(); }, 900);
+    } catch (err) {
+      console.error('[uh/knowledge] transfer failed:', err);
+      setTransferStatus(statusEl, transferErrorMessage(err), 'error');
+    } finally {
+      goBtn.disabled = false; goBtn.textContent = 'Transfer';
+    }
+  }
+
+  function setTransferStatus(el, msg, kind) {
+    el.textContent = msg || '';
+    el.style.color = kind === 'error'
+      ? 'var(--alert, #E24B4A)'
+      : kind === 'success' ? 'var(--accent-tenant, var(--forest, #0F6E56))' : '';
+  }
+
+  // Map the RPC's RAISE EXCEPTION codes (carried in the thrown error body) to
+  // steward-friendly text.
+  function transferErrorMessage(err) {
+    const m = String(err && err.message ? err.message : err);
+    if (/target_not_a_steward/.test(m))    return 'No representative in your union has signed in with that email.';
+    if (/already_owned_by_target/.test(m)) return 'That steward already owns this capture.';
+    if (/not_authorized/.test(m))          return 'You can only transfer captures you own.';
+    if (/entry_not_found/.test(m))         return 'This capture couldn’t be found — save it first.';
+    if (/no_tenant_context/.test(m))       return 'Open this from your union’s address.';
+    if (/not_authenticated/.test(m))       return 'Sign in to transfer.';
+    if (/target_email_required/.test(m))   return 'Enter the recipient’s email.';
+    return 'Transfer failed. Please try again.';
+  }
+
+  // ── Wiring ──────────────────────────────────────────────────────────
+  function wire() {
+    // Auto-save + live readiness on any input.
+    let t = null;
+    form.addEventListener('input', () => {
+      recompute();
+      clearTimeout(t);
+      t = setTimeout(() => saveDraft(false), 600);
+    });
+
+    // Issue-type chips → set hidden input, single-select.
+    root.querySelector('[data-issue-types]').addEventListener('click', (e) => {
+      const chip = e.target.closest('[data-issue]'); if (!chip) return;
+      syncIssueChips(chip.dataset.issue);
+      saveDraft(false);
+    });
+
+    // Timeline scaffolding chips → append a dated, structured line.
+    root.querySelector('[data-scaffold]').addEventListener('click', (e) => {
+      const chip = e.target.closest('[data-line]'); if (!chip) return;
+      const ta = form.elements['timeline'];
+      const line = `• ${today()} — ${chip.dataset.line}: `;
+      ta.value = (ta.value && !ta.value.endsWith('\n') ? ta.value + '\n' : ta.value) + line;
+      ta.focus();
+      ta.selectionStart = ta.selectionEnd = ta.value.length;
+      recompute(); saveDraft(false);
+    });
+
+    root.querySelector('[data-save]').addEventListener('click', () => saveToDatabase());
+    root.querySelector('[data-preview]').addEventListener('click', togglePreview);
+    root.querySelector('[data-copy]').addEventListener('click', copyBrief);
+
+    // My Captures: new / resume / transfer.
+    root.querySelector('[data-new]').addEventListener('click', newCapture);
+    root.querySelector('[data-new-inline]').addEventListener('click', newCapture);
+    root.querySelector('[data-transfer]').addEventListener('click', showTransferNote);
+    root.querySelector('[data-captures-body]').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-capture]'); if (!btn) return;
+      const row = captures.find((r) => r.id === btn.dataset.capture);
+      if (row) applyEntry(row);
+    });
+  }
+
+  function syncIssueChips(value) {
+    form.elements['issue_type'].value = value || '';
+    root.querySelectorAll('[data-issue]').forEach((c) => {
+      const on = c.dataset.issue === value;
+      c.setAttribute('aria-pressed', String(on));
+      c.style.borderColor = on ? 'var(--accent-tenant, var(--forest, #0F6E56))' : '';
+      c.style.color       = on ? 'var(--accent-tenant, var(--forest, #0F6E56))' : '';
+    });
+  }
+
+  // ── Live "intelligence": per-prompt nudges + overall readiness ──────
+  const HINTS = {
+    current: [
+      'Who is affected, and what happens if nothing changes?',
+      'Good — is the urgency / deadline clear?',
+    ],
+    timeline: [
+      'What was the first thing you did?',
+      'Add dates where you can — the sequence is the story.',
+    ],
+    handoff: [
+      'The one thing that would be lost if you weren’t here.',
+      'Name a person to call and a deadline if there is one.',
+    ],
+  };
+  function recompute() {
+    const status = {};
+    for (const key of ['current', 'timeline', 'handoff']) {
+      const filled = val(key).length >= SUBSTANCE;
+      status[key] = filled;
+      const card = root.querySelector(`[data-prompt="${key}"]`);
+      card.classList.toggle('is-filled', filled);
+      const hint = root.querySelector(`[data-hint="${key}"]`);
+      if (hint) hint.textContent = filled ? HINTS[key][1] : (val(key) ? HINTS[key][0] : '');
+    }
+    const done = ['current', 'timeline', 'handoff'].filter((k) => status[k]).length;
+    [1, 2, 3].forEach((n) => root.querySelector(`[data-seg="${n}"]`).classList.toggle('on', n <= done));
+    const label = root.querySelector('[data-readiness-label]');
+    const wrap  = root.querySelector('[data-readiness]');
+    label.textContent = done === 0 ? 'Not started' : done < 3 ? `Getting there · ${done}/3` : 'Handoff-ready ✓';
+    wrap.classList.toggle('is-ready', done === 3);
+
+    updateEditingState();                                           // keep the editing label fresh
+    if (!root.querySelector('[data-brief]').hidden) renderBrief();  // keep preview live
+  }
+
+  // ── Compiled brief ──────────────────────────────────────────────────
+  function briefText() {
+    const title = val('title') || 'Untitled case';
+    const type  = val('issue_type');
+    const head  = `${title}${type ? `  (${type})` : ''}`;
+    const meta  = `Captured ${today()}${root.querySelector('[data-email]').textContent !== '—' ? ` · ${root.querySelector('[data-email]').textContent}` : ''}`;
+    return [
+      head,
+      meta,
+      '',
+      'CURRENT STATE',
+      val('current') || '—',
+      '',
+      "WHAT'S BEEN TRIED",
+      val('timeline') || '—',
+      '',
+      'IF I’M UNAVAILABLE TOMORROW',
+      val('handoff') || '—',
+    ].join('\n');
+  }
+  function renderBrief() {
+    const type = val('issue_type');
+    const emailTxt = root.querySelector('[data-email]').textContent;
+    const sec = (label, body) =>
+      `<div class="brief-sec"><p class="brief-label">${esc(label)}</p><p class="brief-body${body ? '' : ' empty'}">${esc(body || 'Not captured yet.')}</p></div>`;
+    root.querySelector('[data-brief]').innerHTML = `
+      <p class="brief-title">${esc(val('title') || 'Untitled case')}</p>
+      <p class="brief-meta">${type ? esc(type) + ' · ' : ''}Captured ${today()}${emailTxt && emailTxt !== '—' ? ' · ' + esc(emailTxt) : ''}</p>
+      ${sec('Current state', val('current'))}
+      ${sec("What's been tried", val('timeline'))}
+      ${sec('If I’m unavailable tomorrow', val('handoff'))}`;
+  }
+  function togglePreview() {
+    const el = root.querySelector('[data-brief]');
+    const btn = root.querySelector('[data-preview]');
+    if (el.hidden) { renderBrief(); el.hidden = false; btn.textContent = 'Hide brief'; el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+    else { el.hidden = true; btn.textContent = 'Preview brief'; }
+  }
+  async function copyBrief() {
+    const btn = root.querySelector('[data-copy]');
+    try { await navigator.clipboard.writeText(briefText()); btn.textContent = 'Copied ✓'; }
+    catch { btn.textContent = 'Copy failed'; }
+    setTimeout(() => { btn.textContent = 'Copy brief'; }, 1500);
+  }
+</script>
+</body>
+</html>

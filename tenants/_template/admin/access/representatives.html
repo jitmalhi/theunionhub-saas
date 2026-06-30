@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Representatives · The Union Hub Access</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Manage your representative roster — The Union Hub Access.">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/admin/admin.css">
+<style>
+  /* Creation drawer + QR cell — scoped to this page (no shared admin.css edits). */
+  .drawer { position: fixed; inset: 0; z-index: 60; visibility: hidden; }
+  .drawer.is-open { visibility: visible; }
+  .drawer-scrim {
+    position: absolute; inset: 0;
+    background: rgba(13,31,26,0.38);
+    opacity: 0; transition: opacity var(--dur-base, .25s) var(--ease-standard, ease);
+  }
+  .drawer.is-open .drawer-scrim { opacity: 1; }
+  .drawer-panel {
+    position: absolute; top: 0; right: 0; height: 100%;
+    width: min(440px, 92vw);
+    background: var(--off-white);
+    border-left: var(--bw-hair) solid var(--hair);
+    padding: clamp(22px, 4vw, 32px);
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform var(--dur-base, .25s) var(--ease-out, ease);
+  }
+  .drawer.is-open .drawer-panel { transform: none; }
+  .drawer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
+  .drawer-close {
+    background: transparent; border: 0; cursor: pointer;
+    font-family: var(--font-mono); font-size: 20px; line-height: 1; color: var(--muted); padding: 4px 8px;
+  }
+  .drawer-close:hover { color: var(--alert); }
+
+  .qr-btn {
+    background: transparent; border: var(--bw-hair) solid var(--hair);
+    border-radius: var(--rad-sm); padding: 5px 10px; cursor: pointer;
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--ink-soft);
+  }
+  .qr-btn:hover { border-color: var(--accent-tenant, var(--forest)); color: var(--accent-tenant, var(--forest)); }
+  .claimed-yes { color: var(--forest); }
+  .claimed-no  { color: var(--muted); }
+  .col-actions { text-align: right; white-space: nowrap; }
+  @media (prefers-reduced-motion: reduce) {
+    .drawer-scrim, .drawer-panel { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="admin-nav" role="navigation" aria-label="Admin">
+  <div class="admin-nav-brand">
+    <span class="mark" aria-hidden="true" data-tenant-initial>·</span>
+    <div class="admin-nav-brand-stack">
+      <span class="admin-nav-tenant-name" data-tenant-name>—</span>
+      <span class="admin-nav-context">Access Network</span>
+    </div>
+  </div>
+  <div class="admin-nav-meta">
+    <span class="admin-nav-email" data-admin-email>…</span>
+    <button class="admin-btn admin-btn-ghost" type="button" data-signout>Sign out</button>
+  </div>
+</nav>
+
+<nav class="admin-subnav" role="navigation" aria-label="Access sections">
+  <a href="/admin">← Admin</a>
+  <a href="/admin/access/dashboard">Network</a>
+  <a href="/admin/access/representatives" aria-current="page">Representatives</a>
+</nav>
+
+<main class="admin-main">
+  <header class="admin-page-head">
+    <div class="admin-page-head-row">
+      <div>
+        <span class="admin-eyebrow"><span data-tenant-name>—</span> · Roster</span>
+        <h1 class="admin-page-title">Your <em>representatives</em>.</h1>
+      </div>
+      <div class="admin-page-head-actions" data-actions hidden>
+        <button class="admin-btn admin-btn-ghost" type="button" data-export-qr>Print QR sheet</button>
+        <button class="admin-btn admin-btn-primary" type="button" data-open-drawer>New representative</button>
+      </div>
+    </div>
+  </header>
+
+  <div data-app hidden>
+    <div class="filter-bar">
+      <div class="filter-search">
+        <input type="search" placeholder="Search by name…" data-search aria-label="Search representatives by name">
+      </div>
+      <span class="activity-meta" data-count>—</span>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Title</th>
+          <th scope="col">Status</th>
+          <th scope="col">Claimed</th>
+          <th scope="col">Email</th>
+          <th scope="col"><span class="visually-hidden">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody data-rows>
+        <tr><td colspan="6" class="data-table-empty">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="admin-banner is-alert" data-denied hidden>
+    <div class="admin-banner-body">
+      <h3>Not authorized</h3>
+      <p>This area is for organization administrators of this union. Your account isn't an admin here.</p>
+    </div>
+  </div>
+</main>
+
+<!-- ════════════ CREATE DRAWER ════════════ -->
+<div class="drawer" data-drawer role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+  <div class="drawer-scrim" data-drawer-scrim></div>
+  <div class="drawer-panel">
+    <div class="drawer-head">
+      <div>
+        <span class="admin-eyebrow">New</span>
+        <h2 class="activity-title" id="drawer-title">Add a representative</h2>
+      </div>
+      <button class="drawer-close" type="button" data-close-drawer aria-label="Close">×</button>
+    </div>
+    <p class="admin-form-help">Create the profile now and print the QR — the representative claims it later by signing in with the email you set here.</p>
+
+    <form class="admin-form" data-create-form novalidate>
+      <label class="admin-form-field">
+        <span class="admin-form-label">Full name *</span>
+        <input class="admin-form-input" name="full_name" required placeholder="Jordan Rivera" autocomplete="off">
+      </label>
+      <label class="admin-form-field">
+        <span class="admin-form-label">Job title</span>
+        <input class="admin-form-input" name="title" placeholder="Chief Shop Steward" value="Representative">
+      </label>
+      <label class="admin-form-field">
+        <span class="admin-form-label">Email (for claim)</span>
+        <input class="admin-form-input" name="email" type="email" placeholder="rep@your-local.org" autocomplete="off">
+      </label>
+      <label class="admin-form-field">
+        <span class="admin-form-label">Phone</span>
+        <input class="admin-form-input" name="phone" type="tel" placeholder="+1 555 0100" autocomplete="off">
+      </label>
+      <label class="admin-form-field">
+        <span class="admin-form-label">Worksite / area</span>
+        <input class="admin-form-input" name="worksite" placeholder="Plant 2 · Day Shift" autocomplete="off">
+      </label>
+      <label class="admin-form-field">
+        <span class="admin-form-label">Status</span>
+        <div class="admin-form-radio-row">
+          <label class="admin-form-radio"><input type="radio" name="status" value="active" checked> Active</label>
+          <label class="admin-form-radio"><input type="radio" name="status" value="pending"> Pending</label>
+          <label class="admin-form-radio"><input type="radio" name="status" value="inactive"> Inactive</label>
+        </div>
+      </label>
+      <div class="admin-form-actions">
+        <button type="submit" class="admin-btn admin-btn-primary" data-create-submit>Create representative</button>
+        <button type="button" class="admin-btn admin-btn-ghost" data-close-drawer>Cancel</button>
+      </div>
+      <p class="admin-form-status" data-create-status role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</div>
+
+<footer class="admin-foot">
+  <span>The Union Hub Access · Admin</span>
+  <span>Signed in as <span data-admin-email-foot>…</span></span>
+</footer>
+
+<!-- QR generator (Kazuhiko Arase) — vendored; exposes global `qrcode`. -->
+<script src="/lib/qrcode.js"></script>
+
+<script type="module">
+  import { requireAuth, watchAuth, signOut } from '/lib/auth-guard.js';
+  import { getTenant, applyTenantTheme } from '/lib/tenant.js';
+  import createClient from '/lib/supabase.js';
+
+  // ─── 1 · Session gate. ───────────────────────────────────────────────
+  const session = await requireAuth();
+  if (!session) throw new Error('redirecting to sign-in');
+
+  // ─── 2 · Tenant context + theme. ─────────────────────────────────────
+  let tenant = null;
+  try { tenant = await getTenant(); if (tenant) applyTenantTheme(tenant); }
+  catch (e) { console.warn('[uh/access/admin] tenant resolve failed:', e?.message); }
+
+  if (tenant?.slug) {
+    document.querySelector('[data-tenant-initial]').textContent = tenant.slug.charAt(0).toUpperCase();
+  }
+  const email = session.user?.email || '—';
+  document.querySelector('[data-admin-email]').textContent      = email;
+  document.querySelector('[data-admin-email-foot]').textContent = email;
+
+  watchAuth();
+  document.querySelector('[data-signout]')?.addEventListener('click', signOut);
+
+  function showDenied() {
+    document.querySelector('[data-app]').hidden = true;
+    document.querySelector('[data-actions]').hidden = true;
+    document.querySelector('[data-denied]').hidden = false;
+  }
+
+  if (!tenant) { showDenied(); throw new Error('no tenant'); }
+  const client = createClient({ tenantId: tenant.id });
+
+  // ─── 3 · Admin gate (RLS is the real boundary). ──────────────────────
+  let isAdmin = false;
+  try { const { data } = await client.rpc('is_request_tenant_admin', {}); isAdmin = data === true; }
+  catch (e) { console.warn('[uh/access/admin] admin check failed:', e?.message); }
+  if (!isAdmin) { showDenied(); throw new Error('not authorized'); }
+
+  document.querySelector('[data-app]').hidden = false;
+  document.querySelector('[data-actions]').hidden = false;
+
+  // ─── 4 · Data layer ──────────────────────────────────────────────────
+  let allReps = [];
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+
+  async function loadReps() {
+    const cols = 'id,full_name,title,status,email,phone,worksite,user_id,created_at';
+    const res = await client.raw(`/rest/v1/stewards?select=${cols}&order=created_at.desc&limit=500`);
+    if (!res.ok) throw new Error(`list failed: ${res.status}`);
+    allReps = await res.json();
+    renderRows(allReps);
+  }
+
+  async function createRep(input) {
+    // RLS stewards_admin_insert: WITH CHECK is_request_tenant_admin() AND
+    // tenant_id = get_request_tenant_id() — so we MUST stamp tenant_id.
+    const body = {
+      tenant_id: tenant.id,
+      full_name: input.full_name,
+      title:     input.title || 'Representative',
+      status:    input.status || 'active',
+    };
+    if (input.email)    body.email    = input.email;
+    if (input.phone)    body.phone    = input.phone;
+    if (input.worksite) body.worksite = input.worksite;
+
+    const res = await client.raw('/rest/v1/stewards', {
+      method: 'POST',
+      headers: { Prefer: 'return=representation' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const t = await res.text().catch(() => '');
+      throw new Error(t || `create failed: ${res.status}`);
+    }
+    const rows = await res.json();
+    return Array.isArray(rows) ? rows[0] : rows;
+  }
+
+  // ─── 5 · Render roster ───────────────────────────────────────────────
+  function renderRows(rows) {
+    const body = document.querySelector('[data-rows]');
+    const count = document.querySelector('[data-count]');
+    count.textContent = `${rows.length} representative${rows.length === 1 ? '' : 's'}`;
+
+    if (!rows.length) {
+      body.innerHTML = `<tr><td colspan="6" class="data-table-empty">No representatives yet. Use “New representative” to add your first.</td></tr>`;
+      return;
+    }
+
+    body.innerHTML = rows.map(r => {
+      const claimed = r.user_id
+        ? '<span class="claimed-yes">● Claimed</span>'
+        : '<span class="claimed-no">○ Unclaimed</span>';
+      const status = String(r.status || 'active');
+      return `
+        <tr>
+          <td class="col-name">${esc(r.full_name)}</td>
+          <td class="col-meta">${esc(r.title || '—')}</td>
+          <td><span class="status-pill ${esc(status)}"><span class="dot" aria-hidden="true"></span>${esc(status)}</span></td>
+          <td class="col-meta">${claimed}</td>
+          <td class="col-meta">${esc(r.email || '—')}</td>
+          <td class="col-actions">
+            <a class="qr-btn" href="/access/${esc(r.id)}" target="_blank" rel="noopener">View</a>
+            <button class="qr-btn" type="button" data-qr="${esc(r.id)}">QR ↓</button>
+          </td>
+        </tr>`;
+    }).join('');
+
+    body.querySelectorAll('[data-qr]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const rep = allReps.find(x => x.id === btn.getAttribute('data-qr'));
+        if (rep) downloadQrSvg(rep);
+      });
+    });
+  }
+
+  // ─── 6 · Search ──────────────────────────────────────────────────────
+  document.querySelector('[data-search]')?.addEventListener('input', (e) => {
+    const q = (e.target.value || '').trim().toLowerCase();
+    renderRows(!q ? allReps : allReps.filter(r => String(r.full_name || '').toLowerCase().includes(q)));
+  });
+
+  // ─── 7 · QR export utility ───────────────────────────────────────────
+  // The permanent layout target for a rep is their public profile URL.
+  function repUrl(rep) { return `${location.origin}/access/${rep.id}`; }
+
+  function qrSvg(value) {
+    const qr = qrcode(0, 'H');     // type 0 = auto-fit smallest version
+    qr.addData(value);
+    qr.make();
+    return qr.createSvgTag({ cellSize: 4, margin: 4, scalable: true });
+  }
+
+  function downloadQrSvg(rep) {
+    const svg = qrSvg(repUrl(rep));
+    const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const safe = String(rep.full_name || 'representative').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase();
+    a.href = url; a.download = `qr-${safe || 'representative'}.svg`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  // Print sheet: a print-ready grid of QR cards (one per rep) for batch
+  // printing of the permanent codes. Opens a new window the admin can print.
+  function printQrSheet() {
+    const reps = allReps.slice();
+    if (!reps.length) return;
+    const orgName = (tenant && tenant.display_name) || 'The Union Hub Access';
+    const cards = reps.map(r => `
+      <div class="card">
+        <div class="qr">${qrSvg(repUrl(r))}</div>
+        <div class="name">${esc(r.full_name)}</div>
+        <div class="title">${esc(r.title || '')}</div>
+        <div class="url">${esc(repUrl(r))}</div>
+      </div>`).join('');
+
+    const doc = `<!doctype html><html><head><meta charset="utf-8">
+      <title>QR sheet · ${esc(orgName)}</title>
+      <style>
+        @page { margin: 14mm; }
+        body { font-family: 'DM Sans', system-ui, sans-serif; color: #111; margin: 0; padding: 18px; }
+        h1 { font-family: 'Playfair Display', Georgia, serif; font-size: 20px; margin: 0 0 4px; }
+        .sub { font-size: 12px; color: #666; margin: 0 0 18px; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+        .card { border: 0.5px solid rgba(0,0,0,0.18); border-radius: 10px; padding: 14px; text-align: center; break-inside: avoid; }
+        .qr svg { width: 150px; height: 150px; }
+        .name { font-weight: 600; font-size: 14px; margin-top: 8px; }
+        .title { font-size: 12px; color: #444; }
+        .url { font-family: 'DM Mono', ui-monospace, monospace; font-size: 9px; color: #888; margin-top: 6px; word-break: break-all; }
+        @media print { .hint { display: none; } }
+        .hint { font-size: 12px; color: #666; margin: 12px 0 18px; }
+      </style></head><body>
+      <h1>${esc(orgName)} — Access codes</h1>
+      <p class="sub">${reps.length} representative${reps.length === 1 ? '' : 's'} · The Union Hub Access Network</p>
+      <p class="hint">Print this sheet, then use your browser’s print dialog (Ctrl/Cmd+P).</p>
+      <div class="grid">${cards}</div>
+      <script>window.onload=function(){setTimeout(function(){window.print();},250);};<\/script>
+      </body></html>`;
+
+    const w = window.open('', '_blank');
+    if (!w) { alert('Allow pop-ups to print the QR sheet.'); return; }
+    w.document.open(); w.document.write(doc); w.document.close();
+  }
+
+  document.querySelector('[data-export-qr]')?.addEventListener('click', printQrSheet);
+
+  // ─── 8 · Drawer (create) ─────────────────────────────────────────────
+  const drawer = document.querySelector('[data-drawer]');
+  const form   = document.querySelector('[data-create-form]');
+  const status = document.querySelector('[data-create-status]');
+  const submit = document.querySelector('[data-create-submit]');
+
+  function openDrawer() {
+    drawer.classList.add('is-open');
+    setTimeout(() => form.querySelector('[name="full_name"]')?.focus(), 60);
+  }
+  function closeDrawer() {
+    drawer.classList.remove('is-open');
+    setStatus('');
+  }
+  function setStatus(msg, kind) {
+    status.textContent = msg || '';
+    status.classList.remove('is-error', 'is-success');
+    if (kind) status.classList.add('is-' + kind);
+  }
+
+  document.querySelector('[data-open-drawer]')?.addEventListener('click', openDrawer);
+  document.querySelectorAll('[data-close-drawer]').forEach(b => b.addEventListener('click', closeDrawer));
+  document.querySelector('[data-drawer-scrim]')?.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && drawer.classList.contains('is-open')) closeDrawer(); });
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = {
+      full_name: (form.full_name.value || '').trim(),
+      title:     (form.title.value || '').trim(),
+      email:     (form.email.value || '').trim(),
+      phone:     (form.phone.value || '').trim(),
+      worksite:  (form.worksite.value || '').trim(),
+      status:    (form.querySelector('[name="status"]:checked')?.value) || 'active',
+    };
+    if (!input.full_name) { setStatus('Full name is required.', 'error'); return; }
+
+    submit.disabled = true; submit.textContent = 'Creating…'; setStatus('');
+    try {
+      const rep = await createRep(input);
+      allReps.unshift(rep);
+      renderRows(filteredBySearch());
+      form.reset();
+      form.title.value = 'Representative';
+      setStatus('Created. Print the QR from the roster when you’re ready.', 'success');
+      setTimeout(closeDrawer, 900);
+    } catch (err) {
+      console.error(err);
+      setStatus('Could not create. Check the fields and your admin access, then retry.', 'error');
+    } finally {
+      submit.disabled = false; submit.textContent = 'Create representative';
+    }
+  });
+
+  function filteredBySearch() {
+    const q = (document.querySelector('[data-search]')?.value || '').trim().toLowerCase();
+    return !q ? allReps : allReps.filter(r => String(r.full_name || '').toLowerCase().includes(q));
+  }
+
+  // ─── 9 · Initial load ────────────────────────────────────────────────
+  try { await loadReps(); }
+  catch (e) {
+    console.error('[uh/access/admin] roster load failed:', e);
+    document.querySelector('[data-rows]').innerHTML =
+      `<tr><td colspan="6" class="data-table-empty">Couldn’t load the roster. Refresh to try again.</td></tr>`;
+  }
+</script>
+</body>
+</html>

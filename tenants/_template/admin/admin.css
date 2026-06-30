@@ -444,6 +444,13 @@ button, input { font: inherit; }
   height: 1.5px;
   background: var(--accent-tenant, var(--forest));
 }
+/* Dedicated cross-link into the Access Network area. Accent-painted so it
+   stands out from the member-management items in the same row. */
+.admin-subnav a.subnav-access {
+  color: var(--accent-tenant, var(--forest));
+  font-weight: var(--fw-bold);
+}
+.admin-subnav a.subnav-access:hover { filter: brightness(1.08); }
 
 
 /* ════════════ BACK LINK ════════════ */

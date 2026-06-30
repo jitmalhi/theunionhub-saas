@@ -50,3 +50,5 @@ logs/
 # Local-only assets
 /private/
 /.scratch/
+
+.vercel

@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Your profile · The Union Hub Access</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Manage your representative profile — The Union Hub Access.">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/access/portal/portal.css">
+</head>
+<body>
+  <main class="portal-wrap" id="root">
+    <section class="card center">
+      <div class="spinner" aria-hidden="true"></div>
+      <p class="status">Loading your profile…</p>
+    </section>
+  </main>
+
+<script type="module">
+  import { getTenant, applyTenantTheme } from '/lib/tenant.js';
+  import createClient from '/lib/supabase.js';
+
+  const LOGIN_PATH = '/access/portal/login';
+  const root = document.getElementById('root');
+
+  // Fields a representative may edit from the portal. Privilege fields
+  // (status, title is allowed per product spec, but NOT tenant_id/user_id)
+  // are never part of the patch we send. tenant_id/user_id stay put, so the
+  // 0013 self-update RLS WITH CHECK (tenant unchanged, user_id = auth.uid())
+  // always holds.
+  const EDITABLE = ['full_name', 'title', 'phone', 'worksite', 'bio', 'photo_url'];
+
+  // Credential tier → display label + chip class. `role` is intentionally NOT
+  // in EDITABLE: a rep cannot change their own tier (app-layer guard), and the
+  // 0016 DB trigger rejects it at the database too. This is display-only.
+  function roleMeta(role) {
+    switch (role) {
+      case 'executive':    return { label: 'Executive',    cls: 'tier-executive' };
+      case 'unit_officer': return { label: 'Unit Officer',  cls: 'tier-officer' };
+      case 'steward':      return { label: 'Steward',       cls: 'tier-steward' };
+      default:             return null;
+    }
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function showCenter(html) {
+    root.innerHTML = `<section class="card center">${html}</section>`;
+  }
+
+  // ─── Boot ───────────────────────────────────────────────
+  (async () => {
+    // 1 · Tenant context is required — every query carries x-tenant-id so RLS
+    //     scopes the rep to their own union. No tenant → nothing to manage.
+    let tenant = null;
+    try {
+      tenant = await getTenant();
+      if (tenant) { applyTenantTheme(tenant); window.__uh_tenant_name__ = tenant.display_name; }
+    } catch (e) { console.warn('[uh/access/portal] tenant resolve failed:', e?.message); }
+
+    if (!tenant) {
+      showCenter(`
+        <h1>Wrong <em>address</em>.</h1>
+        <p class="lede">Open this portal from your union's web address to manage your profile.</p>
+        <p class="powered">The Union Hub Access</p>`);
+      return;
+    }
+
+    // 2 · Auth guard. Client-side gate; RLS is the real boundary. Bind the
+    //     client to this tenant so x-tenant-id rides on every request.
+    const supabase = createClient({ tenantId: tenant.id });
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      const next = encodeURIComponent('/access/portal');
+      location.replace(`${LOGIN_PATH}?next=${next}`);
+      return;
+    }
+    const uid   = session.user && session.user.id;
+    const email = (session.user && session.user.email) || '';
+
+    // 3 · Find the rep's own row. Public read is tenant-scoped (0013), so
+    //     filtering by user_id returns their linked row if it exists.
+    let rep = await findOwnRow(supabase, uid);
+
+    // 4 · Claim hook — if not yet linked, try to claim by email match. The
+    //     SECURITY DEFINER RPC sets user_id on the matching unclaimed row.
+    if (!rep) {
+      try {
+        const { data } = await supabase.rpc('claim_representative', {});
+        rep = Array.isArray(data) ? data[0] : data;
+      } catch (err) {
+        renderNoClaim(supabase, email, err);
+        return;
+      }
+    }
+
+    if (!rep) { renderNoClaim(supabase, email); return; }
+
+    renderDashboard(supabase, rep, email);
+  })();
+
+  async function findOwnRow(supabase, uid) {
+    if (!uid) return null;
+    try {
+      const cols = 'id,full_name,title,role,email,phone,worksite,bio,photo_url,status,user_id';
+      const { data } = await supabase
+        .from('stewards')
+        .select(cols)
+        .eq('user_id', uid)
+        .limit(1);
+      return (Array.isArray(data) ? data[0] : data) || null;
+    } catch (e) {
+      console.warn('[uh/access/portal] own-row lookup failed:', e?.message);
+      return null;
+    }
+  }
+
+  // ─── No claimable profile ───────────────────────────────
+  function renderNoClaim(supabase, email, err) {
+    const reason = err && /no_claimable_representative/.test(String(err.message || err))
+      ? `We couldn't find an unclaimed representative for <strong>${esc(email)}</strong> in this union.`
+      : `We couldn't link your profile right now.`;
+    showCenter(`
+      <h1>No profile to <em>claim</em>.</h1>
+      <p class="lede">${reason} Ask your union admin to add you (or correct the email on file), then sign in again.</p>
+      <div class="actions">
+        <button class="btn btn-ghost" data-signout>Sign out</button>
+      </div>
+      <p class="powered">The Union Hub Access</p>`);
+    root.querySelector('[data-signout]')?.addEventListener('click', () => doSignOut(supabase));
+  }
+
+  // ─── Dashboard / management form ────────────────────────
+  function renderDashboard(supabase, rep, email) {
+    const publicUrl = `/access/${encodeURIComponent(rep.id)}`;
+    root.innerHTML = `
+      <div class="topbar">
+        <div class="who">
+          <div class="label">Signed in</div>
+          <div class="email">${esc(email)}</div>
+        </div>
+        <button class="signout" type="button" data-signout>Sign out</button>
+      </div>
+
+      <section class="card">
+        <span class="eyebrow"><span data-tenant-name>${esc((tenantName()))}</span></span>
+        ${tierBadge(rep.role)}
+        <h1>Your <em>profile</em>.</h1>
+        <p class="lede">Edits publish instantly to your public page that members see when they scan your code.</p>
+
+        <form data-form novalidate>
+          ${field('Full name', 'full_name', rep.full_name, { required: true, placeholder: 'Jordan Rivera' })}
+          ${field('Job title', 'title', rep.title, { placeholder: 'Chief Shop Steward' })}
+          ${field('Phone', 'phone', rep.phone, { type: 'tel', placeholder: '+1 555 0100', autocomplete: 'tel' })}
+          ${field('Worksite / area', 'worksite', rep.worksite, { placeholder: 'Plant 2 · Day Shift' })}
+          ${textarea('About', 'bio', rep.bio, 'A short note members will see on your profile.')}
+          ${field('Photo URL', 'photo_url', rep.photo_url, { type: 'url', placeholder: 'https://…' })}
+          ${readonlyField('Contact email', email, 'Your sign-in identity. Ask your admin to change this.')}
+
+          <div class="actions">
+            <button type="submit" class="btn btn-primary" data-save>Save changes</button>
+            <a class="btn btn-ghost" href="/access/portal/card">My Steward Card</a>
+            <a class="btn btn-ghost" href="${publicUrl}" target="_blank" rel="noopener">View public page</a>
+          </div>
+          <p class="status" data-status role="status" aria-live="polite"></p>
+        </form>
+      </section>
+      <p class="powered">Secured by The Union Hub Access</p>`;
+
+    const form   = root.querySelector('[data-form]');
+    const save   = root.querySelector('[data-save]');
+    const status = root.querySelector('[data-status]');
+
+    root.querySelector('[data-signout]')?.addEventListener('click', () => doSignOut(supabase));
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const patch = {};
+      for (const key of EDITABLE) {
+        const el = form.elements[key];
+        if (!el) continue;
+        const v = (el.value || '').trim();
+        patch[key] = v === '' ? null : v;
+      }
+      if (!patch.full_name) {
+        setStatus(status, 'Name can’t be empty.', 'error');
+        return;
+      }
+
+      save.disabled = true;
+      save.textContent = 'Saving…';
+      setStatus(status, '');
+
+      try {
+        // RLS (stewards_admin_or_self_update) scopes this to the rep's own
+        // row within the tenant. eq('id') is belt-and-braces; the policy is
+        // the real guard. x-tenant-id rides via the tenant-bound client.
+        const { data } = await supabase
+          .from('stewards')
+          .update(patch)
+          .eq('id', rep.id);
+        const updated = Array.isArray(data) ? data[0] : data;
+        if (updated) rep = Object.assign(rep, updated);
+        setStatus(status, 'Saved. Your public page is updated.', 'success');
+      } catch (err) {
+        console.error(err);
+        setStatus(status, "Couldn't save. Please try again.", 'error');
+      } finally {
+        save.disabled = false;
+        save.textContent = 'Save changes';
+      }
+    });
+  }
+
+  function tenantName() {
+    // tenant is in module scope from boot(); applyTenantTheme also fills
+    // [data-tenant-name], but we seed it here so it renders pre-paint.
+    return (window.__uh_tenant_name__) || 'The Union Hub Access';
+  }
+
+  // The rep's own credential tier, shown read-only. They can't change it here
+  // (it's not in EDITABLE) or by any other route (0016 DB guard) — the title
+  // attribute explains who controls it.
+  function tierBadge(role) {
+    const tier = roleMeta(role);
+    if (!tier) return '';
+    return `<p class="tier ${tier.cls}" title="Set by your union administrator">${esc(tier.label)}</p>`;
+  }
+
+  function setStatus(el, msg, kind) {
+    el.textContent = msg || '';
+    el.classList.remove('is-error', 'is-success');
+    if (kind) el.classList.add('is-' + kind);
+  }
+
+  async function doSignOut(supabase) {
+    try { await supabase.auth.signOut(); } catch {}
+    location.replace(LOGIN_PATH);
+  }
+
+  // ─── Field builders ─────────────────────────────────────
+  function field(label, name, value, opts = {}) {
+    const attrs = [
+      `type="${opts.type || 'text'}"`,
+      `name="${name}"`,
+      `class="input"`,
+      `value="${esc(value)}"`,
+      opts.placeholder ? `placeholder="${esc(opts.placeholder)}"` : '',
+      opts.autocomplete ? `autocomplete="${opts.autocomplete}"` : '',
+      opts.required ? 'required' : '',
+    ].filter(Boolean).join(' ');
+    return `<label class="field"><span class="field-label">${esc(label)}</span><input ${attrs}></label>`;
+  }
+
+  function textarea(label, name, value, hint) {
+    return `<label class="field">
+      <span class="field-label">${esc(label)}</span>
+      <textarea name="${name}" class="textarea" rows="3">${esc(value)}</textarea>
+      ${hint ? `<span class="field-hint">${esc(hint)}</span>` : ''}
+    </label>`;
+  }
+
+  function readonlyField(label, value, hint) {
+    return `<label class="field">
+      <span class="field-label">${esc(label)}</span>
+      <input type="text" class="input" value="${esc(value)}" readonly tabindex="-1">
+      ${hint ? `<span class="field-hint">${esc(hint)}</span>` : ''}
+    </label>`;
+  }
+</script>
+</body>
+</html>
