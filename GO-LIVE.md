@@ -4,7 +4,7 @@ _Spearhead app for the 30-day goal (target ~2026-07-29). Drive THIS to genuinely
 live first; grievance + member-id are demo-state work (see bottom)._
 
 Project: `steward-system` (static + `@vercel/edge`, Supabase).
-US Supabase project: `frdvhmzbsmczknqtexvx`. Demo tenant: `local183`.
+Supabase project: `frdvhmzbsmczknqtexvx` (physical region: **ca-central-1**; the `region:'us'` label in `lib/domains.js` is an env-namespace key, not the DB region). Demo tenant: `local183`.
 
 ---
 

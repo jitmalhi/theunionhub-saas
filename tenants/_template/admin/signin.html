@@ -52,7 +52,7 @@
         >
       </label>
       <button type="submit" class="admin-btn admin-btn-primary auth-submit" data-signin-submit>
-        Send magic link
+        Send secure sign-in link
       </button>
     </form>
 
@@ -130,7 +130,7 @@
       console.error(err);
       setStatus("Couldn't send the link. Check the email and try again.", 'error');
       button.disabled = false;
-      button.textContent = 'Send magic link';
+      button.textContent = 'Send secure sign-in link';
     }
   });
 </script>

@@ -413,7 +413,7 @@
 <!-- ════════════ DEMO TOOLBAR ════════════ -->
 <div class="demo-bar" role="region" aria-label="Demo controls">
   <span class="demo-label">Demo · /card/[id]</span>
-  <a class="home" href="index.html">← Back to site</a>
+  <a class="home" href="/">← Back to site</a>
   <span class="spacer"></span>
   <div class="switcher" role="tablist" aria-label="Card state">
     <button data-state="active"    class="is-active">Active</button>
@@ -436,12 +436,14 @@
 <script src="/lib/qrcode.js"></script>
 
 <script type="module">
-  // ─── Supabase ───────────────────────────────────────────
-  // Credentials come from the central runtime config in /lib/supabase.js.
-  // No hardcoded keys on this page: resolveConfig() resolves the URL +
-  // publishable anon key (env / window.__UH_CONFIG__ / RLS-safe prod fallback).
-  import { resolveConfig } from '/lib/supabase.js';
-  const { url: SUPABASE_URL, anonKey: SUPABASE_KEY } = resolveConfig();
+  // ─── Data layer ─────────────────────────────────────────
+  // Member fetch (LIVE lookup_member RPC + DEMO canonical-cast fallback) and
+  // the shared verdict logic are centralised in /lib — card and verify share
+  // exactly one source of each. Supabase credentials resolve inside
+  // /lib/member-fetch.js (no hardcoded keys on this page).
+  import { fetchMemberById, DEMO_MEMBER } from '/lib/member-fetch.js';
+  import { verdictFor, badgeHtml } from '/lib/verdict.js';
+  import { esc } from '/lib/escape.js';
 
   // Set by the boot IIFE after lib/tenant.js resolves. Without this,
   // post-0002 RLS on members returns 0 rows and ?id= renders notfound.
@@ -456,32 +458,9 @@
   let currentTenant = null;
   let tenantMod     = null;
 
-  function sbHeaders(extra) {
-    const h = {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`
-    };
-    if (currentTenantId) h['x-tenant-id'] = currentTenantId;
-    if (extra) Object.assign(h, extra);
-    return h;
-  }
-
-  async function fetchMemberById(id) {
-    // Goes through the lookup_member SECURITY DEFINER RPC because anon's
-    // direct SELECT on public.members was removed in migration 0008.
-    // The RPC reads x-tenant-id itself, filters server-side, and only
-    // returns the display fields this page paints.
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/lookup_member`, {
-        method: 'POST',
-        headers: sbHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ p_id: id })
-      });
-      if (!res.ok) return null;
-      const rows = await res.json();
-      return (Array.isArray(rows) ? rows[0] : rows) || null;
-    } catch { return null; }
-  }
+  // fetchMemberById(id, tenantId) is imported from /lib/member-fetch.js — it
+  // calls the tenant-scoped lookup_member RPC (anon's only path to members
+  // after migration 0008) and returns the whitelisted display shape.
 
   // Real seeded IDs so demo QR codes resolve to matching states via verify.html.
   const DEMO_IDS = {
@@ -491,22 +470,21 @@
     notfound:  '00000000-0000-0000-0000-000000000000'
   };
 
-  // Demo fallback — used when no ?id= is provided. Overwritten on live fetch.
-  let member = {
-    id: DEMO_IDS.active,
-    full_name: 'Maya Okonkwo',
-    union_name: 'Canadian Union of Public Employees',
-    local_number: '79',
-    member_since: '2019-04-12',
-    status: 'active'
-  };
+  // Demo fallback — the canonical demo-cast member (MOCKUP-RULES governs demo
+  // states inside the live product; only real tenant data is exempt).
+  // Overwritten on live fetch. Copied, not referenced, because
+  // applyTenantToMember() mutates it in place.
+  let member = Object.assign({}, DEMO_MEMBER);
 
   // The QR encodes a real verify URL. In demo mode we substitute one of the
   // seeded DEMO_IDS so a scanned demo QR resolves to the matching real state.
   function verifyUrl(state) {
     const isLive = !!new URLSearchParams(location.search).get('id');
     const id = isLive ? member.id : (DEMO_IDS[state] || member.id);
-    return `${location.origin}${location.pathname.replace(/card\.html$/, '')}verify.html?id=${id}`;
+    // Absolute, pretty verify path — the tenant middleware rewrites /verify →
+    // tenants/_template/verify.html. (The old pathname-replace produced
+    // /cardverify.html on pretty /card URLs, which 404s.)
+    return `${location.origin}/verify?id=${id}`;
   }
 
   function memberSinceYear(d) {
@@ -544,17 +522,15 @@
   // Renderers — each returns the inner HTML for #root
   function renderCard(state) {
     const yr = memberSinceYear(member.member_since);
-    const badgeMap = {
-      active:    { cls: 'active',    label: 'Active Member' },
-      inactive:  { cls: 'inactive',  label: 'Inactive' },
-      suspended: { cls: 'suspended', label: 'Suspended' }
-    };
-    const b = badgeMap[state] || badgeMap.active;
+    // One source of verdict truth (shared with verify.html via lib/verdict.js).
+    // Derived from the state being rendered so the demo switcher previews each
+    // badge; in live mode `state` is verdictFor(row).cardState, so they agree.
+    const verdict = verdictFor(Object.assign({}, member, { status: state }));
 
     const qrSection = state === 'suspended'
       ? `<div class="suspend-panel" role="alert">
            <strong>Suspended.</strong>
-           This membership has been suspended. Contact your union administrator.
+           ${verdict.detail}
          </div>`
       : `<div class="qr-section">
            <div class="qr-frame" id="qr"></div>
@@ -568,14 +544,16 @@
           <span class="label">Digital Membership Card</span>
         </header>
 
-        <h1 class="name">${member.full_name}</h1>
-        <p class="union">${member.union_name}</p>
-        <p class="local">Local ${member.local_number}</p>
+        <h1 class="name">${esc(member.full_name)}</h1>
+        <p class="union">${esc(member.union_name)}</p>
+        <p class="local">Local ${esc(member.local_number)}</p>
         <span class="since">Member since <b>${yr}</b></span>
+        <span class="since">Member No. <b>${esc(member.member_number) || '—'}</b></span>
+        <!-- Live-status philosophy (no printed expiry): the card is verified at
+             scan, not "valid thru" a stale date. Replaces the Valid Thru row. -->
+        <span class="since">Card <b>Live · verified at scan</b></span>
 
-        <div class="badge ${b.cls}" role="status">
-          <span class="dot"></span>${b.label}
-        </div>
+        ${badgeHtml(verdict)}
 
         <div class="divider"></div>
 
@@ -583,7 +561,7 @@
 
         <footer class="card-foot">
           <span>The Union Hub</span>
-          <span>UH–2026–104873</span>
+          <span>${esc(member.member_number) || '—'}</span>
         </footer>
       </article>`;
   }
@@ -611,7 +589,7 @@
         ${markUnionHub(40)}
         <h1 style="margin-top:18px;">This membership card does <em style="color:var(--forest);font-style:italic;">not exist.</em></h1>
         <p>The link is invalid, expired, or was never issued. Ask your local for a new one.</p>
-        <a class="home-link" href="index.html">← Back to The Union Hub</a>
+        <a class="home-link" href="/">← Back to The Union Hub</a>
       </div>`;
   }
 
@@ -664,7 +642,7 @@
 
   // Boot.
   // Live mode:  ?id=<uuid>  → fetch the row and render based on its status.
-  // Demo mode:  ?state=<x>  → switcher / hardcoded fallback (preserves homepage CTAs).
+  // Demo mode:  ?state=<x>  → switcher / hardcoded fallback (the public demo state).
   //
   // Before either path renders, we resolve the tenant from the hostname
   // (demo.theunionhub.com → 'demo' → public.tenants row) and patch the
@@ -707,11 +685,12 @@
     if (liveId) {
       document.querySelector('.demo-bar')?.remove();
       setState('loading');
-      const row = await fetchMemberById(liveId);
+      const row = await fetchMemberById(liveId, currentTenantId);
       if (!row) { setState('notfound'); return; }
       member = applyTenantToMember(row);
-      const valid = ['active','inactive','suspended'].includes(row.status) ? row.status : 'notfound';
-      setState(valid);
+      // Card display state comes from the shared verdict (active | inactive |
+      // suspended). 'pending' now maps to inactive rather than silently 404ing.
+      setState(verdictFor(row).cardState);
       return;
     }
 

@@ -289,8 +289,11 @@
   }
 
   async function fetchRepresentative(id) {
-    // Direct, tenant-scoped anon SELECT (migration 0013 stewards_public_read).
-    // x-tenant-id is supplied by sbHeaders(); cross-tenant ids return [].
+    // Single-row lookup via the lookup_steward SECURITY DEFINER RPC (migration
+    // 0034). anon has no direct SELECT on stewards — the RPC reads x-tenant-id
+    // itself, returns at most one row, and whitelists only the public card /
+    // vCard fields (never user_id / member_id). x-tenant-id is supplied by
+    // sbHeaders(); a cross-tenant id returns [].
     // Note: the live table/column are still stewards / steward_id; the
     // network-facing vocabulary is "representative".
     // Bounded by an AbortController so a hung connection can't strand the page
@@ -298,10 +301,14 @@
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 5000);   // matches STEP_TIMEOUT_MS
     try {
-      const cols = 'id,full_name,title,role,email,phone,worksite,bio,photo_url,status';
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/stewards?id=eq.${encodeURIComponent(id)}&select=${cols}&limit=1`,
-        { headers: sbHeaders(), signal: ctrl.signal }
+        `${SUPABASE_URL}/rest/v1/rpc/lookup_steward`,
+        {
+          method: 'POST',
+          headers: sbHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ p_id: id }),
+          signal: ctrl.signal,
+        }
       );
       if (!res.ok) return null;
       const rows = await res.json();

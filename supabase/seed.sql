@@ -239,3 +239,116 @@ END $$;
 --     → x-tenant-status: active
 
 COMMIT;
+
+
+-- ─── E · Tier-1 website demo · Local 412 ─────────────────────────────────────
+-- Canonical website demo tenant (see UX design/MOCKUP-RULES.md). A separate
+-- tenant from 'demo': Allied Health & Service Workers, Local 412. Guarded on the
+-- site_* tables existing (migrations 0036–0038). Idempotent: content rows are
+-- deleted-then-reinserted per run. Dates anchored to mid-July 2026.
+
+BEGIN;
+
+INSERT INTO public.tenants (slug, display_name, local_number, union_type, accent_hex, contact_email, status)
+VALUES ('local412', 'Allied Health & Service Workers, Local 412', '412', 'Allied Health & Service Workers', '#2F5D7C', 'info@local412.example', 'active')
+ON CONFLICT (slug) DO UPDATE
+  SET display_name = EXCLUDED.display_name, local_number = EXCLUDED.local_number,
+      union_type = EXCLUDED.union_type, accent_hex = EXCLUDED.accent_hex,
+      contact_email = EXCLUDED.contact_email, status = EXCLUDED.status;
+
+DO $$
+DECLARE
+  v_tid uuid;
+  v_has_site boolean;
+BEGIN
+  SELECT id INTO v_tid FROM public.tenants WHERE slug = 'local412';
+
+  SELECT EXISTS (SELECT 1 FROM information_schema.tables
+                 WHERE table_schema='public' AND table_name='site_settings') INTO v_has_site;
+  IF NOT v_has_site THEN
+    RAISE NOTICE '[seed] site_settings missing — skipping Local 412 website seed (apply 0036–0038 first).';
+    RETURN;
+  END IF;
+
+  -- Hostnames: canonical .ca subdomain (verified) + a demo custom domain.
+  INSERT INTO public.tenant_hostnames (tenant_id, hostname, is_primary, verified) VALUES
+    (v_tid, 'local412.theunionhub.ca', true,  true),
+    (v_tid, 'local412.example',        false, false)
+  ON CONFLICT (hostname) DO UPDATE
+    SET tenant_id = EXCLUDED.tenant_id, is_primary = EXCLUDED.is_primary, verified = EXCLUDED.verified;
+
+  -- Fresh content each run.
+  DELETE FROM public.site_alerts    WHERE tenant_id = v_tid;
+  DELETE FROM public.site_posts     WHERE tenant_id = v_tid;
+  DELETE FROM public.site_officers  WHERE tenant_id = v_tid;
+  DELETE FROM public.site_stewards  WHERE tenant_id = v_tid;
+  DELETE FROM public.site_meetings  WHERE tenant_id = v_tid;
+  DELETE FROM public.site_documents WHERE tenant_id = v_tid;
+
+  INSERT INTO public.site_settings (
+    tenant_id, template, accent_hex, published,
+    site_name, tagline, municipality, charter_year, parent_union_name,
+    member_count, show_member_count, about_body, about_facts,
+    office_address, contact_email, contact_phone, affiliations, meta_description
+  ) VALUES (
+    v_tid, 'editorial', '#2F5D7C', true,
+    'Allied Health & Service Workers, Local 412',
+    'Representing healthcare workers at Lakeview Regional Health Centre since 1974.',
+    'Riverbend', 1974, 'Allied Health & Service Workers',
+    340, true,
+    E'Local 412 represents roughly 340 healthcare workers — nurses, personal support workers, diagnostic and support staff — at Lakeview Regional Health Centre in Riverbend. We have held our charter since 1974.\n\nOur work is straightforward: enforce the collective agreement, represent members in grievances and discipline, keep workplaces safe, and bargain a fair contract.',
+    '[{"label":"Members","value":"~340"},{"label":"Chartered","value":"1974"},{"label":"Agreement term","value":"2023–2026"},{"label":"Stewards","value":"8"},{"label":"Employer","value":"Lakeview Regional"}]'::jsonb,
+    E'Union office\n118 Riverbend Main St, Suite 4\nRiverbend',
+    'info@local412.example', '(555) 018-0412',
+    'Affiliated with Allied Health & Service Workers · Riverbend & District Labour Council',
+    'Allied Health & Service Workers, Local 412 — representing healthcare workers at Lakeview Regional Health Centre in Riverbend since 1974.'
+  )
+  ON CONFLICT (tenant_id) DO UPDATE SET
+    template=EXCLUDED.template, accent_hex=EXCLUDED.accent_hex, published=EXCLUDED.published,
+    site_name=EXCLUDED.site_name, tagline=EXCLUDED.tagline, municipality=EXCLUDED.municipality,
+    charter_year=EXCLUDED.charter_year, parent_union_name=EXCLUDED.parent_union_name,
+    member_count=EXCLUDED.member_count, show_member_count=EXCLUDED.show_member_count,
+    about_body=EXCLUDED.about_body, about_facts=EXCLUDED.about_facts,
+    office_address=EXCLUDED.office_address, contact_email=EXCLUDED.contact_email,
+    contact_phone=EXCLUDED.contact_phone, affiliations=EXCLUDED.affiliations,
+    meta_description=EXCLUDED.meta_description;
+
+  INSERT INTO public.site_alerts (tenant_id, message, link_url, link_label, active, expires_at) VALUES
+    (v_tid, 'Bargaining update meeting — Thursday, July 16, 2026, 6:30 PM, Riverbend Community Hall.', '#meetings', 'Details', true, '2026-07-17T00:00:00Z');
+
+  INSERT INTO public.site_posts (tenant_id, title, body, pinned, published_at) VALUES
+    (v_tid, 'Tentative dates set for renewal bargaining',
+      '<p>The bargaining committee has confirmed dates with the employer for renewal of the 2023–2026 agreement. A membership update meeting is scheduled for July 16 — all members are encouraged to attend.</p>', true, '2026-07-02T12:00:00Z'),
+    (v_tid, 'Q2 membership meeting recap',
+      '<p>Minutes and the treasurer''s report from the June general meeting are now posted under Documents. Thank you to everyone who attended.</p>', false, '2026-06-18T12:00:00Z'),
+    (v_tid, 'New health & safety representatives posted',
+      '<p>Two new worker representatives have joined the joint health and safety committee. Contact your steward to raise a concern for the next meeting.</p>', false, '2026-06-05T12:00:00Z');
+
+  INSERT INTO public.site_officers (tenant_id, role_title, display_name, descriptor, sort_order) VALUES
+    (v_tid, 'President', 'M. Delgado', 'Chief spokesperson & bargaining lead', 0),
+    (v_tid, 'Vice-President', 'A. Kaur', 'Grievances & membership', 1),
+    (v_tid, 'Secretary-Treasurer', 'R. Whitefeather', 'Finances & records', 2),
+    (v_tid, 'Recording Secretary', 'T. Okafor', 'Minutes & correspondence', 3);
+
+  INSERT INTO public.site_stewards (tenant_id, shift, area, steward_name, contact_method, sort_order) VALUES
+    (v_tid, 'Days', 'Emergency & ICU', 'E. Vance · Chief Steward', 'evance@local412.example', 0),
+    (v_tid, 'Days', 'Medical / Surgical', 'S. Brar', 'sbrar@local412.example', 1),
+    (v_tid, 'Nights', 'Long-Term Care', 'J. Osei', 'josei@local412.example', 2),
+    (v_tid, 'Rotating', 'Diagnostic Imaging', 'P. Lindgren', 'plindgren@local412.example', 3);
+
+  INSERT INTO public.site_meetings (tenant_id, meeting_type, title, starts_at, location, notes, schedule_note, sort_order) VALUES
+    (v_tid, 'featured', 'General Membership Meeting', '2026-07-21T19:00:00Z', 'Riverbend Community Hall, 40 Main St', 'All members welcome; bring your membership card', NULL, 0),
+    (v_tid, 'schedule', 'General membership', NULL, NULL, NULL, 'Third Tuesday, monthly', 1),
+    (v_tid, 'schedule', 'Executive board', NULL, NULL, NULL, 'First Monday, monthly', 2),
+    (v_tid, 'schedule', 'Health & safety committee', NULL, NULL, NULL, 'Second Wednesday, monthly', 3);
+
+  INSERT INTO public.site_documents (tenant_id, category, title, meta, storage_path, visibility, sort_order) VALUES
+    (v_tid, 'Agreement',  'Collective Agreement 2023–2026',      'PDF · Agreement · 1.8 MB',  '#', 'public', 0),
+    (v_tid, 'Governance', 'Local 412 Bylaws',                    'PDF · Governance · 320 KB', '#', 'public', 1),
+    (v_tid, 'Forms',      'Grievance Form',                      'PDF · Forms · 180 KB',      '#', 'public', 2),
+    (v_tid, 'Committees', 'Health & Safety — Meeting Minutes',   'PDF · Committees · 240 KB', '#', 'public', 3);
+
+  RAISE NOTICE '[seed] Local 412 website seeded (tenant %, published) — local412.theunionhub.ca', v_tid;
+END $$;
+
+COMMIT;

@@ -45,8 +45,14 @@ import { serverConfigForHost } from '../lib/domains.js';
 export const config = {
   /* Exclude internal rewrite targets (app/, tenants/) so a cleanUrls
      308 from /app/about.html → /app/about doesn't re-enter middleware
-     and loop into /app/app/app/... */
-  matcher: '/((?!api/|_vercel/|css/|lib/|Brand/|app/|tenants/|.*\\.[a-zA-Z0-9]+$).*)',
+     and loop into /app/app/app/... The two explicit SEO paths are added so the
+     middleware can serve host-specific robots/sitemap for Tier-1 website hosts
+     (they'd otherwise be excluded by the extension rule). */
+  matcher: [
+    '/((?!api/|_vercel/|css/|lib/|Brand/|app/|tenants/|.*\\.[a-zA-Z0-9]+$).*)',
+    '/robots.txt',
+    '/sitemap.xml',
+  ],
 };
 
 /* ─── Constants ───────────────────────────────────────────────────────── */
@@ -172,9 +178,9 @@ async function resolveTenant(slug, cfg) {
         Authorization: `Bearer ${anonKey}`,
         Accept: 'application/json',
       },
-      /* Vercel honours this on the edge fetch cache. 60s matches our
-         in-memory TTL so the two layers don't drift. */
-      cf: { cacheTtl: 60, cacheEverything: true },
+      /* No edge-fetch cache hint: the `cf` option is Cloudflare-only and is
+         ignored on Vercel. Tenant lookups are served from the in-memory
+         tenantCache (TTL above) instead. */
     });
 
     if (res.status === 404) {
@@ -241,6 +247,23 @@ export default async function middleware(request) {
   const url = new URL(request.url);
   const pathname = url.pathname;
 
+  /* 0 · Per-site SEO files for Tier-1 website hosts. robots.txt / sitemap.xml
+        are host-specific for {slug}.theunionhub.ca — route them to the site
+        renderer (which generates them). The .com app / apex fall through to the
+        static files. Handled before the static passthrough because these are
+        extension paths that isStaticOrInternal() would otherwise wave through. */
+  if (pathname === '/robots.txt' || pathname === '/sitemap.xml') {
+    const h = request.headers.get('host') || '';
+    const a = serverConfigForHost(h, getEnv()).apex.toLowerCase();
+    if (a === 'theunionhub.ca' && !parseHost(h, a).isApex) {
+      const r = rewrite(new URL('/api/site', request.url));
+      r.headers.set('x-site-host', h);
+      r.headers.set('x-site-path', pathname);
+      return r;
+    }
+    return next();
+  }
+
   /* 1 · Pass-through for static / internal. The matcher already filters
         most of this; this is belt-and-braces. */
   if (isStaticOrInternal(pathname)) return next();
@@ -263,7 +286,18 @@ export default async function middleware(request) {
   const { slug, isApex } = parseHost(host, apex);
   const page = normalisePath(pathname);
 
-  /* 3 · Apex (marketing) — no tenant context. */
+  /* 3a · Tier-1 public websites — {slug}.theunionhub.ca (and, in phase 3, custom
+         domains). Route to the server-side site renderer, which resolves the
+         tenant by full hostname (tenant_hostnames) and renders the published
+         site. The .com app path (card/verify/access/admin) below is untouched;
+         the apex .ca marketing site (isApex) also falls through unchanged. */
+  if (!isApex && apex === 'theunionhub.ca') {
+    const siteResp = rewrite(new URL('/api/site', request.url));
+    siteResp.headers.set('x-site-host', host || '');
+    return siteResp;
+  }
+
+  /* 3b · Apex (marketing) — no tenant context. */
   if (isApex) {
     return rewrite(`/app/${page}.html`);
   }

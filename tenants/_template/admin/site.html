@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Public website · Admin · The Union Hub</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/admin/admin.css">
+<style>
+  /* Editor-specific styling; leans on admin.css tokens/classes elsewhere. */
+  .site-card { border:1px solid var(--hair,#e2ddd1); border-radius:12px; background:#fff; padding:22px 24px; margin:0 0 20px; }
+  .site-card > h2 { font-family:'DM Sans',sans-serif; font-size:16px; font-weight:700; margin:0 0 4px; }
+  .site-card > .hint { font-size:13.5px; color:var(--muted,#6d6f78); margin:0 0 16px; }
+  .fld { display:block; margin:0 0 14px; }
+  .fld > span { display:block; font-size:12.5px; font-weight:700; letter-spacing:.02em; color:var(--ink-soft,#33415c); margin:0 0 5px; }
+  .fld input[type=text], .fld input[type=email], .fld input[type=url], .fld input[type=number],
+  .fld input[type=datetime-local], .fld textarea, .fld select {
+    width:100%; font:inherit; font-size:15px; padding:9px 11px; border:1px solid #d7d2c6; border-radius:8px; background:#fff; color:#111;
+  }
+  .fld textarea { min-height:90px; resize:vertical; }
+  .fld-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fld-check { display:flex; align-items:center; gap:9px; margin:0 0 12px; font-size:14.5px; }
+  .fld-check input { width:18px; height:18px; }
+  .row-actions { display:flex; gap:8px; flex-wrap:wrap; }
+  .item-list { list-style:none; margin:0 0 14px; padding:0; border-top:1px solid #efece3; }
+  .item-list li { display:flex; align-items:center; gap:12px; padding:11px 2px; border-bottom:1px solid #efece3; }
+  .item-list .grip { color:#b9b3a6; font-size:13px; }
+  .item-list .sum { flex:1; min-width:0; }
+  .item-list .sum b { display:block; font-weight:600; color:#111; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .item-list .sum small { color:var(--muted,#6d6f78); }
+  .item-form { border:1px dashed #cfc9bb; border-radius:10px; padding:16px; margin:0 0 12px; background:#fbfaf6; }
+  .publish-bar { display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:14px 18px; border-radius:12px; background:#f6f4ee; border:1px solid #e2ddd1; margin:0 0 22px; }
+  .pill { font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:4px 10px; border-radius:999px; }
+  .pill.on  { background:#E1F5EE; color:#085041; }
+  .pill.off { background:#ECEBE7; color:#5C5B57; }
+  .save-note { font-size:13px; color:#1D9E75; margin-left:10px; opacity:0; transition:opacity .15s; }
+  .save-note.show { opacity:1; }
+  .save-note.err { color:#E24B4A; }
+  .facts-editor .fact { display:grid; grid-template-columns:1fr 1fr auto; gap:8px; margin-bottom:8px; }
+  .muted-link { color:var(--muted,#6d6f78); font-size:13px; }
+  @media (max-width:640px){ .fld-row, .facts-editor .fact { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<nav class="admin-nav" role="navigation" aria-label="Admin">
+  <div class="admin-nav-brand">
+    <span class="mark" aria-hidden="true" data-tenant-initial>·</span>
+    <div class="admin-nav-brand-stack">
+      <span class="admin-nav-tenant-name" data-tenant-name>—</span>
+      <span class="admin-nav-context">Admin</span>
+    </div>
+  </div>
+  <div class="admin-nav-meta">
+    <span class="admin-nav-email" data-admin-email>…</span>
+    <button class="admin-btn admin-btn-ghost" type="button" data-signout>Sign out</button>
+  </div>
+</nav>
+
+<nav class="admin-subnav" role="navigation" aria-label="Admin sections">
+  <a href="/admin">Dashboard</a>
+  <a href="/admin/members">Members</a>
+  <a href="/admin/grievances">Grievances</a>
+  <a href="/admin/intelligence">Intelligence</a>
+  <a href="/admin/team">Team</a>
+  <a href="/admin/audit">Audit</a>
+  <a href="/admin/site" aria-current="page">Website</a>
+  <a href="/admin/settings">Settings</a>
+  <a href="/admin/access/dashboard" class="subnav-access">Access</a>
+</nav>
+
+<main class="admin-main">
+  <header class="admin-page-head">
+    <span class="admin-eyebrow">Public website</span>
+    <h1 class="admin-page-title">Your local's <em>website</em>.</h1>
+    <p class="admin-page-meta">Edit the public site members and the world see. Changes save per section; publishing makes them live.</p>
+  </header>
+
+  <div class="publish-bar">
+    <span class="pill off" data-pub-pill>Draft</span>
+    <span data-pub-host class="muted-link">—</span>
+    <span style="flex:1"></span>
+    <a class="admin-btn admin-btn-ghost" data-view-site target="_blank" rel="noopener" href="#">View site ↗</a>
+    <button class="admin-btn admin-btn-ghost" type="button" data-export>Download export</button>
+    <button class="admin-btn" type="button" data-pub-toggle>Publish</button>
+  </div>
+
+  <div id="editor" hidden>
+    <!-- A · Identity -->
+    <section class="site-card">
+      <h2>Identity &amp; template</h2>
+      <p class="hint">The name, tagline and look at the top of your site.</p>
+      <form data-form="identity">
+        <label class="fld"><span>Site name</span><input type="text" name="site_name" placeholder="e.g. Allied Health &amp; Service Workers, Local 412"></label>
+        <label class="fld"><span>Tagline</span><input type="text" name="tagline"></label>
+        <div class="fld-row">
+          <label class="fld"><span>Municipality</span><input type="text" name="municipality"></label>
+          <label class="fld"><span>Charter year</span><input type="number" name="charter_year" min="1800" max="2100"></label>
+        </div>
+        <label class="fld"><span>Parent union (display name)</span><input type="text" name="parent_union_name"></label>
+        <div class="fld-row">
+          <label class="fld"><span>Member count</span><input type="number" name="member_count" min="0"></label>
+          <label class="fld"><span>Accent color</span><input type="text" name="accent_hex" placeholder="#2F5D7C" pattern="#[0-9a-fA-F]{6}"></label>
+        </div>
+        <label class="fld"><span>Template</span><select name="template">
+          <option value="editorial">Editorial (professional association)</option>
+          <option value="civic">Civic (institutional)</option>
+          <option value="modern">Modern</option>
+        </select></label>
+        <label class="fld-check"><input type="checkbox" name="show_member_count"> Show member count on the site</label>
+        <label class="fld"><span>Search description (SEO)</span><textarea name="meta_description" rows="2"></textarea></label>
+        <div class="row-actions"><button class="admin-btn" type="submit">Save identity</button><span class="save-note" data-note></span></div>
+      </form>
+    </section>
+
+    <!-- B · About -->
+    <section class="site-card">
+      <h2>About</h2>
+      <p class="hint">A short description, plus a facts panel you control.</p>
+      <form data-form="about">
+        <label class="fld"><span>About text</span><textarea name="about_body" rows="5"></textarea></label>
+        <span class="fld"><span>Facts panel (label / value)</span></span>
+        <div class="facts-editor" data-facts></div>
+        <button class="admin-btn admin-btn-ghost" type="button" data-add-fact>+ Add fact</button>
+        <div class="row-actions" style="margin-top:14px"><button class="admin-btn" type="submit">Save about</button><span class="save-note" data-note></span></div>
+      </form>
+    </section>
+
+    <!-- C · Footer / contact -->
+    <section class="site-card">
+      <h2>Contact &amp; footer</h2>
+      <form data-form="contact">
+        <label class="fld"><span>Office address (one line each)</span><textarea name="office_address" rows="3"></textarea></label>
+        <div class="fld-row">
+          <label class="fld"><span>General email</span><input type="email" name="contact_email"></label>
+          <label class="fld"><span>Phone</span><input type="text" name="contact_phone"></label>
+        </div>
+        <label class="fld"><span>Affiliations (one line each)</span><textarea name="affiliations" rows="2"></textarea></label>
+        <label class="fld"><span>Stewards — right-to-representation blurb</span><textarea name="stewards_rights_blurb" rows="3"></textarea></label>
+        <div class="row-actions"><button class="admin-btn" type="submit">Save contact</button><span class="save-note" data-note></span></div>
+      </form>
+    </section>
+
+    <!-- D · Sections shown -->
+    <section class="site-card">
+      <h2>Sections shown</h2>
+      <p class="hint">Turn sections off until you're ready. Identity and footer always show.</p>
+      <form data-form="toggles">
+        <label class="fld-check"><input type="checkbox" name="show_alert"> Alert bar</label>
+        <label class="fld-check"><input type="checkbox" name="show_updates"> Updates / notices</label>
+        <label class="fld-check"><input type="checkbox" name="show_about"> About</label>
+        <label class="fld-check"><input type="checkbox" name="show_executive"> Executive</label>
+        <label class="fld-check"><input type="checkbox" name="show_stewards"> Stewards</label>
+        <label class="fld-check"><input type="checkbox" name="show_meetings"> Meetings</label>
+        <label class="fld-check"><input type="checkbox" name="show_documents"> Documents</label>
+        <div class="row-actions"><button class="admin-btn" type="submit">Save sections</button><span class="save-note" data-note></span></div>
+      </form>
+    </section>
+
+    <!-- E · Alert bar (single) -->
+    <section class="site-card">
+      <h2>Alert bar</h2>
+      <p class="hint">One urgent notice at the very top (e.g. a bargaining or vote update). Set an expiry and it disappears on its own.</p>
+      <form data-form="alert">
+        <label class="fld"><span>Message</span><input type="text" name="message" placeholder="Bargaining update meeting — Thursday…"></label>
+        <div class="fld-row">
+          <label class="fld"><span>Link URL (optional)</span><input type="text" name="link_url" placeholder="#meetings"></label>
+          <label class="fld"><span>Link label (optional)</span><input type="text" name="link_label" placeholder="Details"></label>
+        </div>
+        <div class="fld-row">
+          <label class="fld"><span>Expires</span><input type="datetime-local" name="expires_at"></label>
+          <label class="fld-check" style="align-self:end;margin-bottom:20px"><input type="checkbox" name="active"> Active (show it)</label>
+        </div>
+        <div class="row-actions"><button class="admin-btn" type="submit">Save alert</button><button class="admin-btn admin-btn-ghost" type="button" data-alert-clear>Remove alert</button><span class="save-note" data-note></span></div>
+      </form>
+    </section>
+
+    <!-- F–J · list-managed sections -->
+    <section class="site-card" data-list="posts"><h2>Updates</h2><p class="hint">Dated notices. Pin one to keep it on top.</p><ul class="item-list" data-items></ul><div data-form-slot></div><button class="admin-btn admin-btn-ghost" type="button" data-add>+ Add update</button></section>
+    <section class="site-card" data-list="officers"><h2>Executive</h2><p class="hint">Your elected officers, in order.</p><ul class="item-list" data-items></ul><div data-form-slot></div><button class="admin-btn admin-btn-ghost" type="button" data-add>+ Add officer</button></section>
+    <section class="site-card" data-list="stewards"><h2>Stewards</h2><p class="hint">The table members use most — shift, area, name, contact.</p><ul class="item-list" data-items></ul><div data-form-slot></div><button class="admin-btn admin-btn-ghost" type="button" data-add>+ Add steward</button></section>
+    <section class="site-card" data-list="meetings"><h2>Meetings</h2><p class="hint">One featured next meeting, plus recurring schedule lines.</p><ul class="item-list" data-items></ul><div data-form-slot></div><button class="admin-btn admin-btn-ghost" type="button" data-add>+ Add meeting</button></section>
+    <section class="site-card" data-list="documents"><h2>Documents</h2><p class="hint">Public downloads. (File uploads arrive with the next release; add titles &amp; links for now.)</p><ul class="item-list" data-items></ul><div data-form-slot></div><button class="admin-btn admin-btn-ghost" type="button" data-add>+ Add document</button></section>
+
+    <!-- K · Domains -->
+    <section class="site-card">
+      <h2>Web addresses</h2>
+      <p class="hint">Where your site is reached. Custom domains are set up with us.</p>
+      <ul class="item-list" data-hostnames></ul>
+    </section>
+  </div>
+
+  <p id="loading" class="admin-page-meta">Loading your site…</p>
+</main>
+
+<script type="module">
+  import { requireAuth, watchAuth, signOut } from '/lib/auth-guard.js';
+  import { getTenant, applyTenantTheme } from '/lib/tenant.js';
+  import * as site from '/lib/admin-site.js';
+
+  const session = await requireAuth();
+  if (!session) throw new Error('redirecting to sign-in');
+
+  let tenant = null;
+  try { tenant = await getTenant(); if (tenant) applyTenantTheme(tenant); }
+  catch (e) { console.warn('[uh/admin-site] tenant resolve failed:', e?.message); }
+  if (tenant?.slug) document.querySelector('[data-tenant-initial]').textContent = tenant.slug.charAt(0).toUpperCase();
+  const email = session.user?.email || '—';
+  document.querySelector('[data-admin-email]').textContent = email;
+  watchAuth();
+  document.querySelector('[data-signout]')?.addEventListener('click', signOut);
+
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  function note(el, msg, isErr) { if (!el) return; el.textContent = msg; el.classList.toggle('err', !!isErr); el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2200); }
+  // datetime-local <-> ISO helpers (local time in the field; store UTC ISO).
+  const toLocalInput = (iso) => { if (!iso) return ''; const d = new Date(iso); if (isNaN(d)) return ''; const p = (n)=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; };
+  const fromLocalInput = (v) => v ? new Date(v).toISOString() : null;
+
+  let bundle = null;
+
+  // ── List section definitions (generic editor) ─────────────────────────────
+  const LISTS = {
+    posts: { table: 'site_posts', title: 'update',
+      fields: [
+        { name:'title', label:'Title', type:'text', required:true },
+        { name:'body', label:'Body — allows <p>, <ul>, <strong>, links', type:'textarea' },
+        { name:'published_at', label:'Publish date', type:'datetime-local' },
+        { name:'pinned', label:'Pin to top', type:'checkbox' },
+      ],
+      summary: (r) => ({ b: r.title || '(untitled)', s: `${r.pinned ? 'Pinned · ' : ''}${r.published_at ? new Date(r.published_at).toLocaleDateString() : 'Draft'}` }) },
+    officers: { table: 'site_officers', title: 'officer',
+      fields: [
+        { name:'role_title', label:'Role', type:'text', required:true },
+        { name:'display_name', label:'Name', type:'text', required:true },
+        { name:'descriptor', label:'Descriptor (optional)', type:'text' },
+        { name:'email', label:'Public email (optional)', type:'email' },
+        { name:'sort_order', label:'Order', type:'number' },
+      ],
+      summary: (r) => ({ b: `${r.role_title || ''} — ${r.display_name || ''}`, s: r.descriptor || '' }) },
+    stewards: { table: 'site_stewards', title: 'steward',
+      fields: [
+        { name:'shift', label:'Shift', type:'text' },
+        { name:'area', label:'Area / department', type:'text' },
+        { name:'steward_name', label:'Steward name', type:'text', required:true },
+        { name:'contact_method', label:'Contact (email, phone, or note)', type:'text' },
+        { name:'sort_order', label:'Order', type:'number' },
+      ],
+      summary: (r) => ({ b: r.steward_name || '', s: [r.shift, r.area].filter(Boolean).join(' · ') }) },
+    meetings: { table: 'site_meetings', title: 'meeting',
+      fields: [
+        { name:'meeting_type', label:'Type', type:'select', options:[['schedule','Recurring schedule line'],['featured','Featured next meeting']] },
+        { name:'title', label:'Title / label', type:'text', required:true },
+        { name:'starts_at', label:'Date & time (featured only)', type:'datetime-local' },
+        { name:'location', label:'Location (featured only)', type:'text' },
+        { name:'notes', label:'Notes (featured only)', type:'text' },
+        { name:'schedule_note', label:'When (schedule line, e.g. "Third Tuesday, monthly")', type:'text' },
+        { name:'sort_order', label:'Order', type:'number' },
+      ],
+      summary: (r) => ({ b: r.title || '', s: r.meeting_type === 'featured' ? (r.starts_at ? new Date(r.starts_at).toLocaleString() : 'Featured') : (r.schedule_note || 'Schedule') }) },
+    documents: { table: 'site_documents', title: 'document',
+      fields: [
+        { name:'title', label:'Title', type:'text', required:true },
+        { name:'category', label:'Category', type:'text' },
+        { name:'meta', label:'Meta line (e.g. "PDF · Agreement · 1.8 MB")', type:'text' },
+        { name:'storage_path', label:'Link / file path', type:'text' },
+        { name:'visibility', label:'Visibility', type:'select', options:[['public','Public'],['members','Members only (coming with logins)']] },
+        { name:'sort_order', label:'Order', type:'number' },
+      ],
+      summary: (r) => ({ b: r.title || '', s: [r.category, r.visibility].filter(Boolean).join(' · ') }) },
+  };
+
+  function fieldHtml(f, val) {
+    const v = val == null ? '' : val;
+    if (f.type === 'textarea') return `<label class="fld"><span>${esc(f.label)}</span><textarea name="${f.name}" rows="4">${esc(v)}</textarea></label>`;
+    if (f.type === 'checkbox') return `<label class="fld-check"><input type="checkbox" name="${f.name}" ${v ? 'checked' : ''}> ${esc(f.label)}</label>`;
+    if (f.type === 'select') return `<label class="fld"><span>${esc(f.label)}</span><select name="${f.name}">${f.options.map(([ov,ol]) => `<option value="${esc(ov)}" ${String(v)===ov?'selected':''}>${esc(ol)}</option>`).join('')}</select></label>`;
+    const iv = f.type === 'datetime-local' ? toLocalInput(v) : v;
+    return `<label class="fld"><span>${esc(f.label)}</span><input type="${f.type}" name="${f.name}" value="${esc(iv)}" ${f.required?'required':''}></label>`;
+  }
+
+  function readForm(form, fields) {
+    const out = {};
+    for (const f of fields) {
+      const el = form.elements[f.name];
+      if (!el) continue;
+      if (f.type === 'checkbox') out[f.name] = el.checked;
+      else if (f.type === 'datetime-local') out[f.name] = fromLocalInput(el.value);
+      else if (f.type === 'number') out[f.name] = el.value === '' ? null : Number(el.value);
+      else out[f.name] = el.value === '' ? null : el.value;
+    }
+    return out;
+  }
+
+  function renderList(key) {
+    const cfg = LISTS[key];
+    const sec = document.querySelector(`[data-list="${key}"]`);
+    const ul = sec.querySelector('[data-items]');
+    const rows = bundle[key] || [];
+    ul.innerHTML = rows.length ? rows.map((r) => {
+      const s = cfg.summary(r);
+      return `<li data-id="${esc(r.id)}"><span class="grip" aria-hidden="true">⋮⋮</span>
+        <span class="sum"><b>${esc(s.b)}</b><small>${esc(s.s)}</small></span>
+        <span class="row-actions"><button class="admin-btn admin-btn-ghost" type="button" data-edit>Edit</button>
+        <button class="admin-btn admin-btn-ghost" type="button" data-del>Delete</button></span></li>`;
+    }).join('') : `<li><span class="sum"><small>None yet.</small></span></li>`;
+  }
+
+  function openForm(key, row) {
+    const cfg = LISTS[key];
+    const sec = document.querySelector(`[data-list="${key}"]`);
+    const slot = sec.querySelector('[data-form-slot]');
+    const editing = row && row.id;
+    slot.innerHTML = `<form class="item-form">
+      ${cfg.fields.map((f) => fieldHtml(f, row ? row[f.name] : (f.name==='visibility'?'public':(f.name==='meeting_type'?'schedule':'')))).join('')}
+      <div class="row-actions"><button class="admin-btn" type="submit">${editing?'Save':'Add'} ${esc(cfg.title)}</button>
+      <button class="admin-btn admin-btn-ghost" type="button" data-cancel>Cancel</button><span class="save-note" data-note></span></div>
+    </form>`;
+    const form = slot.querySelector('form');
+    form.querySelector('[data-cancel]').addEventListener('click', () => { slot.innerHTML = ''; });
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const patch = readForm(form, cfg.fields);
+      try {
+        if (editing) await site.updateItem(cfg.table, row.id, patch);
+        else await site.createItem(cfg.table, patch);
+        await reload();
+        slot.innerHTML = '';
+      } catch (e) { note(form.querySelector('[data-note]'), e.message || 'Save failed', true); }
+    });
+  }
+
+  function bindList(key) {
+    const sec = document.querySelector(`[data-list="${key}"]`);
+    sec.querySelector('[data-add]').addEventListener('click', () => openForm(key, null));
+    sec.querySelector('[data-items]').addEventListener('click', async (ev) => {
+      const li = ev.target.closest('li[data-id]'); if (!li) return;
+      const id = li.getAttribute('data-id');
+      const row = (bundle[key] || []).find((r) => String(r.id) === id);
+      if (ev.target.matches('[data-edit]')) openForm(key, row);
+      if (ev.target.matches('[data-del]')) {
+        if (!confirm('Delete this item?')) return;
+        try { await site.deleteItem(LISTS[key].table, id); await reload(); } catch (e) { alert(e.message); }
+      }
+    });
+  }
+
+  // ── Settings forms (identity / about / contact / toggles) ──────────────────
+  const SETTINGS_FORMS = {
+    identity: ['site_name','tagline','municipality','charter_year','parent_union_name','member_count','accent_hex','template','show_member_count','meta_description'],
+    contact:  ['office_address','contact_email','contact_phone','affiliations','stewards_rights_blurb'],
+    toggles:  ['show_alert','show_updates','show_about','show_executive','show_stewards','show_meetings','show_documents'],
+  };
+  function fillSettingsForm(name, cols) {
+    const form = document.querySelector(`[data-form="${name}"]`);
+    const s = bundle.settings || {};
+    for (const c of cols) {
+      const el = form.elements[c]; if (!el) continue;
+      if (el.type === 'checkbox') el.checked = !!s[c];
+      else el.value = s[c] == null ? '' : s[c];
+    }
+  }
+  // NOT NULL settings columns (0036): never send null — omit if empty so the
+  // existing value / DB default stands.
+  const KEEP_IF_EMPTY = new Set(['accent_hex', 'template', 'stewards_rights_blurb']);
+  function bindSettingsForm(name, cols) {
+    const form = document.querySelector(`[data-form="${name}"]`);
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const patch = {};
+      for (const c of cols) {
+        const el = form.elements[c]; if (!el) continue;
+        if (el.type === 'checkbox') patch[c] = el.checked;
+        else if (el.type === 'number') patch[c] = el.value === '' ? null : Number(el.value);
+        else if (el.value === '' && KEEP_IF_EMPTY.has(c)) continue;
+        else patch[c] = el.value === '' ? null : el.value;
+      }
+      try { bundle.settings = await site.saveSettings(patch); note(form.querySelector('[data-note]'), 'Saved'); }
+      catch (e) { note(form.querySelector('[data-note]'), e.message || 'Save failed', true); }
+    });
+  }
+
+  // About facts (repeatable label/value)
+  function renderFacts() {
+    const wrap = document.querySelector('[data-facts]');
+    const facts = Array.isArray(bundle.settings?.about_facts) ? bundle.settings.about_facts : [];
+    wrap.innerHTML = facts.map((f, i) => `<div class="fact">
+      <input type="text" placeholder="Label" value="${esc(f.label||'')}" data-fl="${i}">
+      <input type="text" placeholder="Value" value="${esc(f.value||'')}" data-fv="${i}">
+      <button class="admin-btn admin-btn-ghost" type="button" data-fx="${i}">✕</button></div>`).join('');
+  }
+  function readFacts() {
+    const wrap = document.querySelector('[data-facts]');
+    const out = [];
+    wrap.querySelectorAll('.fact').forEach((row) => {
+      const l = row.querySelector('[data-fl]')?.value.trim();
+      const v = row.querySelector('[data-fv]')?.value.trim();
+      if (l || v) out.push({ label: l, value: v });
+    });
+    return out;
+  }
+
+  async function reload() { bundle = await site.loadSite(); paint(); }
+
+  function paint() {
+    const s = bundle.settings || {};
+    // Publish bar
+    const pubPill = document.querySelector('[data-pub-pill]');
+    const published = !!s.published;
+    pubPill.textContent = published ? 'Published' : 'Draft';
+    pubPill.className = 'pill ' + (published ? 'on' : 'off');
+    document.querySelector('[data-pub-toggle]').textContent = published ? 'Unpublish' : 'Publish';
+    const primary = (bundle.hostnames || []).find((h) => h.is_primary) || (bundle.hostnames || [])[0];
+    const host = bundle.primary_host || (primary && primary.hostname) || `${bundle.tenant?.slug || ''}.theunionhub.ca`;
+    document.querySelector('[data-pub-host]').textContent = host;
+    const view = document.querySelector('[data-view-site]'); view.href = `https://${host}`;
+    // Settings forms
+    fillSettingsForm('identity', SETTINGS_FORMS.identity);
+    fillSettingsForm('contact', SETTINGS_FORMS.contact);
+    fillSettingsForm('toggles', SETTINGS_FORMS.toggles);
+    document.querySelector('[data-form="about"] [name=about_body]').value = s.about_body || '';
+    renderFacts();
+    // Alert
+    const af = document.querySelector('[data-form="alert"]');
+    const alert = (bundle.alerts || [])[0] || null;
+    af.dataset.alertId = alert ? alert.id : '';
+    af.elements.message.value = alert?.message || '';
+    af.elements.link_url.value = alert?.link_url || '';
+    af.elements.link_label.value = alert?.link_label || '';
+    af.elements.expires_at.value = toLocalInput(alert?.expires_at);
+    af.elements.active.checked = alert ? !!alert.active : true;
+    // Lists
+    for (const k of Object.keys(LISTS)) renderList(k);
+    // Hostnames
+    document.querySelector('[data-hostnames]').innerHTML = (bundle.hostnames || []).map((h) =>
+      `<li><span class="sum"><b>${esc(h.hostname)}</b><small>${h.is_primary ? 'Primary · ' : ''}${h.verified ? 'Verified' : 'Pending verification'}</small></span></li>`).join('')
+      || '<li><span class="sum"><small>No addresses yet.</small></span></li>';
+  }
+
+  // ── Boot ──
+  try {
+    bundle = await site.loadSite();
+  } catch (e) {
+    document.getElementById('loading').textContent = 'Could not load your site: ' + (e.message || e);
+    throw e;
+  }
+  document.getElementById('loading').hidden = true;
+  document.getElementById('editor').hidden = false;
+  paint();
+
+  // Bind settings forms
+  for (const [name, cols] of Object.entries(SETTINGS_FORMS)) bindSettingsForm(name, cols);
+  // About form (body + facts)
+  document.querySelector('[data-add-fact]').addEventListener('click', () => {
+    bundle.settings = bundle.settings || {};
+    bundle.settings.about_facts = readFacts(); bundle.settings.about_facts.push({ label:'', value:'' }); renderFacts();
+  });
+  document.querySelector('[data-facts]').addEventListener('click', (ev) => {
+    if (ev.target.matches('[data-fx]')) { bundle.settings.about_facts = readFacts().filter((_, i) => i !== Number(ev.target.dataset.fx)); renderFacts(); }
+  });
+  document.querySelector('[data-form="about"]').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const patch = { about_body: ev.target.elements.about_body.value || null, about_facts: readFacts() };
+    try { bundle.settings = await site.saveSettings(patch); note(ev.target.querySelector('[data-note]'), 'Saved'); }
+    catch (e) { note(ev.target.querySelector('[data-note]'), e.message || 'Save failed', true); }
+  });
+  // Alert form
+  const alertForm = document.querySelector('[data-form="alert"]');
+  alertForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const patch = {
+      message: alertForm.elements.message.value || null,
+      link_url: alertForm.elements.link_url.value || null,
+      link_label: alertForm.elements.link_label.value || null,
+      expires_at: fromLocalInput(alertForm.elements.expires_at.value),
+      active: alertForm.elements.active.checked,
+    };
+    if (!patch.message) { note(alertForm.querySelector('[data-note]'), 'Add a message first', true); return; }
+    try {
+      const id = alertForm.dataset.alertId;
+      if (id) await site.updateItem('site_alerts', id, patch);
+      else await site.createItem('site_alerts', patch);
+      await reload(); note(alertForm.querySelector('[data-note]'), 'Saved');
+    } catch (e) { note(alertForm.querySelector('[data-note]'), e.message || 'Save failed', true); }
+  });
+  alertForm.querySelector('[data-alert-clear]').addEventListener('click', async () => {
+    const id = alertForm.dataset.alertId; if (!id) { alertForm.reset(); return; }
+    if (!confirm('Remove the alert bar?')) return;
+    try { await site.deleteItem('site_alerts', id); await reload(); } catch (e) { alert(e.message); }
+  });
+  // Lists
+  for (const k of Object.keys(LISTS)) bindList(k);
+  // Publish toggle + export
+  document.querySelector('[data-pub-toggle]').addEventListener('click', async (ev) => {
+    const willPublish = !(bundle.settings && bundle.settings.published);
+    if (willPublish && !bundle.settings) { alert('Add your identity details first, then publish.'); return; }
+    ev.target.disabled = true;
+    try { bundle.settings = await site.setPublished(willPublish); paint(); }
+    catch (e) { alert(e.message || 'Could not change publish state'); }
+    finally { ev.target.disabled = false; }
+  });
+  document.querySelector('[data-export]').addEventListener('click', async (ev) => {
+    ev.target.disabled = true;
+    try { await site.downloadExport(); } catch (e) { alert(e.message || 'Export failed'); }
+    finally { ev.target.disabled = false; }
+  });
+</script>
+</body>
+</html>

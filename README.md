@@ -114,7 +114,7 @@ theunionhub-online/
 │   │       └── verify.js            ← GET /api/tenants/:slug/verify/:id
 │   ├── webhooks/                                                          · planned
 │   │   └── supabase.js              ← auth, audit-log mirrors
-│   └── health.js                                                          · planned
+│   └── health.js                       ← readiness probe (GET /api/health)   · live
 │
 ├── lib/                             ← shared ES modules (browser + edge)
 │   ├── supabase.js                  ← fetch-thin client factory, env-driven ✓ live
@@ -167,7 +167,7 @@ theunionhub-online/
 > `api/_middleware.js` and `/middleware.js` is a one-line `export { default, config }`
 > re-export. Edit `api/_middleware.js`; never edit `/middleware.js`.
 
-**Tenancy contract:** every database row that belongs to a union has a `tenant_id uuid not null` column; every API route resolves the tenant from the host header in `api/_middleware.js` and stamps it on the request; every Supabase query runs under RLS that compares `auth.jwt() ->> 'tenant_id'` to the row's `tenant_id`. There is no application-level filtering — the database is the boundary.
+**Tenancy contract:** every database row that belongs to a union has a `tenant_id uuid not null` column; the tenant is resolved from the subdomain and carried on every request as the `x-tenant-id` header; every Supabase query runs under RLS that compares `public.get_request_tenant_id()` (which reads that header) to the row's `tenant_id`. The header only *selects* the tenant — for sensitive tables, RLS also requires an admin/membership predicate, so a spoofed header buys nothing. There is no application-level filtering — the database is the boundary. (The earlier `auth.jwt() ->> 'tenant_id'` JWT-claim model was **not** adopted; see `docs/MERGE-PLAN.md`.)
 
 ### 3.1 · Subdomain → Tenant Routing
 
@@ -209,7 +209,7 @@ One codebase serves every union. Tenants are identified by the **leftmost label 
         │
         ▼
    4. Serverless API route                    →  Supabase query under RLS
-        └─ JWT carries tenant_id; RLS rejects cross-tenant reads at the DB
+        └─ x-tenant-id header selects tenant; RLS (get_request_tenant_id) rejects cross-tenant reads at the DB
 ```
 
 **Provisioning a new union** (e.g. onboarding `local52`):

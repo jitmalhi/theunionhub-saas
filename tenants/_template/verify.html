@@ -400,7 +400,7 @@
 <!-- ════════════ DEMO TOOLBAR ════════════ -->
 <div class="demo-bar" role="region" aria-label="Demo controls">
   <span class="demo-label">Demo · /verify/[id]</span>
-  <a class="home" href="index.html">← Back to site</a>
+  <a class="home" href="/">← Back to site</a>
   <span class="spacer"></span>
   <div class="switcher" role="tablist" aria-label="Verify result">
     <button data-result="loading">Loading</button>
@@ -415,53 +415,28 @@
 <main id="screen"></main>
 
 <script type="module">
-  // ─── Supabase ───────────────────────────────────────────
-  // Credentials come from the central runtime config in /lib/supabase.js.
-  // No hardcoded keys on this page: resolveConfig() resolves the URL +
-  // publishable anon key (env / window.__UH_CONFIG__ / RLS-safe prod fallback).
+  // ─── Data layer ─────────────────────────────────────────
+  // Shared member fetch + verdict logic (identical source as card.html) live
+  // in /lib. The Supabase URL is still resolved here for the verify-only RPCs
+  // below (record_verification, check_already_collected, mark_member_paid).
   import { resolveConfig } from '/lib/supabase.js';
-  const { url: SUPABASE_URL, anonKey: SUPABASE_KEY } = resolveConfig();
+  import { fetchMemberById, sbHeaders, DEMO_MEMBER } from '/lib/member-fetch.js';
+  import { verdictFor, VERIFIED } from '/lib/verdict.js';
+  import { esc } from '/lib/escape.js';
+  const { url: SUPABASE_URL } = resolveConfig();
 
   // Set by the boot IIFE after lib/tenant.js resolves. Threaded into every
-  // Supabase REST call via sbHeaders() so RLS policies (from migration
-  // 0002 onward) see the correct tenant context. Without this header,
-  // anon SELECT on members returns 0 rows.
+  // Supabase REST call via sbHeaders(currentTenantId, …) so RLS policies
+  // (migration 0002 onward) see the correct tenant context.
   let currentTenant   = null;
   let currentTenantId = null;
-
-  function sbHeaders(extra) {
-    const h = {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`
-    };
-    if (currentTenantId) h['x-tenant-id'] = currentTenantId;
-    if (extra) Object.assign(h, extra);
-    return h;
-  }
-
-  async function fetchMemberById(id) {
-    // Goes through the lookup_member SECURITY DEFINER RPC because anon's
-    // direct SELECT on public.members was removed in migration 0008.
-    // The RPC reads x-tenant-id itself, filters server-side, and only
-    // returns the display fields this page paints.
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/lookup_member`, {
-        method: 'POST',
-        headers: sbHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ p_id: id })
-      });
-      if (!res.ok) return null;
-      const rows = await res.json();
-      return (Array.isArray(rows) ? rows[0] : rows) || null;
-    } catch { return null; }
-  }
 
   // Fire-and-forget. Never block the UI on logging.
   function recordVerification(memberId, result) {
     try {
       fetch(`${SUPABASE_URL}/rest/v1/rpc/record_verification`, {
         method: 'POST',
-        headers: sbHeaders({ 'Content-Type': 'application/json' }),
+        headers: sbHeaders(currentTenantId, { 'Content-Type': 'application/json' }),
         body: JSON.stringify({ p_member_id: memberId, p_result: result }),
         keepalive: true
       }).catch(() => {});
@@ -472,7 +447,7 @@
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/check_already_collected`, {
         method: 'POST',
-        headers: sbHeaders({ 'Content-Type': 'application/json' }),
+        headers: sbHeaders(currentTenantId, { 'Content-Type': 'application/json' }),
         body: JSON.stringify({ p_member_id: memberId })
       });
       if (!res.ok) return { already: false, paid_at: null };
@@ -485,7 +460,7 @@
   async function markMemberPaid(memberId) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/mark_member_paid`, {
       method: 'POST',
-      headers: sbHeaders({ 'Content-Type': 'application/json' }),
+      headers: sbHeaders(currentTenantId, { 'Content-Type': 'application/json' }),
       body: JSON.stringify({ p_member_id: memberId })
     });
     if (!res.ok) throw new Error('mark_failed');
@@ -493,15 +468,10 @@
     return (Array.isArray(rows) ? rows[0] : rows) || { was_already_paid: false, paid_at: null };
   }
 
-  // Demo fallback — used when no ?id= is provided. Overwritten on live fetch.
-  let member = {
-    id: '550bc413-53db-4f83-98e4-7c5c44d721d0',
-    full_name: 'Maya Okonkwo',
-    union_name: 'Canadian Union of Public Employees',
-    local_number: '79',
-    member_since: '2019-04-12',
-    status: 'active'
-  };
+  // Demo fallback — the canonical demo-cast member (MOCKUP-RULES governs demo
+  // states inside the live product). Overwritten on live fetch. Copied because
+  // applyTenantToMember() mutates it in place.
+  let member = Object.assign({}, DEMO_MEMBER);
 
   function memberSinceYear(d) { return new Date(d).getFullYear(); }
 
@@ -539,8 +509,8 @@
       <section class="screen verified" role="status" aria-live="polite">
         <div class="icon-wrap">${checkSvg}</div>
         <h1 class="state-word">Verified.</h1>
-        <p class="name">${member.full_name}</p>
-        <p class="ucol">${member.union_name} · Local ${member.local_number}</p>
+        <p class="name">${esc(member.full_name)}</p>
+        <p class="ucol">${esc(member.union_name)} · Local ${esc(member.local_number)}</p>
         <p class="since">Active member <b>since ${yr}</b></p>
         <button class="paid-btn" type="button" data-state="idle" data-paid-btn>Mark as paid</button>
         <p class="paid-error" data-paid-error></p>
@@ -549,14 +519,14 @@
       </section>`;
   }
 
-  function renderInvalid(reason = 'Inactive') {
+  function renderInvalid(reason = 'Inactive', detail) {
     return `
       <section class="screen invalid" role="alert" aria-live="assertive">
         <div class="icon-wrap">${xSvg}</div>
         <h1 class="state-word invalid-word">Not&nbsp;valid.</h1>
-        <p class="invalid-msg"><strong>This membership is not currently active.</strong></p>
-        <p class="invalid-status">Status · ${reason}</p>
-        <p class="invalid-action">Contact your union administrator.</p>
+        <p class="invalid-msg"><strong>This membership is on record but not currently active.</strong></p>
+        <p class="invalid-status">Status · ${esc(reason)}</p>
+        <p class="invalid-action">${detail || 'Contact your union administrator.'}</p>
         <span class="checked"><span class="dot"></span>Checked at ${timeNow()}</span>
         <div class="powered">${markSvg}Powered by The Union Hub</div>
       </section>`;
@@ -581,7 +551,7 @@
       <section class="screen collected" role="alert" aria-live="assertive">
         <div class="icon-wrap">${checkSvg}</div>
         <h1 class="state-word">Already&nbsp;collected.</h1>
-        <p class="name">${member.full_name}</p>
+        <p class="name">${esc(member.full_name)}</p>
         <p class="invalid-status">Verified and paid at ${t}</p>
         <span class="checked"><span class="dot"></span>Checked at ${timeNow()}</span>
         <div class="powered">${markSvg}Powered by The Union Hub</div>
@@ -656,7 +626,7 @@
     });
   }
 
-  function setResult(result, reason) {
+  function setResult(result, reason, detail) {
     document.querySelectorAll('.switcher button').forEach(btn => {
       btn.classList.toggle('is-active', btn.dataset.result === result);
     });
@@ -679,7 +649,7 @@
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme);
 
     if (result === 'loading')   { screen.innerHTML = renderLoading(); return; }
-    if (result === 'invalid')   { screen.innerHTML = renderInvalid(reason || 'Inactive'); return; }
+    if (result === 'invalid')   { screen.innerHTML = renderInvalid(reason || 'Inactive', detail); return; }
     if (result === 'collected') { screen.innerHTML = renderAlreadyCollected(reason); return; }
     if (result === 'notfound')  { screen.innerHTML = renderNotFound(); return; }
     screen.innerHTML = renderVerified();
@@ -731,11 +701,15 @@
     if (liveId) {
       document.querySelector('.demo-bar')?.remove();
       setResult('loading');
-      const row = await fetchMemberById(liveId);
+      const row = await fetchMemberById(liveId, currentTenantId);
       if (!row) { setResult('notfound'); return; }
       member = applyTenantToMember(row);
 
-      if (row.status === 'active') {
+      // Shared verdict (same source as the card). VERIFIED → check the dues
+      // ledger for already-collected; anything else → not valid, painted with
+      // the lapsed-specific copy (distinct from the not-found screen).
+      const verdict = verdictFor(row);
+      if (verdict.kind === VERIFIED) {
         const check = await checkAlreadyCollected(row.id);
         if (check && check.already) {
           recordVerification(row.id, 'already_collected');
@@ -747,9 +721,8 @@
         return;
       }
 
-      const reason = row.status.charAt(0).toUpperCase() + row.status.slice(1);
       recordVerification(row.id, 'invalid');
-      setResult('invalid', reason);
+      setResult('invalid', verdict.reason, verdict.detail);
       return;
     }
 

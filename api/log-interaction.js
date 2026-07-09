@@ -6,9 +6,14 @@
    confirms a representation meeting. This route writes ONE row into
    public.member_interactions using the SERVICE-ROLE key — which bypasses RLS —
    because migration 0020 gives that table NO anon/authenticated INSERT policy.
-   This route is therefore the only write path: a forged record would need the
-   secret service-role key, which never leaves the server. That is what makes
-   the log an auditable, un-forgeable record.
+   This route is the only DB-WRITE path (the table has no anon/authenticated
+   INSERT policy, so a direct client insert is impossible). Be precise about what
+   that buys, though: the ENDPOINT itself is anonymously callable and only
+   validates that steward_id exists — it does not authenticate the member. So a
+   row proves "someone POSTed this steward_id through this route," not the
+   member's identity, and there is no rate limiting. Treat it as an attributable
+   log, not a cryptographically un-forgeable one. Hardening (auth, provenance,
+   rate limiting) is tracked in docs/BACKLOG.md (Fable review #4).
 
    API contract:
      POST /api/log-interaction
