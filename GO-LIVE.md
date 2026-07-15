@@ -19,7 +19,7 @@ bypass RLS and need the secret service-role key. It's already in local
       (Supabase → Project Settings → API → `service_role`; decoded payload must
       say `"role":"service_role"`). Scope: **Production + Preview**.
 - [ ] **Redeploy** (env changes don't apply to existing deployments).
-- [ ] Verify: `curl -s https://local183.theunionhub.com/api/health` → `200` /
+- [ ] Verify: `curl -s https://local183.theunionhub.ca/api/health` → `200` /
       `ready:true` (was `503`).
 
 > Scope note: the plain (unsuffixed) var drives only the default `.com` region.
@@ -31,12 +31,12 @@ bypass RLS and need the secret service-role key. It's already in local
 
 Do this with a REAL magic-link session (nothing here was browser-verified yet).
 
-- [ ] **Admin login:** open `local183.theunionhub.com/admin`, request magic link,
+- [ ] **Admin login:** open `local183.theunionhub.ca/admin`, request magic link,
       sign in as a tenant admin. Confirm Dashboard loads.
 - [ ] **Admin pages render:** Members · Grievances · Intelligence · Team · Audit ·
       Settings · Access — each loads without console errors.
 - [ ] **DFR write path (the key test):** open
-      `local183.theunionhub.com/meet/a57e0a00-0000-4000-8000-000000000010`
+      `local183.theunionhub.ca/meet/a57e0a00-0000-4000-8000-000000000010`
       (seeded steward Eleanor Vance) → complete the 3-step interaction → expect
       `201`.
 - [ ] **Confirm it landed:** new row in `/admin/activity`, and the count bumps in

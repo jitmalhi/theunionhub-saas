@@ -40,7 +40,7 @@ FROM t, (VALUES
   (
     'a57e0a00-0000-4000-8000-000000000010'::uuid,
     'Eleanor Vance', 'Local President', 'executive',
-    'eleanor.vance@local183.theunionhub.com', '+1-555-0183',
+    'eleanor.vance@local183.theunionhub.ca', '+1-555-0183',
     'Local 183 · Executive Board',
     'President of Local 183. Here for contract questions, member concerns, and anything I can do to back you up on the floor.',
     '2016-03-01'::date
@@ -48,7 +48,7 @@ FROM t, (VALUES
   (
     'a57e0a00-0000-4000-8000-000000000011'::uuid,
     'Marcus Bell', 'Unit Chair', 'unit_officer',
-    'marcus.bell@local183.theunionhub.com', '+1-555-0184',
+    'marcus.bell@local183.theunionhub.ca', '+1-555-0184',
     'Distribution Center · Unit 4',
     'Unit Chair for the Distribution Center. Bring me scheduling disputes, overtime issues, and health-and-safety concerns.',
     '2020-09-14'::date
@@ -56,7 +56,7 @@ FROM t, (VALUES
   (
     'a57e0a00-0000-4000-8000-000000000012'::uuid,
     'Priya Anand', 'Shop Steward', 'steward',
-    'priya.anand@local183.theunionhub.com', '+1-555-0185',
+    'priya.anand@local183.theunionhub.ca', '+1-555-0185',
     'Warehouse · Night Shift',
     'Night-shift steward in the warehouse. Reach out about grievances, breaks, or anything that needs a rep in your corner.',
     '2022-01-10'::date

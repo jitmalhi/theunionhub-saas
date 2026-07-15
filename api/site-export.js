@@ -28,7 +28,7 @@ export default async function handler(req, res) {
       detail: 'Send Authorization: Bearer <session token> and x-tenant-id.' });
   }
 
-  const cfg = serverConfigForHost(req.headers.host || 'theunionhub.com', process.env);
+  const cfg = serverConfigForHost(req.headers.host || 'theunionhub.ca', process.env);
   const url = cfg.supabaseUrl, anonKey = cfg.anonKey;
   if (!url || !anonKey) return json(res, 503, { error: 'backend_unconfigured' });
 

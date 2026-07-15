@@ -20,7 +20,7 @@
                                Validated for WCAG AA vs #F5F4F1 (≥ 4.5:1).
      --local <number>          Union local number ("183", "B-9", etc.). Text.
      --union-type <type>       Parent org (IBEW, UA, LIUNA, …). Free text.
-     --apex <domain>           Override PUBLIC_BASE_DOMAIN env. Default theunionhub.com.
+     --apex <domain>           Override PUBLIC_BASE_DOMAIN env. Default theunionhub.ca.
 
      --skip-dns                Don't wait for DNS to propagate. Status stays
                                'pending' and you flip it manually later.
@@ -34,7 +34,7 @@
      SUPABASE_URL                  required
      SUPABASE_SERVICE_ROLE_KEY     required for tenant INSERT (bypasses RLS)
      SUPABASE_ANON_KEY             required for magic-link request
-     PUBLIC_BASE_DOMAIN            optional; defaults to 'theunionhub.com'
+     PUBLIC_BASE_DOMAIN            optional; defaults to 'theunionhub.ca'
 
      The script auto-loads .env.local from the project root if it exists.
      Process env wins over .env.local.
@@ -230,7 +230,7 @@ Optional:
   --accent <#RRGGBB>        Per-tenant accent (default ${DEFAULT_ACCENT}). WCAG AA validated.
   --local <number>          Union local number (text — "183", "B-9", …)
   --union-type <type>       Parent org ("IBEW", "UA", "LIUNA", …)
-  --apex <domain>           Override PUBLIC_BASE_DOMAIN. Default theunionhub.com.
+  --apex <domain>           Override PUBLIC_BASE_DOMAIN. Default theunionhub.ca.
   --skip-dns                Don't wait for DNS; tenant stays 'pending'
   --skip-magic-link         Don't email the admin
   --dry-run                 Validate + print plan; mutate nothing
@@ -501,7 +501,7 @@ async function main() {
 
   const { contrast } = validateOrDie(args);
 
-  const apex     = (args.apex || process.env.PUBLIC_BASE_DOMAIN || 'theunionhub.com').toLowerCase();
+  const apex     = (args.apex || process.env.PUBLIC_BASE_DOMAIN || 'theunionhub.ca').toLowerCase();
   const hostname = `${args.slug}.${apex}`;
 
   const row = {

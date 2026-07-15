@@ -12,10 +12,10 @@
       "has": [
         {
           "type": "host",
-          "value": "www.theunionhub.com"
+          "value": "www.theunionhub.ca"
         }
       ],
-      "destination": "https://theunionhub.com/$1",
+      "destination": "https://theunionhub.ca/$1",
       "permanent": true
     },
     {

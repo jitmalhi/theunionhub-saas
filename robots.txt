@@ -12,4 +12,4 @@ Disallow: /*?id=*
 # Legacy brand book — superseded by /brandbook.html, kept only as the print-version download.
 Disallow: /TheUnionHub_BrandBook.html
 
-Sitemap: https://theunionhub.com/sitemap.xml
+Sitemap: https://theunionhub.ca/sitemap.xml

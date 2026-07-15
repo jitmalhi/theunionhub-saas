@@ -54,7 +54,7 @@ function deviceFromUA(ua) {
 }
 
 function slugFromHost(host, apexEnv) {
-  const apex = String(apexEnv || 'theunionhub.com').toLowerCase();
+  const apex = String(apexEnv || 'theunionhub.ca').toLowerCase();
   const bare = String(host || '').split(':')[0].toLowerCase();
   if (!bare || bare === apex) return null;
 

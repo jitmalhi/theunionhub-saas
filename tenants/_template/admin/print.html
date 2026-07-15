@@ -294,8 +294,8 @@
 
   function renderCard(member) {
     /* The QR encodes the canonical verify URL using the CURRENT origin
-       — so on local183.theunionhub.com/admin/print the QR points at
-       local183.theunionhub.com/verify?id=…  No cross-tenant accidents. */
+       — so on local183.theunionhub.ca/admin/print the QR points at
+       local183.theunionhub.ca/verify?id=…  No cross-tenant accidents. */
     const verifyUrl  = `${window.location.origin}/verify?id=${encodeURIComponent(member.id)}`;
     const displayUrl = verifyUrl.replace(/^https?:\/\//, '');
     const since      = member.member_since

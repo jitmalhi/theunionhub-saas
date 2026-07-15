@@ -2,70 +2,70 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <url>
-    <loc>https://theunionhub.com/</loc>
+    <loc>https://theunionhub.ca/</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
-    <loc>https://theunionhub.com/about</loc>
+    <loc>https://theunionhub.ca/about</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://theunionhub.com/contact</loc>
+    <loc>https://theunionhub.ca/contact</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://theunionhub.com/audit-log</loc>
+    <loc>https://theunionhub.ca/audit-log</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://theunionhub.com/security</loc>
+    <loc>https://theunionhub.ca/security</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://theunionhub.com/brandbook</loc>
+    <loc>https://theunionhub.ca/brandbook</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://theunionhub.com/privacy</loc>
+    <loc>https://theunionhub.ca/privacy</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
-    <loc>https://theunionhub.com/terms</loc>
+    <loc>https://theunionhub.ca/terms</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
-    <loc>https://theunionhub.com/data-processing</loc>
+    <loc>https://theunionhub.ca/data-processing</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
-    <loc>https://theunionhub.com/status</loc>
+    <loc>https://theunionhub.ca/status</loc>
     <lastmod>2026-05-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>

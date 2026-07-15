@@ -75,8 +75,8 @@ export default async function handler(req, res) {
   const host = String(req.headers['x-site-host'] || req.headers.host || '')
     .split(':')[0].toLowerCase().trim();
 
-  // The one live Supabase project (primary apex), independent of the .ca host.
-  const cfg = serverConfigForHost('theunionhub.com', process.env);
+  // The one live Supabase project (primary apex = theunionhub.ca).
+  const cfg = serverConfigForHost('theunionhub.ca', process.env);
   const url = cfg.supabaseUrl, anonKey = cfg.anonKey;
   if (!url || !anonKey) return send(res, 503, notFoundPage(host), 'no-store');
 

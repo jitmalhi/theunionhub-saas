@@ -109,7 +109,7 @@ Refactor so one codebase serves both country domains, each with its **own Supaba
    - `/api/log-interaction` (DFR logs)
    - `/api/access-event` (scan analytics)
    Everything else works without it. `/api/health` returns `503` until the Vercel var is set + redeployed, `200` after. Scope note: the plain (unsuffixed) var drives only the default `.com` region; `.ca` needs its own `SUPABASE_SERVICE_ROLE_KEY_CA` (§4), so no leak risk.
-2. **No browser verification yet.** All verification this session was `node --check` (syntax) + live REST/DB audits. The rendered pages have **not** been opened end-to-end (running `vercel dev` needs a Vercel login, unavailable in the working environment). **Recommended smoke test after setting the key:** open `local183.theunionhub.com/meet/a57e0a00-0000-4000-8000-000000000010`, submit → expect `201` + a new row in `/admin/activity` and `/admin/intelligence`.
+2. **No browser verification yet.** All verification this session was `node --check` (syntax) + live REST/DB audits. The rendered pages have **not** been opened end-to-end (running `vercel dev` needs a Vercel login, unavailable in the working environment). **Recommended smoke test after setting the key:** open `local183.theunionhub.ca/meet/a57e0a00-0000-4000-8000-000000000010`, submit → expect `201` + a new row in `/admin/activity` and `/admin/intelligence`.
 3. **0016 trigger negative-test** (a non-admin steward cannot change `role`) hasn't been run — it needs an authenticated steward session.
 4. **Notifications are NOT wired.** The member-view success copy was deliberately softened to "…now on record for your union representative" (no false "notified" claim). Wire a provider if real-time notification is wanted.
 5. **`.ca`** — registry placeholder pending the Canadian project (see §4).
@@ -121,7 +121,7 @@ Refactor so one codebase serves both country domains, each with its **own Supaba
 - **Apply migrations:** paste the migration SQL into Supabase → SQL Editor → Run. They're idempotent (`IF NOT EXISTS` / `OR REPLACE` / `DROP POLICY IF EXISTS`). After DDL, run `NOTIFY pgrst, 'reload schema';`.
 - **Re-create a function that may already exist with a different signature:** drop all overloads first (a `DO` loop over `pg_proc`), then `CREATE` — `CREATE OR REPLACE` cannot change return type/param names (this bit us on 0019).
 - **Local dev:** `.env.local` points the **server** (middleware + `/api`) at the cloud project; the **browser** always uses the registry fallback (cloud). `npm run dev` only serves static files — use `vercel dev` (needs login) for middleware + `/api`. Visit tenant pages via `local183.lvh.me:3000/...`.
-- **Audit readiness:** `curl -s https://<tenant>.theunionhub.com/api/health | jq` → `ready:true` when config is set. Deeper object/security checks were done with anon-key REST probes (table existence, RPC existence, anon write/exec blocked).
+- **Audit readiness:** `curl -s https://<tenant>.theunionhub.ca/api/health | jq` → `ready:true` when config is set. Deeper object/security checks were done with anon-key REST probes (table existence, RPC existence, anon write/exec blocked).
 - **Syntax-check an embedded page module:** extract the `<script type="module">` body and `node --check` it (HTML can't be checked directly).
 
 ---

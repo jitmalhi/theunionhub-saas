@@ -18,10 +18,10 @@
 
      3. Host parse — extract slug, classify as apex vs tenant subdomain.
 
-     4. Apex (theunionhub.com) — rewrite /<path> → /app/<path>.html.
+     4. Apex (theunionhub.ca) — rewrite /<path> → /app/<path>.html.
         No tenant data needed; marketing site is tenant-agnostic.
 
-     5. Tenant subdomain (local183.theunionhub.com):
+     5. Tenant subdomain (local183.theunionhub.ca):
           a. Look up the tenant row in Supabase
              (edge cache → REST fetch, fail-open on errors).
           b. status='active'   → rewrite to /tenants/_template/<path>.html

@@ -46,10 +46,10 @@ Add these three (Settings → Environment Variables). Do NOT set
 
 ## Step 5 — Domains (CRITICAL: the wildcard)
 
-Multi-tenant subdomains (`local183.theunionhub.com`) require the wildcard.
+Multi-tenant subdomains (`local183.theunionhub.ca`) require the wildcard.
 
-- [ ] Settings → **Domains** → add `theunionhub.com`
-- [ ] Add **`*.theunionhub.com`**  ← the wildcard; without it, tenant subdomains
+- [ ] Settings → **Domains** → add `theunionhub.ca`
+- [ ] Add **`*.theunionhub.ca`**  ← the wildcard; without it, tenant subdomains
       silently 404
 - [ ] Follow Vercel's DNS instructions. If your registrar's DNS already points at
       Vercel from before, it may verify instantly; otherwise add the shown
@@ -58,11 +58,11 @@ Multi-tenant subdomains (`local183.theunionhub.com`) require the wildcard.
 
 ## Step 6 — Verify
 
-- [ ] `curl -s https://theunionhub.com/api/health` → `200` / `ready:true`
-- [ ] `curl -s https://local183.theunionhub.com/api/health` → `200`
+- [ ] `curl -s https://theunionhub.ca/api/health` → `200` / `ready:true`
+- [ ] `curl -s https://local183.theunionhub.ca/api/health` → `200`
       (proves the wildcard + tenant routing work)
-- [ ] Open `https://local183.theunionhub.com/admin` → magic-link login loads
-- [ ] DFR smoke test: `https://local183.theunionhub.com/meet/a57e0a00-0000-4000-8000-000000000010`
+- [ ] Open `https://local183.theunionhub.ca/admin` → magic-link login loads
+- [ ] DFR smoke test: `https://local183.theunionhub.ca/meet/a57e0a00-0000-4000-8000-000000000010`
       → submit → `201` → row appears in `/admin/activity`
 
 ---

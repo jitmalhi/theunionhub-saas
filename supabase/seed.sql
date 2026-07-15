@@ -6,7 +6,7 @@
 -- either upserts or is wrapped in an existence guard.
 --
 -- Purpose:
---   1. Land a 'demo' tenant so demo.theunionhub.com / demo.lvh.me:3000
+--   1. Land a 'demo' tenant so demo.theunionhub.ca / demo.lvh.me:3000
 --      stops failing-open in the middleware and starts rendering with
 --      real x-tenant-{id,name,accent} headers.
 --   2. Bind the three carry-over prototype member UUIDs to the demo
@@ -49,7 +49,7 @@ VALUES (
   '000',
   'DEMO',
   '#0F6E56',
-  'demo@theunionhub.com',
+  'demo@theunionhub.ca',
   'active'
 )
 ON CONFLICT (slug) DO UPDATE
@@ -141,7 +141,7 @@ END $$;
 -- Skipping is harmless (NOTICE in seed output). The id is pinned to a fixed
 -- uuid so the demo scan URL is stable and copy-pasteable:
 --
---   demo.theunionhub.com/access/a57e0a00-0000-4000-8000-000000000001
+--   demo.theunionhub.ca/access/a57e0a00-0000-4000-8000-000000000001
 --   demo.lvh.me:3000/access/a57e0a00-0000-4000-8000-000000000001   (local dev)
 --
 -- user_id is left NULL on purpose — this mirrors the launch reality where an
@@ -188,7 +188,7 @@ BEGIN
     'Maya Okonkwo',
     'Chief Shop Steward',
     'steward',                                   -- credential tier (0015)
-    'maya.okonkwo@demo.theunionhub.com',
+    'maya.okonkwo@demo.theunionhub.ca',
     '+1-555-0100',
     'Plant 2 · Day Shift',
     'Day-shift steward at Plant 2. Reach out about scheduling, grievances, or health-and-safety concerns — I am here to help.',
@@ -216,9 +216,9 @@ END $$;
 -- ─── D · Smoke check ─────────────────────────────────────────────────────
 -- After seeding, the routing pipeline should resolve:
 --
---   demo.theunionhub.com           →  card.html  · status=active
---   demo.theunionhub.com/verify    →  verify.html
---   demo.theunionhub.com/access/a57e0a00-0000-4000-8000-000000000001
+--   demo.theunionhub.ca           →  card.html  · status=active
+--   demo.theunionhub.ca/verify    →  verify.html
+--   demo.theunionhub.ca/access/a57e0a00-0000-4000-8000-000000000001
 --                                  →  access.html · Maya Okonkwo
 --
 -- Quick verifications (run in psql or the Supabase SQL editor):
@@ -231,7 +231,7 @@ END $$;
 --
 -- And on the wire (after deploy):
 --
---   curl -sI https://demo.theunionhub.com/card | grep -i '^x-tenant-'
+--   curl -sI https://demo.theunionhub.ca/card | grep -i '^x-tenant-'
 --     → x-tenant-id:     <uuid>
 --     → x-tenant-slug:   demo
 --     → x-tenant-name:   The Union Hub Demo Local

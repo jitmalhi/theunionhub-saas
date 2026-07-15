@@ -8,7 +8,7 @@ There is no per-tenant deploy, no per-tenant build artefact, and no
 per-tenant code. A new union becomes live the moment two things are true:
 
 1. A row exists in `public.tenants` with `slug = <name>` and `status = 'active'`.
-2. DNS for `<name>.theunionhub.com` resolves to `cname.vercel-dns.com`.
+2. DNS for `<name>.theunionhub.ca` resolves to `cname.vercel-dns.com`.
 
 ---
 
@@ -54,7 +54,7 @@ The script performs, in order:
 2. **Validate accent** — contrast against `--off-white` (#F5F4F1) must
    pass WCAG AA for body text (≥ 4.5:1). Rejects with a remediation hint.
 3. **Insert tenants row** with `status = 'pending'`.
-4. **DNS check** — resolves `<slug>.theunionhub.com`, retries with
+4. **DNS check** — resolves `<slug>.theunionhub.ca`, retries with
    exponential backoff up to 5 minutes. Fails loud if the CNAME is wrong.
 5. **Issue magic-link** to `--contact` for first admin sign-in.
 6. **Seed audit_log** with row 0 (`tenant_created`, actor = system).

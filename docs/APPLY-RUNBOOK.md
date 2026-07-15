@@ -1,11 +1,11 @@
-# APPLY-RUNBOOK — live apply evening (migrations 0022–0035 + ai-service)
+# APPLY-RUNBOOK — live apply evening (migrations 0022–0040 + ai-service)
 
 **One consolidated runbook for the live apply.** This is the gate for all further schema work (Phase 2 is held until every ✅ below passes on the live database).
 
-- **Target project:** Supabase `frdvhmzbsmczknqtexvx` (`theunionhub.com`; physical region **ca-central-1** — the `us` label in `lib/domains.js` is an env-namespace key, not the DB region).
-- **Live host for verification:** `local183.theunionhub.com` (demo/anchor tenant).
-- **What applies:** `supabase/migrations/0022`–`0035` (grievance merge `0022`–`0030` + identity harvest `0032`–`0033` + Fable-review security fixes `0034` steward-PII lockdown / `0035` member_number auto-assign; `0031` is intentionally not present — reserved).
-- **Risk profile:** additive, **zero data migration** (grievance never had live data; the identity harvest only ADDs a column + backfills + CREATE OR REPLACE). The realistic rollback is *restore the pre-apply snapshot*, not per-statement undo.
+- **Target project:** Supabase `frdvhmzbsmczknqtexvx` (now the `theunionhub.ca` primary entry in `lib/domains.js`; physical region **ca-central-1**). `theunionhub.com` is kept as a defensive alias pointing at the same project; its `us` label is only an env-namespace key, not the DB region.
+- **Live host for verification:** `local183.theunionhub.ca` (demo/anchor tenant).
+- **What applies:** `supabase/migrations/0022`–`0040` (grievance merge `0022`–`0030` + identity harvest `0032`–`0033` + Fable-review security fixes `0034` steward-PII lockdown / `0035` member_number auto-assign + **Tier-1 website product** `0036` site settings/hostnames / `0037` site content / `0038` get_public_site / `0039` export_site + **document pipeline** `0040` source_documents/document_extractions with the verify gate; `0031` is intentionally not present — reserved).
+- **Risk profile:** additive, **zero data migration** (grievance never had live data; the identity harvest only ADDs a column + backfills + CREATE OR REPLACE; the website + pipeline migrations only CREATE new, initially-empty tables/RPCs/policies). The realistic rollback is *restore the pre-apply snapshot*, not per-statement undo.
 
 > **Golden rule:** the steps are ordered and gated. **If any step fails, STOP — do not improvise fixes on the live DB. Go to §7 (Rollback).** DB migrations go through the CLI (`npx --no-install supabase db push`); the backup check is done in the **Dashboard** and the isolation tests in the **SQL Editor** (which runs as a role that can `SET ROLE`, as the tests require). No direct psql connection string is used.
 
@@ -26,7 +26,7 @@ If that ever prints ENOENT for `supabase.exe`, the binary was removed post-insta
 
 Project ref `frdvhmzbsmczknqtexvx` is written literally where the CLI needs it. For the §4 verification curls, set the live host once (PowerShell — the machine's default shell):
 ```powershell
-$env:LIVE_HOST = 'local183.theunionhub.com'      # Git Bash: export LIVE_HOST=local183.theunionhub.com
+$env:LIVE_HOST = 'local183.theunionhub.ca'      # Git Bash: export LIVE_HOST=local183.theunionhub.ca
 ```
 > No direct DB connection string is needed. The backup check runs in the Dashboard (§0) and the isolation tests run in the SQL Editor (§3). The CLI (`db push`, `migration list`) connects using the linked project + the DB password entered interactively at link time. The `npx --no-install supabase` and `curl` commands work in both PowerShell and Git Bash; the §4 curls use `$env:LIVE_HOST` (PowerShell) / `$LIVE_HOST` (Git Bash).
 
@@ -90,33 +90,33 @@ $env:LIVE_HOST = 'local183.theunionhub.com'      # Git Bash: export LIVE_HOST=lo
   ```powershell
   0001..0021 | ForEach-Object { npx --no-install supabase migration repair --status applied ('{0:0000}' -f $_) }
   ```
-  Do **not** include `0022`–`0035` — they must stay pending so §1's `db push` adds them.
-- [ ] Re-run `npx --no-install supabase migration list`. **Repair gate:** `0001`–`0021` now show in Remote, `0022`–`0035` do not, nothing else (`0031` is intentionally absent).
+  Do **not** include `0022`–`0040` — they must stay pending so §1's `db push` adds them.
+- [ ] Re-run `npx --no-install supabase migration list`. **Repair gate:** `0001`–`0021` now show in Remote, `0022`–`0040` do not, nothing else (`0031` is intentionally absent).
 
 **Gate:** CLI linked, a pre-apply backup/PITR point is recorded from the Dashboard, and `migration list` shows `0001–0021` applied with only `0022+` pending (after the §0a repair if the history was empty). Do not proceed otherwise.
 
 ---
 
-## 1 · Apply migrations 0022–0035  ⏱️ ~5 min
+## 1 · Apply migrations 0022–0040  ⏱️ ~5 min
 
 - [ ] Dry-run inspection (prints the SQL that will run, applies nothing):
   ```bash
   npx --no-install supabase db push --dry-run
   ```
-  Confirm the list is exactly `0022 … 0030, 0032, 0033, 0034, 0035` (no `0031`, nothing unexpected).
+  Confirm the list is exactly `0022 … 0030, 0032, 0033, 0034, 0035, 0036, 0037, 0038, 0039, 0040` (no `0031`, nothing unexpected).
 - [ ] Apply:
   ```bash
   npx --no-install supabase db push
   ```
-- [ ] Confirm all reported applied with no error; `npx --no-install supabase migration list` now shows `0035` as the latest applied.
+- [ ] Confirm all reported applied with no error; `npx --no-install supabase migration list` now shows `0040` as the latest applied.
 
-**Gate:** `db push` exits 0 and `migration list` shows through `0035`. Any error → §7.
+**Gate:** `db push` exits 0 and `migration list` shows through `0040`. Any error → §7.
 
 ---
 
 ## 2 · Reload PostgREST schema cache  ⏱️ ~1 min
 
-New tables/columns/RPCs (incl. `lookup_member`'s new `member_number` field and the new `lookup_steward` RPC) 404 over REST until the cache reloads. Run in **Dashboard → SQL Editor**:
+New tables/columns/RPCs (incl. `lookup_member`'s new `member_number` field, the `lookup_steward` RPC, the website RPCs `resolve_site_tenant` / `get_public_site` / `site_is_published` / `export_site`, and the `source_documents` / `document_extractions` pipeline tables) 404 over REST until the cache reloads. Run in **Dashboard → SQL Editor**:
 ```sql
 NOTIFY pgrst, 'reload schema';
 ```
@@ -134,8 +134,10 @@ Run each in **Dashboard → SQL Editor**. Each script is self-contained and ends
   Expect the notice: `PASS: members direct-read denied (anon + non-admin); lookup_member is tenant-scoped; member_number exposed on the whitelisted shape only.`
 - [ ] **Steward lookup isolation** — `supabase/tests/steward_lookup_isolation_test.sql` (0034: anon can't enumerate stewards; `lookup_steward` is tenant-scoped and returns only public fields).
   Expect the notice: `PASS: stewards direct-read denied to anon; lookup_steward is tenant-scoped and returns only public card fields.`
+- [ ] **Document pipeline verify gate** — `supabase/tests/document_pipeline_isolation_test.sql` (0040: members read only `published` extractions, admins read all, cross-tenant denied, member writes blocked).
+  Expect the notice: `PASS: verify gate holds — members read published only, admins read all, cross-tenant denied, member writes blocked.`
 
-**Gate:** ALL THREE show their `PASS:` notice with **no error**. In the SQL Editor a failed `ASSERT` surfaces as a query error (`ERROR: … FAIL: …`) instead of the notice — treat any error as a failed gate → §7. (The SQL Editor connects as a role that can `SET ROLE anon/authenticated`, which the tests require.)
+**Gate:** ALL FOUR show their `PASS:` notice with **no error**. In the SQL Editor a failed `ASSERT` surfaces as a query error (`ERROR: … FAIL: …`) instead of the notice — treat any error as a failed gate → §7. (The SQL Editor connects as a role that can `SET ROLE anon/authenticated`, which the tests require.)
 
 ---
 
@@ -175,7 +177,12 @@ The merge must not have changed what already works. Verify against `$LIVE_HOST`.
 - [ ] **DFR / interaction writer** (`/api/log-interaction`): open `https://$LIVE_HOST/meet/a57e0a00-0000-4000-8000-000000000010` (seeded steward), complete the 3-step interaction → expect `201`, and a new row appears in `/admin/activity`.
 - [ ] **Scan analytics** (`/api/access-event`): open a representative's `access.html` (scan/QR) → the per-profile view count increments (and **no** scanner-identifying data is written — schema-enforced).
 
-**Gate:** health `200`, all three verify outcomes correct, both service-role writers land their rows. Any deviation → §7.
+**4e · Website tier — publish gate + render (migrations 0036–0039)**
+- [ ] Publish the `local183` site: in **SQL Editor** `update public.site_settings set published = true where tenant_id = <local183-uuid>;` (or use the admin site editor), then `NOTIFY pgrst, 'reload schema';`.
+- [ ] **DB-level (the real gate):** `select * from public.get_public_site('<local183-uuid>');` returns the site blob, and `select public.resolve_site_tenant('<a-local183-hostname>');` resolves the tenant. Flip `published=false` and confirm `get_public_site` no longer returns published content — **the publish gate holds** (unpublished tenants don't leak).
+- [ ] **App-level (only if the site route is already deployed):** `curl -s https://$LIVE_HOST/api/site` (or open the apex/subdomain) renders the published page, not a 404.
+
+**Gate:** health `200`, all three verify outcomes correct, both service-role writers land their rows, and the published `local183` site returns content via `get_public_site` while an unpublished tenant returns none. Any deviation → §7.
 
 ---
 
@@ -201,8 +208,8 @@ The merge must not have changed what already works. Verify against `$LIVE_HOST`.
 ## 6 · Close-out
 
 - [ ] Re-run `curl -s https://$LIVE_HOST/api/health` → still `200`.
-- [ ] Record the apply in `docs/BACKLOG.md`: check off "Apply the merge (0022–0030) + deploy ai-service" in the rollout sequence.
-- [ ] **Follow-up (code, not this evening):** bump `migration_version` in `api/health.js` from `'0021'` to `'0035'` and ship on the next normal deploy.
+- [ ] Record the apply in `docs/BACKLOG.md`: check off "Apply the merge (0022–0030) + website/pipeline (0036–0040) + deploy ai-service" in the rollout sequence.
+- [ ] **Follow-up (code, not this evening):** bump `migration_version` in `api/health.js` from `'0021'` to `'0040'` and ship on the next normal deploy.
 - [ ] Notify: the gate for Phase 2 (Identity System) and for the `0031` members-RLS-hardening deploy is now met. Phase 2 remains held until explicitly resumed.
 
 ---
@@ -223,4 +230,4 @@ The merge must not have changed what already works. Verify against `$LIVE_HOST`.
 
 ---
 
-_Prepared 2026-07-05. Execute this runbook to open the gate; nothing further (Phase 2, `0031`) proceeds until every gate here has passed live._
+_Prepared 2026-07-05; extended to `0022`–`0040` (Tier-1 website product + document pipeline) 2026-07-09. Execute this runbook to open the gate; nothing further (Phase 2, `0031`) proceeds until every gate here has passed live._

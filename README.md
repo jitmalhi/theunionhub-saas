@@ -3,7 +3,7 @@
 > The system of record for who is a union member, right now.
 > No app. No password. Verified in seconds.
 
-This repository is the **multi-tenant SaaS rebuild** of [theunionhub.com](https://theunionhub.com). It supersedes the single-tenant static prototype at `C:\Theunionhub` and is engineered for horizontal scale across unions (locals, districts, internationals) on **Vercel + Supabase**.
+This repository is the **multi-tenant SaaS rebuild** of [theunionhub.ca](https://theunionhub.ca). It supersedes the single-tenant static prototype at `C:\Theunionhub` and is engineered for horizontal scale across unions (locals, districts, internationals) on **Vercel + Supabase**.
 
 Brand discipline is non-negotiable. Tokens, type, and layout rules are derived directly from the canonical brand book at [Brand/brandbook.html](Brand/brandbook.html) and materialised as CSS custom properties in [css/tokens.css](css/tokens.css). Every stylesheet imports `tokens.css` first. No raw hex values in component CSS — ever.
 
@@ -14,7 +14,7 @@ Brand discipline is non-negotiable. Tokens, type, and layout rules are derived d
 | Item                | Current                              | Target                                                                 |
 | ------------------- | ------------------------------------ | ---------------------------------------------------------------------- |
 | Hosting             | Apache (`.htaccess`)                 | Vercel (Edge + Serverless)                                             |
-| Tenancy             | Single-tenant prototype              | Multi-tenant, subdomain-routed (`<slug>.theunionhub.com`)              |
+| Tenancy             | Single-tenant prototype              | Multi-tenant, subdomain-routed (`<slug>.theunionhub.ca`)              |
 | Backend             | Supabase project `frdvhmzbsmczknqtexvx` (shared) | Supabase with strict RLS per `tenant_id`                        |
 | Frontend            | Hand-rolled HTML + 3 JS files        | Vanilla HTML + ES modules, no build step (deliberate)                  |
 | Secrets             | Centralised in `lib/supabase.js` (`resolveConfig`); env / `__UH_CONFIG__` override | Env-driven Supabase client, public anon key per tenant via API route   |
@@ -29,7 +29,7 @@ The migration is **clean-slate at the file layout**; the Supabase project is **e
 
 ### Edge & Hosting
 - **Vercel** — static assets, serverless API routes, edge middleware for subdomain → tenant resolution.
-- **Wildcard DNS** — `*.theunionhub.com` → Vercel; the root (`theunionhub.com`, `www.`) serves the marketing site.
+- **Wildcard DNS** — `*.theunionhub.ca` → Vercel; the root (`theunionhub.ca`, `www.`) serves the marketing site.
 - **No build step (Phase 1)** — vanilla HTML + ES modules served direct. A bundler is permitted later only if a real constraint appears.
 
 ### Backend
@@ -175,11 +175,11 @@ One codebase serves every union. Tenants are identified by the **leftmost label 
 
 | Host                          | Tenant slug | Resolves to                                        |
 | ----------------------------- | ----------- | -------------------------------------------------- |
-| `theunionhub.com`             | *(none)*    | Marketing site → `app/index.html`                  |
-| `www.theunionhub.com`         | *(none)*    | 301 → `theunionhub.com`                            |
-| `local183.theunionhub.com`    | `local183`  | Tenant app for IBEW Local 183                      |
-| `local419.theunionhub.com`    | `local419`  | Tenant app for IBEW Local 419                      |
-| `<any>.theunionhub.com`       | `<any>`     | Lookup in `tenants` table; 404 if no row, 410 if archived |
+| `theunionhub.ca`             | *(none)*    | Marketing site → `app/index.html`                  |
+| `www.theunionhub.ca`         | *(none)*    | 301 → `theunionhub.ca`                            |
+| `local183.theunionhub.ca`    | `local183`  | Tenant app for IBEW Local 183                      |
+| `local419.theunionhub.ca`    | `local419`  | Tenant app for IBEW Local 419                      |
+| `<any>.theunionhub.ca`       | `<any>`     | Lookup in `tenants` table; 404 if no row, 410 if archived |
 | `demo.lvh.me:3000`            | `demo`      | Local-dev seeded tenant (lvh.me → 127.0.0.1)       |
 
 **Resolution pipeline (every request, every page):**
@@ -187,14 +187,14 @@ One codebase serves every union. Tenants are identified by the **leftmost label 
 ```
    Browser request                                Vercel
    ─────────────────                              ──────────────────────────
-   GET https://local183.theunionhub.com/card?id=…
+   GET https://local183.theunionhub.ca/card?id=…
         │
         ▼
-   1. Wildcard DNS  *.theunionhub.com ─ CNAME ─►  cname.vercel-dns.com
+   1. Wildcard DNS  *.theunionhub.ca ─ CNAME ─►  cname.vercel-dns.com
         │
         ▼
    2. Edge middleware   api/_middleware.js
-        ├─ parse Host header                  →  "local183.theunionhub.com"
+        ├─ parse Host header                  →  "local183.theunionhub.ca"
         ├─ strip apex (PUBLIC_BASE_DOMAIN)    →  slug = "local183"
         ├─ SELECT id, name, status, theme
         │    FROM tenants WHERE slug = $1
@@ -217,12 +217,12 @@ One codebase serves every union. Tenants are identified by the **leftmost label 
 ```bash
 npm run new-tenant -- --slug local52 --name "IBEW Local 52" --contact admin@local52.org
 # 1. INSERT INTO tenants (slug, name, contact_email, status) VALUES …
-# 2. verifies DNS:  local52.theunionhub.com → cname.vercel-dns.com
+# 2. verifies DNS:  local52.theunionhub.ca → cname.vercel-dns.com
 # 3. issues magic-link to contact_email for first admin sign-in
 # 4. seeds the tenant's audit_log with row 0 ("tenant created")
 ```
 
-No code changes, no redeploys, no per-tenant build artefacts. `local52.theunionhub.com` is live the moment the DNS check passes and the `tenants` row exists.
+No code changes, no redeploys, no per-tenant build artefacts. `local52.theunionhub.ca` is live the moment the DNS check passes and the `tenants` row exists.
 
 **Reserved slugs** (never assignable to a union): `www`, `app`, `api`, `admin`, `status`, `docs`, `blog`, `mail`, `assets`, `cdn`, `static`, `demo`. Enforced by a CHECK constraint on `tenants.slug` and re-checked in `new-tenant.mjs`.
 
@@ -350,9 +350,9 @@ To exercise multi-tenancy locally, `lvh.me` resolves all subdomains to `127.0.0.
 
 ## 6 · Deployment
 
-- **Vercel:** connect this repo, set env vars in the project dashboard, configure custom domains (`theunionhub.com`, `*.theunionhub.com`).
+- **Vercel:** connect this repo, set env vars in the project dashboard, configure custom domains (`theunionhub.ca`, `*.theunionhub.ca`).
 - **Supabase:** migrations applied via `supabase db push` from CI. Anon key is public-safe (RLS enforces isolation); service-role key lives only in Vercel env vars, never in client code.
-- **DNS:** wildcard CNAME `*.theunionhub.com → cname.vercel-dns.com`. Apex `A` record per Vercel docs.
+- **DNS:** wildcard CNAME `*.theunionhub.ca → cname.vercel-dns.com`. Apex `A` record per Vercel docs.
 
 ---
 
