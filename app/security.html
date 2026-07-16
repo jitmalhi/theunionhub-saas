@@ -1,19 +1,258 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Security · The Union Hub</title>
-  <!-- tokens.css always first -->
-  <link rel="stylesheet" href="/css/tokens.css">
-  <link rel="stylesheet" href="/css/site.css">
-  <meta name="robots" content="noindex">
+<meta charset="utf-8">
+<title>Security — The Union Hub</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="How The Union Hub protects member personal information: TLS, encryption at rest, row-level security, audit logs, incident response, and responsible disclosure.">
+<meta name="theme-color" content="#0F6E56">
+<link rel="canonical" href="https://theunionhub.ca/security.html">
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="alternate icon" href="/favicon.ico">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Security — The Union Hub">
+<meta property="og:description" content="What we do to protect member data, and how to reach us if something is wrong.">
+<meta property="og:url" content="https://theunionhub.ca/security.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/marketing.css">
 </head>
 <body>
-  <main class="wrap">
-    <p class="eyebrow">Phase 0 · Placeholder</p>
-    <h1>Security</h1>
-    <p>This page is a Phase&nbsp;0 placeholder. Content is authored in a later phase.</p>
-  </main>
+
+<div class="util">
+  <div class="wrap">
+    <span class="util-left">Live · Roster sync</span>
+    <div class="util-right">
+      <a href="/contact">Talk to a human</a>
+      <a href="/brandbook">Brand book</a>
+      <a href="mailto:hello@theunionhub.ca">hello@theunionhub.ca</a>
+    </div>
+  </div>
+</div>
+
+<div class="nav-shell">
+  <div class="wrap">
+    <nav class="nav" aria-label="Primary">
+      <a class="nav-brand" href="/" aria-label="The Union Hub home">
+        <svg viewBox="0 0 552.18 532.22" fill="#0F6E56" aria-hidden="true"><path d="M294.51,82.88c-8.68-4.36-16.87-8.05-24.61-12.53-4.49-2.6-7.94-2.22-12.39.04-44.73,22.63-89.64,44.91-134.36,67.56-28.42,14.39-49.35,35.84-59.05,66.69-2.82,8.97-4.65,18.66-4.71,28.04-.41,63.23-.22,126.47-.22,189.7,0,1.1,0,2.2,0,3.54,0,2.11-2.3,3.43-4.12,2.35-6.56-3.88-12.45-7.12-17.77-11.11C13,398.94.06,374.78.08,344.07c.04-53.51.27-107.01-.08-160.52-.26-39.82,18.24-68.14,52.77-85.82,57.38-29.39,115.19-57.95,172.99-86.53C248.92-.24,273.54-2.17,298.87,2.05c19.59,3.26,36.38,13.21,53.72,21.86,64.71,32.29,129.36,64.68,194.02,97.06h0c2,1.01,1.99,3.86-.01,4.86-17.57,8.78-34.26,17.09-50.91,25.46-51.26,25.78-102.49,51.63-153.77,77.38-14.73,7.4-29.69,14.35-41.88,25.86-20.9,19.75-33,43.64-33.1,72.67-.24,66.71-.08,133.42-.11,200.12,0,.77-.05,1.54-.12,2.38-.16,1.92-2.21,3.08-3.94,2.23-4.9-2.41-9.36-4.6-13.81-6.83-18.15-9.09-36.26-18.26-54.46-27.24-3.39-1.67-4.62-3.71-4.62-7.59.12-71.75-.09-143.49.15-215.24.11-31.39,16.62-53.26,43.45-67.08,49.28-25.38,99.07-49.77,148.64-74.59.62-.31,1.22-.64,1.88-1.01,1.82-1.03,1.86-3.63.07-4.72-.4-.24-.79-.46-1.18-.66-6.97-3.52-14.03-6.84-20.92-10.5"/><path d="M295.15,529.05c-.22-2.62-.5-4.44-.5-6.27-.02-64.62-.21-129.25.09-193.87.14-29.23,14.47-50.34,39.77-64.2,9.73-5.33,19.8-10.05,29.73-15.02,1.49-.74,3.08-1.28,5.47-2.25.23,2.55.53,4.34.54,6.13.03,24.84.01,49.68,0,74.52,0,6.51.49,6.81,6.38,3.85,32.07-16.1,64.11-32.29,96.26-48.23,4.62-2.29,6.58-4.94,6.51-10.32-.29-25.71-.05-51.42-.21-77.13-.02-3.99,1.18-6.27,4.86-8.07,20.72-10.14,41.31-20.54,61.96-30.83,1.66-.83,3.39-1.53,5.8-2.62.14,2.42.32,4.24.33,6.06.01,78.17,0,156.35.02,234.52,0,3,.06,5.46-3.49,7.2-22.27,10.89-44.39,22.08-66.57,33.15-.88.44-1.85.7-3.63,1.36v-92.95c-4.07,1.88-7.18,3.18-10.18,4.71-31.18,15.97-62.3,32.05-93.54,47.88-3.84,1.94-4.53,4.54-4.52,8.29.09,26.93-.07,53.85.15,80.78.04,4.9-1.63,7.35-6.03,9.45-21.41,10.26-42.64,20.91-63.94,31.42-1.39.69-2.82,1.29-5.29,2.42Z"/></svg>
+        <span class="nav-brand-stack">
+          <span class="nav-brand-name">The Union Hub</span>
+          <span class="nav-brand-tag">Powering the future of union membership.</span>
+        </span>
+      </a>
+      <div class="nav-links">
+        <a href="#products">Product</a>
+        <a href="#why">For unions</a>
+        <a href="/about">About</a>
+        <a href="/security" aria-current="page">Security</a>
+        <a href="/card">Live demo</a>
+      </div>
+      <div class="nav-cta">
+        <a class="nav-signin" href="/contact">Sign in</a>
+        <a href="/contact" class="btn btn-primary">Start the pilot <span class="arrow">→</span></a>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<header class="page-head">
+  <div class="wrap">
+    <div class="eyebrow"><span class="dash"></span>Security &amp; trust</div>
+    <h1>How we protect the record of <em>who is a member, right now.</em></h1>
+    <p class="dek">A small team can be more secure than a large one — fewer hands, fewer credentials, fewer assumptions. This page describes our actual posture, not a checklist designed for a sales engineer's spreadsheet.</p>
+    <div class="meta">
+      <span>Last reviewed<strong>2026-05-09</strong></span>
+      <span>Disclosure<strong>security@theunionhub.ca</strong></span>
+      <span>Status<strong><a href="/status">/status.html</a></strong></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap prose">
+  <aside class="prose-toc" aria-label="On this page">
+    <h4>On this page</h4>
+    <ol>
+      <li><a href="#model">Threat model</a></li>
+      <li><a href="#transit">In transit</a></li>
+      <li><a href="#rest">At rest</a></li>
+      <li><a href="#access">Access &amp; identity</a></li>
+      <li><a href="#rls">Row-level security</a></li>
+      <li><a href="#audit">Audit log</a></li>
+      <li><a href="#abuse">Abuse &amp; rate limits</a></li>
+      <li><a href="#supply">Supply chain</a></li>
+      <li><a href="#backup">Backups &amp; continuity</a></li>
+      <li><a href="#ir">Incident response</a></li>
+      <li><a href="#disclosure">Responsible disclosure</a></li>
+      <li><a href="#roadmap">Roadmap</a></li>
+    </ol>
+  </aside>
+
+  <div class="prose-body">
+
+    <section id="model">
+      <h2>Threat model</h2>
+      <p>The Service exists because employers, contractors, and government agencies sometimes need to know — quickly and accurately — whether a person is a member of a particular union. The threats we worry about, in priority order, are:</p>
+      <ol>
+        <li><strong>Wrong answers.</strong> Telling a verifier that a current member is inactive, or that a former member is active, can cost someone a shift or worse. Integrity of the status field is our top concern.</li>
+        <li><strong>Unauthorized status changes.</strong> An attacker who flips a member from <code>active</code> to <code>suspended</code> commits real harm even if no data is exfiltrated.</li>
+        <li><strong>Bulk member enumeration.</strong> A list of who is in a union is itself sensitive — politically in some jurisdictions, commercially in others.</li>
+        <li><strong>Loss of audit trail.</strong> A platform that quietly forgets what it did is worse than one that says nothing.</li>
+        <li><strong>Bulk data exfiltration.</strong> Standard but lower in priority than the above because the dataset per record is small and well-bounded.</li>
+      </ol>
+      <p>Our controls are sized to those threats, not to a generic SaaS checklist.</p>
+    </section>
+
+    <section id="transit">
+      <h2>In transit</h2>
+      <p>Every request to <code>theunionhub.ca</code>, the card, the verifier, and the Supabase API is served over <strong>TLS 1.2 or higher</strong> with HSTS preloaded. We do not accept plain HTTP on production hostnames.</p>
+      <p>The verifier never includes a member's UUID in the page chrome (browser title, referrer header). Outbound links from the verify screen are <code>rel="noopener noreferrer"</code>.</p>
+    </section>
+
+    <section id="rest">
+      <h2>At rest</h2>
+      <p>The <code>members</code> table and the audit log are stored in Supabase Postgres with disk-level encryption managed by the underlying cloud provider. Application-layer encryption of specific sensitive fields is on the roadmap; today, the design relies on row-level security and minimal field set.</p>
+      <p>Daily backups are encrypted and retained for thirty (30) days. We test restore from backup at least once a quarter.</p>
+    </section>
+
+    <section id="access">
+      <h2>Access &amp; identity</h2>
+      <p>The Operator is currently a single person. Administrative access to Supabase, the hosting account, and the domain registrar uses:</p>
+      <ul>
+        <li>Unique, randomly generated passwords stored in a hardware-backed password manager;</li>
+        <li>Multi-factor authentication on every console, with hardware security keys (FIDO2) where the provider supports them;</li>
+        <li>No shared accounts, ever;</li>
+        <li>Session re-auth at least every twenty-four hours.</li>
+      </ul>
+      <p>Customer administrators sign in to the Service via a passwordless, secure email sign-in link. Sessions last twelve hours and are bound to a single browser. There is no "remember me" past that window.</p>
+      <p>Members do not have passwords. The card and verifier work over an unguessable per-member URL backed by row-level security; possession of the URL does not, by itself, prove identity.</p>
+    </section>
+
+    <section id="rls">
+      <h2>Row-level security</h2>
+      <p>The publishable anon key shipped in the front-end is, by design, public. The defence is that Supabase row-level security only allows the anon key to <strong>read a single row by exact <code>id</code> match</strong>. There is no <code>SELECT *</code> path, no <code>WHERE name LIKE</code>, no enumeration. Every other operation — insert, update, delete, list — requires the service-role key, which lives only on the server side.</p>
+      <p>The RLS policies are versioned in source control and reviewed before each release.</p>
+    </section>
+
+    <section id="audit">
+      <h2>Audit log</h2>
+      <p>Every read of a member's record — whether through the card or the verifier — and every administrative action writes a row to an append-only <code>audit_log</code> table. The full feature description, including what gets logged and how unions can use it, is on the <a href="/audit-log">audit log page</a>.</p>
+      <p>Audit log entries cannot be edited or deleted by the Operator without breaking the chain. The chain is checkpointed daily into write-once storage so that any tampering is detectable.</p>
+    </section>
+
+    <section id="abuse">
+      <h2>Abuse &amp; rate limits</h2>
+      <p>The verifier is rate-limited at the edge per IP and per member ID. Anomalous patterns — bursts of consecutive lookups, sequential UUID probing, distributed enumeration — trigger a captcha challenge and an alert to the Operator. Persistent abuse results in a temporary block and a written notice to the affected union.</p>
+    </section>
+
+    <section id="supply">
+      <h2>Supply chain</h2>
+      <p>The site is intentionally austere. Production pages depend on three external resources only: Google Fonts (typefaces), Supabase (data API), and the page itself. There is no analytics SDK, no tag manager, no chat widget, no marketing pixel. Adding a new dependency requires a written change in the project repo.</p>
+      <p>For server-side build tooling, we pin direct dependencies and review transitive updates monthly.</p>
+    </section>
+
+    <section id="backup">
+      <h2>Backups &amp; continuity</h2>
+      <p>Database: encrypted daily backups, 30-day retention, quarterly restore drill.</p>
+      <p>Static site: source of truth in version control; the running site can be redeployed from a clean repo in under thirty minutes.</p>
+      <p>Domain: registered with a registrar that supports registry-level transfer locks; the lock is on by default.</p>
+    </section>
+
+    <section id="ir">
+      <h2>Incident response</h2>
+      <p>If an incident is confirmed, the response sequence is:</p>
+      <ol>
+        <li><strong>Contain</strong> — stop the bleeding (rotate credentials, take an affected component offline, restore from a known-good backup).</li>
+        <li><strong>Notify the Customer</strong> — within seventy-two (72) hours of confirmation, with the information required by the <a href="/data-processing#breach">DPA</a>.</li>
+        <li><strong>Notify members and regulators</strong> — assist the Customer in fulfilling its statutory obligations under PIPEDA and any provincial law.</li>
+        <li><strong>Investigate</strong> — root-cause analysis with a written post-mortem.</li>
+        <li><strong>Remediate</strong> — close the gap, document the change, tell the Customer what changed.</li>
+      </ol>
+      <p>We publish a redacted summary of any material incident at <a href="/status">/status.html</a>.</p>
+    </section>
+
+    <section id="disclosure">
+      <h2>Responsible disclosure</h2>
+      <div class="callout">
+        <p>If you believe you have found a security issue, please write to <a href="mailto:security@theunionhub.ca"><strong>security@theunionhub.ca</strong></a>. Include enough detail for us to reproduce the issue. We will acknowledge within one business day and keep you posted as we investigate.</p>
+        <p><em>We will not pursue legal action against good-faith security researchers</em> who follow these guidelines: do not access more data than necessary to demonstrate the issue; do not publish before we have had a reasonable chance to fix it; do not pivot from one finding to another using the access you found.</p>
+      </div>
+      <p>We do not, today, offer a paid bug bounty. We do offer public credit on this page for anyone who reports a valid finding.</p>
+    </section>
+
+    <section id="roadmap">
+      <h2>Roadmap</h2>
+      <p>Things we know we want to add, in priority order:</p>
+      <ul>
+        <li>Application-layer field encryption for the optional photo and member name;</li>
+        <li>A SOC 2 Type II audit once the Operator is incorporated and has the second pair of hands needed for proper segregation of duties;</li>
+        <li>Customer-managed encryption keys for unions that want them;</li>
+        <li>Automated quarterly third-party penetration testing.</li>
+      </ul>
+      <p>If you are evaluating us and one of these matters today, tell us and we will give you a real timeline.</p>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <svg viewBox="0 0 552.18 532.22" fill="#1D9E75" aria-hidden="true"><path d="M294.51,82.88c-8.68-4.36-16.87-8.05-24.61-12.53-4.49-2.6-7.94-2.22-12.39.04-44.73,22.63-89.64,44.91-134.36,67.56-28.42,14.39-49.35,35.84-59.05,66.69-2.82,8.97-4.65,18.66-4.71,28.04-.41,63.23-.22,126.47-.22,189.7,0,1.1,0,2.2,0,3.54,0,2.11-2.3,3.43-4.12,2.35-6.56-3.88-12.45-7.12-17.77-11.11C13,398.94.06,374.78.08,344.07c.04-53.51.27-107.01-.08-160.52-.26-39.82,18.24-68.14,52.77-85.82,57.38-29.39,115.19-57.95,172.99-86.53C248.92-.24,273.54-2.17,298.87,2.05c19.59,3.26,36.38,13.21,53.72,21.86,64.71,32.29,129.36,64.68,194.02,97.06h0c2,1.01,1.99,3.86-.01,4.86-17.57,8.78-34.26,17.09-50.91,25.46-51.26,25.78-102.49,51.63-153.77,77.38-14.73,7.4-29.69,14.35-41.88,25.86-20.9,19.75-33,43.64-33.1,72.67-.24,66.71-.08,133.42-.11,200.12,0,.77-.05,1.54-.12,2.38-.16,1.92-2.21,3.08-3.94,2.23-4.9-2.41-9.36-4.6-13.81-6.83-18.15-9.09-36.26-18.26-54.46-27.24-3.39-1.67-4.62-3.71-4.62-7.59.12-71.75-.09-143.49.15-215.24.11-31.39,16.62-53.26,43.45-67.08,49.28-25.38,99.07-49.77,148.64-74.59.62-.31,1.22-.64,1.88-1.01,1.82-1.03,1.86-3.63.07-4.72-.4-.24-.79-.46-1.18-.66-6.97-3.52-14.03-6.84-20.92-10.5"/><path d="M295.15,529.05c-.22-2.62-.5-4.44-.5-6.27-.02-64.62-.21-129.25.09-193.87.14-29.23,14.47-50.34,39.77-64.2,9.73-5.33,19.8-10.05,29.73-15.02,1.49-.74,3.08-1.28,5.47-2.25.23,2.55.53,4.34.54,6.13.03,24.84.01,49.68,0,74.52,0,6.51.49,6.81,6.38,3.85,32.07-16.1,64.11-32.29,96.26-48.23,4.62-2.29,6.58-4.94,6.51-10.32-.29-25.71-.05-51.42-.21-77.13-.02-3.99,1.18-6.27,4.86-8.07,20.72-10.14,41.31-20.54,61.96-30.83,1.66-.83,3.39-1.53,5.8-2.62.14,2.42.32,4.24.33,6.06.01,78.17,0,156.35.02,234.52,0,3,.06,5.46-3.49,7.2-22.27,10.89-44.39,22.08-66.57,33.15-.88.44-1.85.7-3.63,1.36v-92.95c-4.07,1.88-7.18,3.18-10.18,4.71-31.18,15.97-62.3,32.05-93.54,47.88-3.84,1.94-4.53,4.54-4.52,8.29.09,26.93-.07,53.85.15,80.78.04,4.9-1.63,7.35-6.03,9.45-21.41,10.26-42.64,20.91-63.94,31.42-1.39.69-2.82,1.29-5.29,2.42Z"/></svg>
+          The Union Hub
+        </div>
+        <span class="foot-tag">Powering the future of union membership.</span>
+        <p class="foot-line">Real-time digital membership for unions. The system of record for who is a member, right now.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/card">The card</a></li>
+          <li><a href="/verify">The verify screen</a></li>
+          <li><a href="/audit-log">The audit log</a></li>
+          <li><a href="/status">Status</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="/about">About</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/brandbook">Brand book</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/privacy">Privacy</a></li>
+          <li><a href="/terms">Terms</a></li>
+          <li><a href="/data-processing">Data processing</a></li>
+          <li><a href="/security" aria-current="page">Security</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Reach us</h4>
+        <ul>
+          <li><a href="mailto:hello@theunionhub.ca">hello@</a></li>
+          <li><a href="mailto:privacy@theunionhub.ca">privacy@</a></li>
+          <li><a href="mailto:security@theunionhub.ca">security@</a></li>
+          <li><a href="mailto:support@theunionhub.ca">support@</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bar">
+      <span>The Union Hub · v1.0 · 2026</span>
+      <span>Made for organized labour. Not the other way around.</span>
+    </div>
+  </div>
+</footer>
+
+<script defer src="/js/live.js"></script>
+
 </body>
 </html>

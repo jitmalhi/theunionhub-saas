@@ -1,19 +1,328 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Status · The Union Hub</title>
-  <!-- tokens.css always first -->
-  <link rel="stylesheet" href="/css/tokens.css">
-  <link rel="stylesheet" href="/css/site.css">
-  <meta name="robots" content="noindex">
+<meta charset="utf-8">
+<title>Status — The Union Hub</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Live operational status for The Union Hub. Real-time pings of the marketing site, the member directory, and the verifier — checked from your browser.">
+<meta name="theme-color" content="#0F6E56">
+<link rel="canonical" href="https://theunionhub.ca/status.html">
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="alternate icon" href="/favicon.ico">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Status — The Union Hub">
+<meta property="og:description" content="Live operational status, checked from your own browser.">
+<meta property="og:url" content="https://theunionhub.ca/status.html">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/marketing.css">
 </head>
 <body>
-  <main class="wrap">
-    <p class="eyebrow">Phase 0 · Placeholder</p>
-    <h1>Status</h1>
-    <p>This page is a Phase&nbsp;0 placeholder. Content is authored in a later phase.</p>
-  </main>
+
+<div class="util">
+  <div class="wrap">
+    <span class="util-left">Live · Roster sync</span>
+    <div class="util-right">
+      <a href="/contact">Talk to a human</a>
+      <a href="/brandbook">Brand book</a>
+      <a href="mailto:hello@theunionhub.ca">hello@theunionhub.ca</a>
+    </div>
+  </div>
+</div>
+
+<div class="nav-shell">
+  <div class="wrap">
+    <nav class="nav" aria-label="Primary">
+      <a class="nav-brand" href="/" aria-label="The Union Hub home">
+        <svg viewBox="0 0 552.18 532.22" fill="#0F6E56" aria-hidden="true"><path d="M294.51,82.88c-8.68-4.36-16.87-8.05-24.61-12.53-4.49-2.6-7.94-2.22-12.39.04-44.73,22.63-89.64,44.91-134.36,67.56-28.42,14.39-49.35,35.84-59.05,66.69-2.82,8.97-4.65,18.66-4.71,28.04-.41,63.23-.22,126.47-.22,189.7,0,1.1,0,2.2,0,3.54,0,2.11-2.3,3.43-4.12,2.35-6.56-3.88-12.45-7.12-17.77-11.11C13,398.94.06,374.78.08,344.07c.04-53.51.27-107.01-.08-160.52-.26-39.82,18.24-68.14,52.77-85.82,57.38-29.39,115.19-57.95,172.99-86.53C248.92-.24,273.54-2.17,298.87,2.05c19.59,3.26,36.38,13.21,53.72,21.86,64.71,32.29,129.36,64.68,194.02,97.06h0c2,1.01,1.99,3.86-.01,4.86-17.57,8.78-34.26,17.09-50.91,25.46-51.26,25.78-102.49,51.63-153.77,77.38-14.73,7.4-29.69,14.35-41.88,25.86-20.9,19.75-33,43.64-33.1,72.67-.24,66.71-.08,133.42-.11,200.12,0,.77-.05,1.54-.12,2.38-.16,1.92-2.21,3.08-3.94,2.23-4.9-2.41-9.36-4.6-13.81-6.83-18.15-9.09-36.26-18.26-54.46-27.24-3.39-1.67-4.62-3.71-4.62-7.59.12-71.75-.09-143.49.15-215.24.11-31.39,16.62-53.26,43.45-67.08,49.28-25.38,99.07-49.77,148.64-74.59.62-.31,1.22-.64,1.88-1.01,1.82-1.03,1.86-3.63.07-4.72-.4-.24-.79-.46-1.18-.66-6.97-3.52-14.03-6.84-20.92-10.5"/><path d="M295.15,529.05c-.22-2.62-.5-4.44-.5-6.27-.02-64.62-.21-129.25.09-193.87.14-29.23,14.47-50.34,39.77-64.2,9.73-5.33,19.8-10.05,29.73-15.02,1.49-.74,3.08-1.28,5.47-2.25.23,2.55.53,4.34.54,6.13.03,24.84.01,49.68,0,74.52,0,6.51.49,6.81,6.38,3.85,32.07-16.1,64.11-32.29,96.26-48.23,4.62-2.29,6.58-4.94,6.51-10.32-.29-25.71-.05-51.42-.21-77.13-.02-3.99,1.18-6.27,4.86-8.07,20.72-10.14,41.31-20.54,61.96-30.83,1.66-.83,3.39-1.53,5.8-2.62.14,2.42.32,4.24.33,6.06.01,78.17,0,156.35.02,234.52,0,3,.06,5.46-3.49,7.2-22.27,10.89-44.39,22.08-66.57,33.15-.88.44-1.85.7-3.63,1.36v-92.95c-4.07,1.88-7.18,3.18-10.18,4.71-31.18,15.97-62.3,32.05-93.54,47.88-3.84,1.94-4.53,4.54-4.52,8.29.09,26.93-.07,53.85.15,80.78.04,4.9-1.63,7.35-6.03,9.45-21.41,10.26-42.64,20.91-63.94,31.42-1.39.69-2.82,1.29-5.29,2.42Z"/></svg>
+        <span class="nav-brand-stack">
+          <span class="nav-brand-name">The Union Hub</span>
+          <span class="nav-brand-tag">Powering the future of union membership.</span>
+        </span>
+      </a>
+      <div class="nav-links">
+        <a href="#products">Product</a>
+        <a href="#why">For unions</a>
+        <a href="/about">About</a>
+        <a href="/security">Security</a>
+        <a href="/card">Live demo</a>
+      </div>
+      <div class="nav-cta">
+        <a class="nav-signin" href="/contact">Sign in</a>
+        <a href="/contact" class="btn btn-primary">Start the pilot <span class="arrow">→</span></a>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<header class="page-head">
+  <div class="wrap">
+    <div class="eyebrow"><span class="dash"></span>System status</div>
+    <h1>Live, <em>checked from your own browser.</em></h1>
+    <p class="dek">Most status pages are static. This one calls the same Supabase endpoints the verifier uses, in real time, from the device you're reading this on. If your network can't reach us, this page tells the truth instead of lying green.</p>
+    <div class="meta">
+      <span>Last refresh<strong id="last-refresh">—</strong></span>
+      <span>Refresh interval<strong>60 seconds</strong></span>
+      <span>Time zone<strong>America/Toronto</strong></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" style="padding: clamp(40px, 6vw, 80px) 0 clamp(48px, 8vw, 96px);">
+
+  <div id="banner" class="status-banner" data-state="ok" role="status" aria-live="polite">
+    <span id="banner-text">Checking systems…</span>
+  </div>
+
+  <div class="status-grid" id="grid">
+    <div class="status-card" data-status="pending" data-id="site">
+      <div class="label">Component</div>
+      <div class="name">Marketing site</div>
+      <span class="pill"><span class="dot"></span><span class="state">Checking…</span></span>
+      <div class="latency"><span class="lat">—</span> · <span class="note">theunionhub.ca</span></div>
+    </div>
+    <div class="status-card" data-status="pending" data-id="api">
+      <div class="label">Component</div>
+      <div class="name">Member directory API</div>
+      <span class="pill"><span class="dot"></span><span class="state">Checking…</span></span>
+      <div class="latency"><span class="lat">—</span> · <span class="note">Supabase REST</span></div>
+    </div>
+    <div class="status-card" data-status="pending" data-id="card">
+      <div class="label">Component</div>
+      <div class="name">Card lookup</div>
+      <span class="pill"><span class="dot"></span><span class="state">Checking…</span></span>
+      <div class="latency"><span class="lat">—</span> · <span class="note">Active demo ID</span></div>
+    </div>
+    <div class="status-card" data-status="pending" data-id="verify">
+      <div class="label">Component</div>
+      <div class="name">Verifier (empty path)</div>
+      <span class="pill"><span class="dot"></span><span class="state">Checking…</span></span>
+      <div class="latency"><span class="lat">—</span> · <span class="note">Not-found probe</span></div>
+    </div>
+  </div>
+
+  <div class="prose-body" style="max-width: 68ch; margin: 32px auto 0;">
+    <section style="border-top: 0; padding-top: 0;">
+      <h2>How this page works</h2>
+      <p>Every sixty seconds, your browser performs four checks. None of them touch any member's real data:</p>
+      <ul>
+        <li><strong>Marketing site</strong> — implicit. If you're reading this page, the static site is up. Latency is the time it took your browser to fetch the page itself.</li>
+        <li><strong>Member directory API</strong> — a HEAD request to the Supabase REST root with our publishable anon key. Confirms the API is reachable and accepting our credentials.</li>
+        <li><strong>Card lookup</strong> — a GET request for the seeded demo "active" member. Confirms that the row-level-security read path returns a row in the expected shape and within an acceptable latency budget.</li>
+        <li><strong>Verifier (empty path)</strong> — a GET request for a deliberately non-existent UUID (<code>00000000-0000-0000-0000-000000000000</code>). Confirms the empty-result branch returns cleanly, which is the path real verifiers hit when an unknown ID is provided.</li>
+      </ul>
+      <p>Latency thresholds: <strong>green</strong> under 800 ms, <strong>yellow</strong> 800–1500 ms, <strong>red</strong> over 1500 ms or any error.</p>
+
+      <h2>What this page does not check</h2>
+      <ul>
+        <li>The <strong>audit log</strong>. The audit log is not publicly readable by design. Customers see audit-log health in the admin console.</li>
+        <li><strong>Email delivery</strong> for secure sign-in links or notifications. We monitor that out-of-band.</li>
+        <li><strong>Bluehost</strong> static hosting. If Bluehost is down, this page would not load — so the page being visible is the check.</li>
+      </ul>
+
+      <h2>Past incidents</h2>
+      <p id="incidents">No incidents have been reported since this page went live. When something goes wrong, we publish a redacted post-mortem here within seven days, plus a same-day summary in the banner above.</p>
+
+      <h2>Subscribe</h2>
+      <p>Customer administrators receive incident notifications by email automatically. The general public can subscribe to the same feed at <a href="mailto:support@theunionhub.ca?subject=Status%20updates">support@theunionhub.ca</a>.</p>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <svg viewBox="0 0 552.18 532.22" fill="#1D9E75" aria-hidden="true"><path d="M294.51,82.88c-8.68-4.36-16.87-8.05-24.61-12.53-4.49-2.6-7.94-2.22-12.39.04-44.73,22.63-89.64,44.91-134.36,67.56-28.42,14.39-49.35,35.84-59.05,66.69-2.82,8.97-4.65,18.66-4.71,28.04-.41,63.23-.22,126.47-.22,189.7,0,1.1,0,2.2,0,3.54,0,2.11-2.3,3.43-4.12,2.35-6.56-3.88-12.45-7.12-17.77-11.11C13,398.94.06,374.78.08,344.07c.04-53.51.27-107.01-.08-160.52-.26-39.82,18.24-68.14,52.77-85.82,57.38-29.39,115.19-57.95,172.99-86.53C248.92-.24,273.54-2.17,298.87,2.05c19.59,3.26,36.38,13.21,53.72,21.86,64.71,32.29,129.36,64.68,194.02,97.06h0c2,1.01,1.99,3.86-.01,4.86-17.57,8.78-34.26,17.09-50.91,25.46-51.26,25.78-102.49,51.63-153.77,77.38-14.73,7.4-29.69,14.35-41.88,25.86-20.9,19.75-33,43.64-33.1,72.67-.24,66.71-.08,133.42-.11,200.12,0,.77-.05,1.54-.12,2.38-.16,1.92-2.21,3.08-3.94,2.23-4.9-2.41-9.36-4.6-13.81-6.83-18.15-9.09-36.26-18.26-54.46-27.24-3.39-1.67-4.62-3.71-4.62-7.59.12-71.75-.09-143.49.15-215.24.11-31.39,16.62-53.26,43.45-67.08,49.28-25.38,99.07-49.77,148.64-74.59.62-.31,1.22-.64,1.88-1.01,1.82-1.03,1.86-3.63.07-4.72-.4-.24-.79-.46-1.18-.66-6.97-3.52-14.03-6.84-20.92-10.5"/><path d="M295.15,529.05c-.22-2.62-.5-4.44-.5-6.27-.02-64.62-.21-129.25.09-193.87.14-29.23,14.47-50.34,39.77-64.2,9.73-5.33,19.8-10.05,29.73-15.02,1.49-.74,3.08-1.28,5.47-2.25.23,2.55.53,4.34.54,6.13.03,24.84.01,49.68,0,74.52,0,6.51.49,6.81,6.38,3.85,32.07-16.1,64.11-32.29,96.26-48.23,4.62-2.29,6.58-4.94,6.51-10.32-.29-25.71-.05-51.42-.21-77.13-.02-3.99,1.18-6.27,4.86-8.07,20.72-10.14,41.31-20.54,61.96-30.83,1.66-.83,3.39-1.53,5.8-2.62.14,2.42.32,4.24.33,6.06.01,78.17,0,156.35.02,234.52,0,3,.06,5.46-3.49,7.2-22.27,10.89-44.39,22.08-66.57,33.15-.88.44-1.85.7-3.63,1.36v-92.95c-4.07,1.88-7.18,3.18-10.18,4.71-31.18,15.97-62.3,32.05-93.54,47.88-3.84,1.94-4.53,4.54-4.52,8.29.09,26.93-.07,53.85.15,80.78.04,4.9-1.63,7.35-6.03,9.45-21.41,10.26-42.64,20.91-63.94,31.42-1.39.69-2.82,1.29-5.29,2.42Z"/></svg>
+          The Union Hub
+        </div>
+        <span class="foot-tag">Powering the future of union membership.</span>
+        <p class="foot-line">Real-time digital membership for unions. The system of record for who is a member, right now.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/card">The card</a></li>
+          <li><a href="/verify">The verify screen</a></li>
+          <li><a href="/audit-log">The audit log</a></li>
+          <li><a href="/status" aria-current="page">Status</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="/about">About</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/brandbook">Brand book</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/privacy">Privacy</a></li>
+          <li><a href="/terms">Terms</a></li>
+          <li><a href="/data-processing">Data processing</a></li>
+          <li><a href="/security">Security</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Reach us</h4>
+        <ul>
+          <li><a href="mailto:hello@theunionhub.ca">hello@</a></li>
+          <li><a href="mailto:privacy@theunionhub.ca">privacy@</a></li>
+          <li><a href="mailto:security@theunionhub.ca">security@</a></li>
+          <li><a href="mailto:support@theunionhub.ca">support@</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bar">
+      <span>The Union Hub · v1.0 · 2026</span>
+      <span>Made for organized labour. Not the other way around.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  // Mirrors the configuration used by card.html and verify.html.
+  var SUPABASE_URL = 'https://frdvhmzbsmczknqtexvx.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P';
+  var ACTIVE_DEMO  = '550bc413-53db-4f83-98e4-7c5c44d721d0';
+  var EMPTY_UUID   = '00000000-0000-0000-0000-000000000000';
+
+  var GREEN_MS  = 800;
+  var YELLOW_MS = 1500;
+
+  var STATE_LABEL = {
+    ok:       'Operational',
+    degraded: 'Degraded',
+    down:     'Down'
+  };
+
+  function classify(durationMs, ok) {
+    if (!ok) return 'down';
+    if (durationMs > YELLOW_MS) return 'down';
+    if (durationMs > GREEN_MS)  return 'degraded';
+    return 'ok';
+  }
+
+  function paint(id, status, latencyMs) {
+    var card = document.querySelector('.status-card[data-id="' + id + '"]');
+    if (!card) return;
+    card.setAttribute('data-status', status);
+    var stateEl = card.querySelector('.state');
+    var latEl   = card.querySelector('.lat');
+    if (stateEl) stateEl.textContent = STATE_LABEL[status] || status;
+    if (latEl)   latEl.textContent   = latencyMs == null ? '—' : Math.round(latencyMs) + ' ms';
+  }
+
+  function timed(promiseFactory) {
+    var t0 = performance.now();
+    return promiseFactory().then(function (ok) {
+      return { ok: ok, ms: performance.now() - t0 };
+    }).catch(function () {
+      return { ok: false, ms: performance.now() - t0 };
+    });
+  }
+
+  function checkSite() {
+    // Implicit: this page loaded, so the static site is up.
+    // Latency comes from Navigation Timing if available.
+    var nav = (performance.getEntriesByType && performance.getEntriesByType('navigation') || [])[0];
+    var ms = nav ? Math.max(0, nav.responseEnd - nav.requestStart) : 0;
+    return Promise.resolve({ ok: true, ms: ms });
+  }
+
+  function checkApi() {
+    return timed(function () {
+      return fetch(SUPABASE_URL + '/rest/v1/?select=', {
+        method: 'HEAD',
+        headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+      }).then(function (r) { return r.status >= 200 && r.status < 500; });
+    });
+  }
+
+  function checkCard() {
+    return timed(function () {
+      return fetch(SUPABASE_URL + '/rest/v1/members?id=eq.' + ACTIVE_DEMO + '&select=id,status', {
+        headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+      }).then(function (r) {
+        if (!r.ok) return false;
+        return r.json().then(function (rows) { return Array.isArray(rows) && rows.length === 1; });
+      });
+    });
+  }
+
+  function checkVerify() {
+    return timed(function () {
+      return fetch(SUPABASE_URL + '/rest/v1/members?id=eq.' + EMPTY_UUID + '&select=id', {
+        headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+      }).then(function (r) {
+        if (!r.ok) return false;
+        return r.json().then(function (rows) { return Array.isArray(rows) && rows.length === 0; });
+      });
+    });
+  }
+
+  function aggregate(states) {
+    if (states.indexOf('down') !== -1)     return 'down';
+    if (states.indexOf('degraded') !== -1) return 'degraded';
+    return 'ok';
+  }
+
+  function setBanner(state) {
+    var banner = document.getElementById('banner');
+    var text = document.getElementById('banner-text');
+    if (!banner || !text) return;
+    banner.setAttribute('data-state', state);
+    if (state === 'ok')       text.textContent = 'All systems operational.';
+    if (state === 'degraded') text.textContent = 'Some systems are slow. We are watching it.';
+    if (state === 'down')     text.textContent = 'A component is failing checks. Refresh in a minute.';
+  }
+
+  function setLastRefresh() {
+    var el = document.getElementById('last-refresh');
+    if (!el) return;
+    var d = new Date();
+    var hh = String(d.getHours()).padStart(2, '0');
+    var mm = String(d.getMinutes()).padStart(2, '0');
+    var ss = String(d.getSeconds()).padStart(2, '0');
+    el.textContent = hh + ':' + mm + ':' + ss;
+  }
+
+  function tick() {
+    Promise.all([
+      checkSite(),
+      checkApi(),
+      checkCard(),
+      checkVerify()
+    ]).then(function (results) {
+      var keys = ['site', 'api', 'card', 'verify'];
+      var states = [];
+      results.forEach(function (r, i) {
+        var state = classify(r.ms, r.ok);
+        states.push(state);
+        paint(keys[i], state, r.ms);
+      });
+      setBanner(aggregate(states));
+      setLastRefresh();
+    });
+  }
+
+  tick();
+  setInterval(tick, 60000);
+})();
+</script>
+
+<script defer src="/js/live.js"></script>
+
 </body>
 </html>
