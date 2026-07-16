@@ -1,19 +1,1606 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>The Union Hub · The Union Hub</title>
-  <!-- tokens.css always first -->
-  <link rel="stylesheet" href="/css/tokens.css">
-  <link rel="stylesheet" href="/css/site.css">
-  <meta name="robots" content="noindex">
+<meta charset="utf-8">
+<title>The Union Hub — Real-time digital membership for unions</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Real-time digital membership infrastructure for unions, members, and reps. The system of record for who is a member, right now.">
+<meta name="theme-color" content="#0F6E56">
+<link rel="canonical" href="https://theunionhub.ca/">
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="alternate icon" href="/favicon.ico">
+
+<!-- Open Graph / social -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="The Union Hub">
+<meta property="og:title" content="The Union Hub — Real-time digital membership for unions">
+<meta property="og:description" content="The system of record for who is a member, right now. Verified in seconds. No app. No password.">
+<meta property="og:url" content="https://theunionhub.ca/">
+<meta property="og:image" content="https://theunionhub.ca/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Union Hub — Real-time digital membership for unions">
+<meta name="twitter:description" content="The system of record for who is a member, right now. Verified in seconds. No app. No password.">
+<meta name="twitter:image" content="https://theunionhub.ca/og-image.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700;1,900&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ──────────────────────────────────────────────────────────────
+     The Union Hub · Marketing site (barn2-style structure)
+     Brand tokens locked. No shadows. No gradients. 0.5px borders.
+     Structure mirrors a SaaS plugin homepage:
+       Utility bar → Nav → Hero → Product cards →
+       Trust stats → Bestseller spotlight → 3-col features →
+       Testimonials → CTA banner → Blog teaser → Newsletter → Footer
+     ────────────────────────────────────────────────────────────── */
+  :root {
+    --forest:        #0F6E56;
+    --active:        #1D9E75;
+    --mint:          #E1F5EE;
+    --deep-forest:   #0D1F1A;
+    --near-black:    #111111;
+    --off-white:     #F5F4F1;
+    --paper:         #FAF9F5;
+    --alert:         #E24B4A;
+    --mid-gray:      #888780;
+
+    --ink:           #111111;
+    --ink-soft:      #2A2A2A;
+    --muted:         #888780;
+    --hair:          rgba(0,0,0,0.15);
+    --hair-on-dark:  rgba(245,244,241,0.18);
+
+    --pad-x:         clamp(20px, 5vw, 88px);
+    --rad:           12px;
+    --rad-sm:        8px;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  body {
+    margin: 0;
+    background: var(--off-white);
+    color: var(--ink);
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 1.65;
+  }
+  ::selection { background: var(--forest); color: var(--off-white); }
+  img, svg { display: block; max-width: 100%; }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; }
+
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 var(--pad-x); }
+
+  h1, h2, h3, h4 { font-family: 'Playfair Display', serif; color: var(--deep-forest); margin: 0; letter-spacing: -0.01em; }
+  h1 em, h2 em, h3 em, h4 em { font-style: italic; color: var(--forest); }
+
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--forest);
+  }
+  .eyebrow .dash::before {
+    content:''; display:inline-block;
+    width:22px; height:0.5px; background: currentColor;
+    margin-right: 12px; vertical-align: middle;
+  }
+
+  /* ════════════ UTILITY BAR (barn2: top thin bar) ════════════ */
+  .util {
+    background: var(--deep-forest);
+    color: rgba(245,244,241,0.85);
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .util .wrap {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+    padding-top: 9px; padding-bottom: 9px;
+  }
+  .util-left { display: inline-flex; align-items: center; gap: 10px; }
+  .util-left::before {
+    content:''; width:7px; height:7px; border-radius:999px;
+    background: var(--active);
+    box-shadow: 0 0 0 0 rgba(29,158,117,0.55);
+    animation: pulse 2.4s ease-out infinite;
+  }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(29,158,117,0.55); }
+    70%  { box-shadow: 0 0 0 9px rgba(29,158,117,0); }
+    100% { box-shadow: 0 0 0 0 rgba(29,158,117,0); }
+  }
+  .util-right { display: none; align-items: center; gap: 22px; }
+  .util-right a:hover { color: var(--mint); }
+  @media (min-width: 760px) { .util-right { display: inline-flex; } }
+
+  /* ════════════ NAV (barn2: logo left, links centre, CTA right) ════════════ */
+  .nav-shell {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(245,244,241,0.94);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 0.5px solid var(--hair);
+  }
+  .nav {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px;
+    padding: 16px 0;
+  }
+  .nav-brand {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--deep-forest);
+    letter-spacing: -0.005em;
+  }
+  .nav-brand svg { width: 24px; height: 24px; flex: none; }
+
+  /* Tagline — three placements (nav stack, hero, footer) */
+  .nav-brand-stack {
+    display: flex; flex-direction: column;
+    line-height: 1;
+    gap: 3px;
+  }
+  .nav-brand-name {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--deep-forest);
+    letter-spacing: -0.005em;
+    line-height: 1;
+  }
+  .nav-brand-tag { display: none; }
+  @media (min-width: 1100px) {
+    .nav-brand-tag {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-weight: 500;
+      font-size: 9.5px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      line-height: 1;
+    }
+  }
+
+  .nav-links {
+    display: none;
+    gap: 28px; align-items: center;
+  }
+  .nav-links a {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--ink-soft);
+    transition: color .15s;
+  }
+  .nav-links a:hover { color: var(--forest); }
+  .nav-links .has-caret::after {
+    content:'▾'; margin-left: 4px; color: var(--muted); font-size: 10px;
+  }
+  .nav-cta { display: inline-flex; align-items: center; gap: 10px; }
+  .nav-signin {
+    display: none;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+  .nav-signin:hover { color: var(--forest); }
+  @media (min-width: 1000px) {
+    .nav-links { display: inline-flex; }
+    .nav-signin { display: inline-block; }
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    border-radius: 999px;
+    border: 0.5px solid transparent;
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--forest); color: var(--off-white); }
+  .btn-primary:hover { background: var(--deep-forest); }
+  .btn-ghost { background: transparent; color: var(--deep-forest); border-color: var(--forest); border-width: 1px; }
+  .btn-ghost:hover { background: var(--forest); color: var(--off-white); border-color: var(--forest); }
+  .btn-on-dark { background: var(--off-white); color: var(--deep-forest); }
+  .btn-on-dark:hover { background: var(--mint); }
+  .btn-ghost-on-dark { color: var(--off-white); border-color: var(--hair-on-dark); background: transparent; }
+  .btn-ghost-on-dark:hover { border-color: var(--off-white); }
+  .btn .arrow { font-family: 'DM Mono', monospace; }
+
+  /* ════════════ HERO ════════════ */
+  .hero {
+    padding: clamp(48px, 8vw, 96px) 0 clamp(48px, 8vw, 88px);
+    background: var(--off-white);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-grid {
+    display: grid; grid-template-columns: 1fr; gap: clamp(36px, 5vw, 64px);
+    align-items: center;
+  }
+  @media (min-width: 1000px) {
+    .hero-grid { grid-template-columns: 1.1fr 1fr; }
+  }
+  .hero h1 {
+    font-weight: 700;
+    font-size: clamp(40px, 6.4vw, 84px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin: 22px 0 22px;
+  }
+  .hero-tagline {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: clamp(20px, 2.4vw, 28px);
+    line-height: 1.3;
+    color: var(--forest);
+    letter-spacing: -0.005em;
+    margin: -6px 0 24px 0;
+    max-width: 32ch;
+  }
+  .hero-sub {
+    font-size: clamp(16px, 1.5vw, 19px);
+    line-height: 1.6;
+    color: var(--ink-soft);
+    max-width: 36ch;
+    margin: 0 0 32px 0;
+  }
+  .hero-sub strong { font-weight: 500; color: var(--ink); }
+  .hero-ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 36px; }
+  .hero-trust {
+    display: flex; align-items: center; gap: 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .hero-trust .dot {
+    width: 7px; height: 7px; border-radius: 999px; background: var(--active);
+  }
+
+  /* Hero stage = the card on a phone */
+  .hero-stage {
+    position: relative;
+    background: var(--mint);
+    border-radius: 24px;
+    border: 0.5px solid rgba(15,110,86,0.22);
+    padding: clamp(28px, 4vw, 48px);
+    min-height: 460px;
+    display: grid; place-items: center;
+  }
+  .hero-stage-tag {
+    position: absolute;
+    top: 18px; left: 22px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--forest);
+  }
+  .hero-stage-clock {
+    position: absolute;
+    top: 18px; right: 22px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--forest);
+  }
+
+  /* Member card (the brand) */
+  .membercard {
+    width: min(360px, 100%);
+    background: var(--off-white);
+    border-radius: var(--rad);
+    border: 0.5px solid var(--hair);
+    padding: 26px;
+  }
+  .mc-head { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .mc-head svg { width: 26px; height: 26px; }
+  .mc-org { font-family:'DM Mono',monospace; font-weight:500; font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color: var(--ink-soft); }
+  .mc-name { font-family:'Playfair Display',serif; font-weight:700; font-size:28px; line-height:1.05; color: var(--deep-forest); margin-bottom:6px; }
+  .mc-meta { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.06em; color: var(--muted); margin-bottom:16px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 13px 6px 11px;
+    border-radius: 999px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 12.5px;
+  }
+  .pill .dot { width:7px; height:7px; border-radius:999px; background: currentColor; }
+  .pill.verified { background: rgba(29,158,117,0.14); color: var(--forest); }
+  .mc-qr { margin-top: 16px; padding: 10px; border: 0.5px solid var(--hair); border-radius: var(--rad-sm); display: flex; align-items: center; gap: 12px; }
+  .mc-qr svg { width: 64px; height: 64px; flex: none; }
+  .mc-qr-text { font-family:'DM Sans',sans-serif; font-weight:300; font-size:11.5px; line-height:1.45; color: var(--ink-soft); }
+  .mc-qr-text strong { font-weight:500; color: var(--deep-forest); display:block; }
+  .mc-foot { margin-top: 18px; padding-top: 12px; border-top: 0.5px solid var(--hair); display: flex; justify-content: space-between; font-family:'DM Mono',monospace; font-weight:500; font-size:9.5px; letter-spacing:0.18em; text-transform:uppercase; color: var(--muted); }
+
+  /* Hero floating "verified" badge */
+  .floating-verified {
+    position: absolute;
+    bottom: 28px; right: 28px;
+    background: var(--off-white);
+    border: 0.5px solid var(--hair);
+    border-radius: var(--rad);
+    padding: 14px 18px;
+    display: inline-flex; align-items: center; gap: 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    max-width: 240px;
+  }
+  .floating-verified .check {
+    width: 28px; height: 28px; border-radius: 999px;
+    background: var(--active);
+    display: grid; place-items: center; flex: none;
+  }
+  .floating-verified strong { font-family:'Playfair Display',serif; font-weight:700; font-size:15px; color: var(--deep-forest); display:block; letter-spacing:-0.005em; }
+
+  /* ════════════ LOGO BAR (trusted by) ════════════ */
+  .logobar {
+    border-top: 0.5px solid var(--hair);
+    border-bottom: 0.5px solid var(--hair);
+    padding: 32px 0;
+    background: var(--off-white);
+  }
+  .logobar-grid {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 32px 56px;
+  }
+  .logobar-label {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .logobar-item {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--ink-soft);
+    letter-spacing: -0.005em;
+    opacity: 0.78;
+  }
+  .logobar-item .num {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--forest);
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* ════════════ SECTIONS ════════════ */
+  section { padding: clamp(64px, 9vw, 112px) 0; }
+
+  .section-head {
+    display: grid; gap: 16px;
+    margin: 0 auto clamp(40px, 5vw, 64px);
+    max-width: 60ch;
+    text-align: center;
+  }
+  .section-head .eyebrow { justify-self: center; }
+  .section-head h2 {
+    font-weight: 700;
+    font-size: clamp(30px, 4.4vw, 52px);
+    line-height: 1.05;
+  }
+  .section-head p { color: var(--ink-soft); margin: 0; font-size: 17px; line-height: 1.6; }
+
+  /* ════════════ PRODUCT GRID (barn2 plugin cards) ════════════ */
+  .products {
+    display: grid; gap: 20px;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 700px) { .products { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1100px) { .products { grid-template-columns: repeat(4, 1fr); gap: 18px; } }
+
+  .product-card {
+    border: 0.5px solid var(--hair);
+    border-radius: var(--rad);
+    background: var(--off-white);
+    padding: 28px;
+    display: flex; flex-direction: column;
+    gap: 14px;
+    transition: border-color .15s, transform .15s;
+  }
+  .product-card:hover { border-color: var(--forest); }
+  .product-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: var(--mint);
+    display: grid; place-items: center;
+    border: 0.5px solid rgba(15,110,86,0.22);
+  }
+  .product-icon svg { width: 24px; height: 24px; stroke: var(--forest); fill: none; stroke-width: 1.5; stroke-linecap: square; stroke-linejoin: miter; }
+  .product-card h3 {
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 1.15;
+  }
+  .product-card p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 14px;
+    line-height: 1.6;
+    flex: 1;
+  }
+  .product-card .more {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--forest);
+    margin-top: 8px;
+  }
+  .product-card .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--mint);
+    color: var(--forest);
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 9.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    align-self: flex-start;
+  }
+
+  /* ════════════ STATS BAR ════════════ */
+  .stats {
+    background: var(--deep-forest);
+    color: var(--off-white);
+  }
+  .stats .wrap {
+    display: grid; grid-template-columns: 1fr; gap: 24px;
+    padding-top: 56px; padding-bottom: 56px;
+  }
+  @media (min-width: 800px) { .stats .wrap { grid-template-columns: repeat(4, 1fr); } }
+  .stat {
+    border-left: 0.5px solid var(--hair-on-dark);
+    padding-left: 22px;
+  }
+  .stat:first-child { border-left: 0; padding-left: 0; }
+  @media (max-width: 799px) {
+    .stat { border-left: 0; border-top: 0.5px solid var(--hair-on-dark); padding-left: 0; padding-top: 16px; }
+    .stat:first-child { border-top: 0; padding-top: 0; }
+  }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-style: italic;
+    font-size: clamp(40px, 5vw, 64px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--mint);
+    margin-bottom: 8px;
+  }
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(245,244,241,0.7);
+  }
+  .stat p { margin: 8px 0 0; color: rgba(245,244,241,0.78); font-size: 14px; line-height: 1.55; max-width: 28ch; }
+
+  /* ════════════ BESTSELLER SPOTLIGHT (barn2 feature spotlight) ════════════ */
+  .spotlight { background: var(--off-white); }
+  .spotlight-grid {
+    display: grid; grid-template-columns: 1fr; gap: clamp(32px, 5vw, 64px);
+    align-items: center;
+  }
+  @media (min-width: 1000px) { .spotlight-grid { grid-template-columns: 1fr 1fr; } }
+  .spotlight-grid.flip > :first-child { order: 2; }
+
+  .spotlight-copy h2 {
+    font-weight: 700;
+    font-size: clamp(30px, 4vw, 48px);
+    line-height: 1.05;
+    margin-top: 16px;
+    margin-bottom: 16px;
+  }
+  .spotlight-copy p { color: var(--ink-soft); margin: 0 0 22px; max-width: 42ch; }
+  .spotlight-features {
+    list-style: none; padding: 0; margin: 0 0 28px;
+    display: grid; gap: 10px;
+  }
+  .spotlight-features li {
+    display: grid; grid-template-columns: 22px 1fr; gap: 12px;
+    align-items: baseline;
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+  .spotlight-features li::before {
+    content:''; display: block;
+    width: 16px; height: 16px;
+    border-radius: 999px;
+    background: var(--active);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M9 17 L14 22 L23 11' fill='none' stroke='%23F5F4F1' stroke-width='3.5' stroke-linecap='square'/></svg>");
+    background-size: 16px 16px;
+    margin-top: 4px;
+  }
+  .spotlight-features li strong { font-weight: 500; color: var(--ink); }
+
+  /* The verify-screen mock */
+  .verifyscreen {
+    background: var(--deep-forest);
+    color: var(--off-white);
+    border-radius: 20px;
+    padding: clamp(40px, 5vw, 64px);
+    border: 0.5px solid var(--hair-on-dark);
+    min-height: 360px;
+    display: flex; flex-direction: column; gap: 18px; justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .verifyscreen::after {
+    content: ''; position: absolute; inset: 0;
+    background: rgba(29,158,117,0.08);
+    pointer-events: none;
+  }
+  .vs-icon {
+    width: 72px; height: 72px; border-radius: 999px;
+    background: var(--active);
+    display: grid; place-items: center;
+    position: relative; z-index: 1;
+  }
+  .vs-state {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: clamp(48px, 5vw, 64px);
+    line-height: 1;
+    color: var(--off-white);
+    letter-spacing: -0.015em;
+    position: relative; z-index: 1;
+  }
+  .vs-state em { color: var(--active); font-style: italic; }
+  .vs-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: rgba(245,244,241,0.78);
+    line-height: 1.7;
+    position: relative; z-index: 1;
+  }
+
+  /* Roster mock */
+  .roster {
+    background: var(--off-white);
+    border: 0.5px solid var(--hair);
+    border-radius: var(--rad);
+    overflow: hidden;
+  }
+  .roster-head {
+    padding: 14px 18px;
+    border-bottom: 0.5px solid var(--hair);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .roster-row {
+    padding: 12px 18px;
+    border-bottom: 0.5px solid var(--hair);
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 14px;
+    align-items: center;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+  }
+  .roster-row:last-child { border-bottom: 0; }
+  .roster-name { font-weight: 500; color: var(--deep-forest); }
+  .roster-id { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.04em; }
+  .roster-status {
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--forest);
+    font-weight: 500;
+  }
+  .roster-status.invalid { color: var(--alert); }
+
+  /* ════════════ 3-COL FEATURES (Why Barn2 → Why Union Hub) ════════════ */
+  .why { background: var(--mint); }
+  .why .section-head h2 { color: var(--deep-forest); }
+  .why-grid {
+    display: grid; grid-template-columns: 1fr; gap: 22px;
+  }
+  @media (min-width: 900px) { .why-grid { grid-template-columns: repeat(3, 1fr); } }
+  .why-card {
+    background: var(--off-white);
+    border-radius: var(--rad);
+    border: 0.5px solid rgba(15,110,86,0.22);
+    padding: clamp(24px, 3vw, 36px);
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .why-num {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-style: italic;
+    font-size: 56px;
+    line-height: 0.85;
+    color: var(--forest);
+    letter-spacing: -0.02em;
+  }
+  .why-card h3 {
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1.15;
+  }
+  .why-card p { margin: 0; color: var(--ink-soft); font-size: 14.5px; line-height: 1.65; }
+
+  /* ════════════ TESTIMONIALS ════════════ */
+  .testis-grid {
+    display: grid; grid-template-columns: 1fr; gap: 20px;
+  }
+  @media (min-width: 800px) { .testis-grid { grid-template-columns: repeat(3, 1fr); } }
+  .testi {
+    border: 0.5px solid var(--hair);
+    border-radius: var(--rad);
+    padding: clamp(24px, 3vw, 32px);
+    background: var(--off-white);
+    display: flex; flex-direction: column; gap: 18px;
+  }
+  .testi-stars {
+    display: inline-flex; gap: 4px;
+    color: var(--forest);
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.04em;
+  }
+  .testi-q {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: 19px;
+    line-height: 1.45;
+    color: var(--deep-forest);
+    margin: 0;
+  }
+  .testi-q em { color: var(--forest); font-style: italic; }
+  .testi-attr {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 0.5px solid var(--hair);
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .testi-attr b { color: var(--deep-forest); }
+
+  /* ════════════ CTA BANNER (barn2: All Access Pass band) ════════════ */
+  .cta-banner {
+    background: var(--forest);
+    color: var(--off-white);
+  }
+  .cta-banner .wrap {
+    display: grid; grid-template-columns: 1fr; gap: 32px;
+    align-items: center;
+    padding-top: clamp(56px, 8vw, 96px);
+    padding-bottom: clamp(56px, 8vw, 96px);
+  }
+  @media (min-width: 900px) { .cta-banner .wrap { grid-template-columns: 1.4fr auto; } }
+  .cta-banner .eyebrow { color: rgba(245,244,241,0.78); }
+  .cta-banner h2 {
+    font-weight: 700;
+    font-size: clamp(34px, 5vw, 60px);
+    line-height: 1;
+    color: var(--off-white);
+    margin: 18px 0 18px;
+    letter-spacing: -0.02em;
+  }
+  .cta-banner h2 em { color: var(--mint); }
+  .cta-banner p {
+    color: rgba(245,244,241,0.82);
+    margin: 0;
+    max-width: 44ch;
+    font-size: 16.5px;
+    line-height: 1.6;
+  }
+  .cta-banner .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+
+  /* ════════════ BLOG TEASER ════════════ */
+  .blog-grid {
+    display: grid; grid-template-columns: 1fr; gap: 20px;
+  }
+  @media (min-width: 800px) { .blog-grid { grid-template-columns: repeat(3, 1fr); } }
+  .post {
+    border: 0.5px solid var(--hair);
+    border-radius: var(--rad);
+    background: var(--off-white);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: border-color .15s;
+  }
+  .post:hover { border-color: var(--forest); }
+  .post-hero {
+    aspect-ratio: 16 / 9;
+    background: var(--mint);
+    border-bottom: 0.5px solid rgba(15,110,86,0.22);
+    display: grid; place-items: center;
+    position: relative;
+  }
+  .post-hero .num {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-style: italic;
+    font-size: 96px;
+    color: var(--forest);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .post-hero .tag {
+    position: absolute; top: 14px; left: 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--forest);
+    font-weight: 500;
+  }
+  .post-body { padding: 22px 24px 26px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+  .post-meta {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .post h3 {
+    font-weight: 700;
+    font-size: 21px;
+    line-height: 1.2;
+    color: var(--deep-forest);
+    margin: 0;
+  }
+  .post p { margin: 0; font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
+  .post .read {
+    margin-top: auto;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--forest);
+  }
+
+  /* ════════════ NEWSLETTER ════════════ */
+  .newsletter {
+    background: var(--mint);
+    border-top: 0.5px solid rgba(15,110,86,0.22);
+    border-bottom: 0.5px solid rgba(15,110,86,0.22);
+  }
+  .newsletter .wrap {
+    display: grid; grid-template-columns: 1fr; gap: 28px;
+    align-items: center;
+    padding-top: 56px; padding-bottom: 56px;
+  }
+  @media (min-width: 900px) { .newsletter .wrap { grid-template-columns: 1fr 1fr; } }
+  .newsletter h3 {
+    font-weight: 700;
+    font-size: clamp(24px, 3vw, 34px);
+    line-height: 1.1;
+    color: var(--deep-forest);
+    margin: 8px 0 6px;
+  }
+  .newsletter p { margin: 0; color: var(--ink-soft); font-size: 15px; max-width: 44ch; }
+  .newsletter form {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    background: var(--off-white);
+    padding: 6px;
+    border-radius: 999px;
+    border: 0.5px solid rgba(15,110,86,0.22);
+  }
+  .newsletter input[type="email"] {
+    flex: 1; min-width: 200px;
+    border: 0; outline: 0; background: transparent;
+    padding: 12px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .newsletter input[type="email"]::placeholder { color: var(--muted); }
+  .newsletter button { border: 0; cursor: pointer; }
+
+  /* ════════════ FOOTER ════════════ */
+  footer {
+    background: var(--deep-forest);
+    color: rgba(245,244,241,0.78);
+    padding: clamp(56px, 8vw, 96px) 0 28px;
+  }
+  .foot-grid {
+    display: grid; grid-template-columns: 1fr; gap: 36px;
+    padding-bottom: 48px;
+    border-bottom: 0.5px solid var(--hair-on-dark);
+  }
+  @media (min-width: 800px) { .foot-grid { grid-template-columns: 1.7fr 1fr 1fr 1fr 1fr; gap: 32px; } }
+  .foot-brand {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--off-white);
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px;
+  }
+  .foot-brand svg { width: 26px; height: 26px; }
+  .foot-tag {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--mint);
+    margin: -2px 0 14px 0;
+  }
+  .foot-line { color: rgba(245,244,241,0.7); font-size: 14px; line-height: 1.65; max-width: 36ch; margin-bottom: 22px; }
+  .foot-social { display: flex; gap: 10px; }
+  .foot-social a {
+    width: 34px; height: 34px;
+    border-radius: 999px;
+    border: 0.5px solid var(--hair-on-dark);
+    display: grid; place-items: center;
+    color: var(--off-white);
+    transition: border-color .15s, background .15s;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 11px;
+  }
+  .foot-social a:hover { background: var(--off-white); color: var(--deep-forest); }
+  .foot-col h4 {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--mint);
+    margin: 0 0 14px;
+  }
+  .foot-col ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .foot-col a {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    font-size: 14px;
+    color: var(--off-white);
+    transition: color .15s;
+  }
+  .foot-col a:hover { color: var(--mint); }
+  .foot-bar {
+    padding-top: 24px;
+    display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(245,244,241,0.55);
+  }
+
+  :focus-visible { outline: 2px solid var(--active); outline-offset: 3px; border-radius: 6px; }
+
+  /* ════════════ MOTION & FEEDBACK ════════════ */
+  /* Brand-safe: no shadows, no gradients, no blur. */
+  /* No content-hiding animation — interaction polish only. */
+
+  html { scroll-padding-top: 84px; }
+
+  /* Sticky nav — shrink + sharper hairline at scroll. */
+  .nav-shell { transition: background-color .2s ease, border-color .2s ease; }
+  .nav        { transition: padding .25s cubic-bezier(.2,.7,.2,1); }
+  .nav-shell.is-scrolled .nav { padding: 10px 0; }
+  .nav-shell.is-scrolled      { background: rgba(245,244,241,0.97); border-bottom-color: rgba(0,0,0,0.20); }
+
+  /* Buttons — press feedback + gentle hover lift via translate. */
+  .btn { transition: background .18s ease, color .18s ease, border-color .18s ease, transform .14s ease; }
+  .btn:hover  { transform: translateY(-1px); }
+  .btn:active { transform: translateY(1px); transition-duration: .05s; }
+
+  /* Cards — lift via translate + border colour shift. No shadow. */
+  .product-card { transition: border-color .2s ease, transform .25s cubic-bezier(.2,.7,.2,1); }
+  .product-card:hover { transform: translateY(-3px); border-color: var(--forest); }
+
+  .post { transition: border-color .2s ease, transform .25s cubic-bezier(.2,.7,.2,1); }
+  .post:hover { transform: translateY(-3px); border-color: var(--forest); }
+
+  .testi { transition: border-color .2s ease, transform .25s cubic-bezier(.2,.7,.2,1); }
+  .testi:hover { transform: translateY(-2px); border-color: var(--forest); }
+
+  /* "More" / "Read" links — underline draws in on parent hover. */
+  .product-card .more,
+  .post .read {
+    position: relative; display: inline-block;
+  }
+  .product-card .more::after,
+  .post .read::after {
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: -3px;
+    height: 0.5px; background: var(--forest);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform .28s cubic-bezier(.2,.7,.2,1);
+  }
+  .product-card:hover .more::after,
+  .post:hover .read::after { transform: scaleX(1); }
+
+  /* Footer + nav links — same underline rule. */
+  .nav-links a, .foot-col a { position: relative; }
+  .nav-links a::after, .foot-col a::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -2px;
+    height: 0.5px; background: currentColor; opacity: 0.5;
+    transform: scaleX(0); transform-origin: left;
+    transition: transform .25s cubic-bezier(.2,.7,.2,1);
+  }
+  .nav-links a:hover::after, .foot-col a:hover::after { transform: scaleX(1); }
+
+  /* Logo bar — subtle hover. */
+  .logobar-item { transition: opacity .2s ease, color .2s ease; }
+  .logobar-item:hover { opacity: 1; color: var(--forest); }
+
+  /* Reduced-motion: kill hover translates and instant transitions. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      transition-duration: .001ms !important;
+      scroll-behavior: auto !important;
+    }
+    .btn:hover, .btn:active,
+    .product-card:hover, .post:hover, .testi:hover { transform: none; }
+  }
+</style>
 </head>
 <body>
-  <main class="wrap">
-    <p class="eyebrow">Phase 0 · Placeholder</p>
-    <h1>The Union Hub</h1>
-    <p>This page is a Phase&nbsp;0 placeholder. Content is authored in a later phase.</p>
-  </main>
+
+<!-- ════════════ UTILITY BAR ════════════ -->
+<div class="util">
+  <div class="wrap">
+    <span class="util-left">Live · Roster sync</span>
+    <div class="util-right">
+      <a href="#pilot">Talk to a human</a>
+      <a href="/brandbook">Brand book</a>
+      <a href="mailto:hello@theunionhub.app">hello@theunionhub.app</a>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ NAV ════════════ -->
+<div class="nav-shell">
+  <div class="wrap">
+    <nav class="nav" aria-label="Primary">
+      <a class="nav-brand" href="#top" aria-label="The Union Hub home">
+        <svg viewBox="0 0 552.18 532.22" fill="#0F6E56" aria-hidden="true">
+          <path d="M294.51,82.88c-8.68-4.36-16.87-8.05-24.61-12.53-4.49-2.6-7.94-2.22-12.39.04-44.73,22.63-89.64,44.91-134.36,67.56-28.42,14.39-49.35,35.84-59.05,66.69-2.82,8.97-4.65,18.66-4.71,28.04-.41,63.23-.22,126.47-.22,189.7,0,1.1,0,2.2,0,3.54,0,2.11-2.3,3.43-4.12,2.35-6.56-3.88-12.45-7.12-17.77-11.11C13,398.94.06,374.78.08,344.07c.04-53.51.27-107.01-.08-160.52-.26-39.82,18.24-68.14,52.77-85.82,57.38-29.39,115.19-57.95,172.99-86.53C248.92-.24,273.54-2.17,298.87,2.05c19.59,3.26,36.38,13.21,53.72,21.86,64.71,32.29,129.36,64.68,194.02,97.06h0c2,1.01,1.99,3.86-.01,4.86-17.57,8.78-34.26,17.09-50.91,25.46-51.26,25.78-102.49,51.63-153.77,77.38-14.73,7.4-29.69,14.35-41.88,25.86-20.9,19.75-33,43.64-33.1,72.67-.24,66.71-.08,133.42-.11,200.12,0,.77-.05,1.54-.12,2.38-.16,1.92-2.21,3.08-3.94,2.23-4.9-2.41-9.36-4.6-13.81-6.83-18.15-9.09-36.26-18.26-54.46-27.24-3.39-1.67-4.62-3.71-4.62-7.59.12-71.75-.09-143.49.15-215.24.11-31.39,16.62-53.26,43.45-67.08,49.28-25.38,99.07-49.77,148.64-74.59.62-.31,1.22-.64,1.88-1.01,1.82-1.03,1.86-3.63.07-4.72-.4-.24-.79-.46-1.18-.66-6.97-3.52-14.03-6.84-20.92-10.5"/>
+          <path d="M295.15,529.05c-.22-2.62-.5-4.44-.5-6.27-.02-64.62-.21-129.25.09-193.87.14-29.23,14.47-50.34,39.77-64.2,9.73-5.33,19.8-10.05,29.73-15.02,1.49-.74,3.08-1.28,5.47-2.25.23,2.55.53,4.34.54,6.13.03,24.84.01,49.68,0,74.52,0,6.51.49,6.81,6.38,3.85,32.07-16.1,64.11-32.29,96.26-48.23,4.62-2.29,6.58-4.94,6.51-10.32-.29-25.71-.05-51.42-.21-77.13-.02-3.99,1.18-6.27,4.86-8.07,20.72-10.14,41.31-20.54,61.96-30.83,1.66-.83,3.39-1.53,5.8-2.62.14,2.42.32,4.24.33,6.06.01,78.17,0,156.35.02,234.52,0,3,.06,5.46-3.49,7.2-22.27,10.89-44.39,22.08-66.57,33.15-.88.44-1.85.7-3.63,1.36v-92.95c-4.07,1.88-7.18,3.18-10.18,4.71-31.18,15.97-62.3,32.05-93.54,47.88-3.84,1.94-4.53,4.54-4.52,8.29.09,26.93-.07,53.85.15,80.78.04,4.9-1.63,7.35-6.03,9.45-21.41,10.26-42.64,20.91-63.94,31.42-1.39.69-2.82,1.29-5.29,2.42Z"/>
+        </svg>
+        <span class="nav-brand-stack">
+          <span class="nav-brand-name">The Union Hub</span>
+          <span class="nav-brand-tag">Powering the future of union membership.</span>
+        </span>
+      </a>
+      <div class="nav-links">
+        <a class="has-caret" href="#products">Product</a>
+        <a href="#why">For unions</a>
+        <a href="#testis">Customers</a>
+        <a class="has-caret" href="#blog">Resources</a>
+        <a href="/card">Live demo</a>
+        <a href="/brandbook">Brand book</a>
+      </div>
+      <div class="nav-cta">
+        <a class="nav-signin" href="#pilot">Sign in</a>
+        <a href="#pilot" class="btn btn-primary">Start the pilot <span class="arrow">→</span></a>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<!-- ════════════ HERO ════════════ -->
+<header id="top" class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow"><span class="dash"></span>Real-time digital membership</div>
+        <h1>Real-time digital<br>membership for<br><em>unions.</em></h1>
+        <p class="hero-tagline">Powering the future of union membership.</p>
+        <p class="hero-sub">The system of record for who is a member, <strong>right now.</strong> Verified in seconds. No app. No password.</p>
+        <div class="hero-ctas">
+          <a href="#pilot" class="btn btn-primary">Start the pilot <span class="arrow">→</span></a>
+          <a href="/card" class="btn btn-ghost">See the live card</a>
+        </div>
+        <div class="hero-trust">
+          <span class="dot"></span>
+          <span>Built with locals, not at them</span>
+        </div>
+      </div>
+
+      <div class="hero-stage" aria-label="A member's card on their phone">
+        <div class="hero-stage-tag">Member view</div>
+        <div class="hero-stage-clock">00:12 ⏱</div>
+
+        <div class="membercard">
+          <div class="mc-head">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <circle cx="60" cy="60" r="52" fill="#0F6E56"/>
+              <path d="M36 62 L52 78 L86 42" fill="none" stroke="#F5F4F1" stroke-width="9" stroke-linecap="square"/>
+            </svg>
+            <span class="mc-org">Local 412 · Healthcare Workers</span>
+          </div>
+          <div class="mc-name">Maya Okonkwo</div>
+          <div class="mc-meta">Active member since 2019 · UH–2026–104873</div>
+          <div class="pill verified" style="margin-bottom:6px;"><span class="dot"></span>Verified</div>
+
+          <div class="mc-qr" aria-hidden="true">
+            <svg viewBox="0 0 64 64">
+              <rect width="64" height="64" fill="#F5F4F1"/>
+              <g fill="#111111">
+                <rect x="6"  y="6"  width="14" height="14"/>
+                <rect x="44" y="6"  width="14" height="14"/>
+                <rect x="6"  y="44" width="14" height="14"/>
+                <rect x="10" y="10" width="6"  height="6" fill="#F5F4F1"/>
+                <rect x="48" y="10" width="6"  height="6" fill="#F5F4F1"/>
+                <rect x="10" y="48" width="6"  height="6" fill="#F5F4F1"/>
+                <rect x="26" y="8"  width="2" height="2"/><rect x="30" y="8"  width="2" height="2"/><rect x="34" y="8"  width="2" height="2"/>
+                <rect x="26" y="14" width="2" height="2"/><rect x="34" y="14" width="2" height="2"/>
+                <rect x="26" y="22" width="2" height="2"/><rect x="30" y="22" width="2" height="2"/><rect x="34" y="22" width="2" height="2"/><rect x="40" y="22" width="2" height="2"/>
+                <rect x="22" y="28" width="2" height="2"/><rect x="26" y="28" width="2" height="2"/><rect x="34" y="28" width="2" height="2"/>
+                <rect x="22" y="34" width="2" height="2"/><rect x="30" y="34" width="2" height="2"/><rect x="38" y="34" width="2" height="2"/>
+                <rect x="22" y="40" width="2" height="2"/><rect x="26" y="40" width="2" height="2"/><rect x="30" y="40" width="2" height="2"/><rect x="40" y="40" width="2" height="2"/>
+                <rect x="26" y="46" width="2" height="2"/><rect x="34" y="46" width="2" height="2"/><rect x="40" y="46" width="2" height="2"/>
+                <rect x="26" y="52" width="2" height="2"/><rect x="30" y="52" width="2" height="2"/><rect x="38" y="52" width="2" height="2"/>
+              </g>
+            </svg>
+            <div class="mc-qr-text">
+              <strong>Show this to your rep.</strong>
+              One tap. No app.
+            </div>
+          </div>
+          <div class="mc-foot">
+            <span>The Union Hub</span><span>Last sync · 12:04</span>
+          </div>
+        </div>
+
+        <div class="floating-verified" aria-hidden="true">
+          <div class="check">
+            <svg width="16" height="16" viewBox="0 0 32 32"><path d="M9 17 L14 22 L23 11" fill="none" stroke="#F5F4F1" stroke-width="3.5" stroke-linecap="square"/></svg>
+          </div>
+          <div>
+            <strong>Verified.</strong>
+            Active member since 2019
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ════════════ LOGO BAR ════════════ -->
+<div class="logobar">
+  <div class="wrap">
+    <div class="logobar-grid">
+      <span class="logobar-label">Built with locals across</span>
+      <span class="logobar-item">Healthcare Workers 412</span>
+      <span class="logobar-item">Transit Workers 88</span>
+      <span class="logobar-item">Grocery &amp; Retail 611</span>
+      <span class="logobar-item">Building Trades 27</span>
+      <span class="logobar-item">Public Employees 350</span>
+      <span class="logobar-item" style="opacity:1;color:var(--forest);">+ 11 more <span class="num">In pilot · 2026</span></span>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ PRODUCT GRID ════════════ -->
+<section id="products">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow"><span class="dash"></span>The four surfaces</div>
+      <h2>One product. Four <em>screens.</em></h2>
+      <p>Each surface answers one question. Together they replace the paper card, the spreadsheet, and the phone tree.</p>
+    </div>
+
+    <div class="products">
+      <article class="product-card">
+        <div class="product-icon">
+          <svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="1"/><line x1="4" y1="10" x2="20" y2="10"/><line x1="8" y1="14" x2="13" y2="14"/></svg>
+        </div>
+        <span class="badge">Member · Live demo</span>
+        <h3>The card.</h3>
+        <p>What a member opens on their phone. One tap from a text. No install, no account, no password.</p>
+        <a href="/card?state=active" class="more">Open the card →</a>
+      </article>
+
+      <article class="product-card">
+        <div class="product-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12 L11 15 L16 9"/></svg>
+        </div>
+        <span class="badge">Rep · Live demo</span>
+        <h3>The verify screen.</h3>
+        <p>What a rep sees when scanning. Verified or Invalid. A status, a name, a date. Nothing else to read.</p>
+        <a href="/verify?result=verified" class="more">Open the screen →</a>
+      </article>
+
+      <article class="product-card">
+        <div class="product-icon">
+          <svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+        </div>
+        <span class="badge">Admin</span>
+        <h3>The roster.</h3>
+        <p>Upload a CSV. Edit a status. Export the list. The union owns the data — exportable any time.</p>
+        <a href="#roster" class="more">See the roster →</a>
+      </article>
+
+      <article class="product-card">
+        <div class="product-icon">
+          <svg viewBox="0 0 24 24"><path d="M5 4 H19 V20 H5 Z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+        </div>
+        <span class="badge">Board</span>
+        <h3>The audit log.</h3>
+        <p>Every scan, every export, every sync. Append-only. For the people who sign the contract and answer to members.</p>
+        <a href="/audit-log" class="more">See the log →</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ STATS ════════════ -->
+<section class="stats" aria-label="The numbers">
+  <div class="wrap">
+    <div class="stat">
+      <div class="stat-num">12s</div>
+      <div class="stat-label">Verification time</div>
+      <p>Camera, scan, screen. The line moves.</p>
+    </div>
+    <div class="stat">
+      <div class="stat-num">0</div>
+      <div class="stat-label">Apps to install</div>
+      <p>Browser-based. Works on any phone, any version.</p>
+    </div>
+    <div class="stat">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Roster ownership</div>
+      <p>The union owns the data. Always. Exportable any time.</p>
+    </div>
+    <div class="stat">
+      <div class="stat-num">2 wk</div>
+      <div class="stat-label">Pilot to live</div>
+      <p>One local. Real members. Real reps. Real verifications.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ LIVE NOW — real Supabase counts ════════════ -->
+<section class="live-now" aria-label="Live numbers">
+  <div class="wrap">
+    <div class="uh-live-strip" role="status" aria-live="polite">
+      <div class="uh-live-cell">
+        <div class="label"><span class="uh-dot" aria-hidden="true"></span>Members on platform</div>
+        <div class="num" data-live-stat="members">4,218</div>
+        <div class="sub">Across active locals · refreshed every minute.</div>
+      </div>
+      <div class="uh-live-cell">
+        <div class="label"><span class="uh-dot" aria-hidden="true"></span>Verifications today</div>
+        <div class="num" data-live-stat="verifications_today">312</div>
+        <div class="sub">Card and verifier hits since 00:00 ET.</div>
+      </div>
+      <div class="uh-live-cell">
+        <div class="label"><span class="uh-dot" aria-hidden="true"></span>Locals served</div>
+        <div class="num" data-live-stat="locals">1</div>
+        <div class="sub">Live unions on the system of record.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ SPOTLIGHT 1 — THE CARD ════════════ -->
+<section class="spotlight" id="card">
+  <div class="wrap">
+    <div class="spotlight-grid">
+      <div class="spotlight-copy">
+        <div class="eyebrow"><span class="dash"></span>The member card</div>
+        <h2>The card is the <em>brand.</em></h2>
+        <p>What a member opens on their phone. What a rep sees when scanning. The most-used surface of the entire product.</p>
+        <ul class="spotlight-features">
+          <li><span><strong>One tap.</strong> A text from the local. No app. No account. No friction.</span></li>
+          <li><span><strong>Always current.</strong> Pulls from the live roster. The card reflects today's truth.</span></li>
+          <li><span><strong>Recoverable.</strong> Lose the phone, log in on another, reload the link. Done.</span></li>
+        </ul>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <a href="/card?state=active" class="btn btn-primary">Open the live card <span class="arrow">→</span></a>
+          <a href="/verify?result=verified" class="btn btn-ghost">See the verify screen</a>
+        </div>
+      </div>
+
+      <div class="hero-stage" style="background: var(--mint); min-height: 0; padding: clamp(36px, 4vw, 56px); position: relative;">
+        <div class="hero-stage-tag">Member view</div>
+        <div class="membercard">
+          <div class="mc-head">
+            <svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="#0F6E56"/><path d="M36 62 L52 78 L86 42" fill="none" stroke="#F5F4F1" stroke-width="9" stroke-linecap="square"/></svg>
+            <span class="mc-org">Local 412 · Healthcare Workers</span>
+          </div>
+          <div class="mc-name">Maya Okonkwo</div>
+          <div class="mc-meta">Active member since 2019 · UH–2026–104873</div>
+          <div class="pill verified" style="margin-bottom:6px;"><span class="dot"></span>Verified</div>
+          <div class="mc-qr" aria-hidden="true">
+            <svg viewBox="0 0 64 64"><rect width="64" height="64" fill="#F5F4F1"/><g fill="#111111"><rect x="6" y="6" width="14" height="14"/><rect x="44" y="6" width="14" height="14"/><rect x="6" y="44" width="14" height="14"/><rect x="10" y="10" width="6" height="6" fill="#F5F4F1"/><rect x="48" y="10" width="6" height="6" fill="#F5F4F1"/><rect x="10" y="48" width="6" height="6" fill="#F5F4F1"/><rect x="26" y="8" width="2" height="2"/><rect x="30" y="8" width="2" height="2"/><rect x="34" y="8" width="2" height="2"/><rect x="26" y="14" width="2" height="2"/><rect x="34" y="14" width="2" height="2"/><rect x="26" y="22" width="2" height="2"/><rect x="30" y="22" width="2" height="2"/><rect x="34" y="22" width="2" height="2"/><rect x="40" y="22" width="2" height="2"/><rect x="22" y="28" width="2" height="2"/><rect x="26" y="28" width="2" height="2"/><rect x="34" y="28" width="2" height="2"/><rect x="22" y="34" width="2" height="2"/><rect x="30" y="34" width="2" height="2"/><rect x="38" y="34" width="2" height="2"/><rect x="22" y="40" width="2" height="2"/><rect x="26" y="40" width="2" height="2"/><rect x="30" y="40" width="2" height="2"/><rect x="40" y="40" width="2" height="2"/><rect x="26" y="46" width="2" height="2"/><rect x="34" y="46" width="2" height="2"/><rect x="40" y="46" width="2" height="2"/><rect x="26" y="52" width="2" height="2"/><rect x="30" y="52" width="2" height="2"/><rect x="38" y="52" width="2" height="2"/></g></svg>
+            <div class="mc-qr-text"><strong>Show this to your rep.</strong>One tap. No app.</div>
+          </div>
+          <div class="mc-foot"><span>The Union Hub</span><span>Last sync · 12:04</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ SPOTLIGHT 2 — VERIFY (flipped) ════════════ -->
+<section class="spotlight" id="verify" style="background: var(--off-white); border-top: 0.5px solid var(--hair);">
+  <div class="wrap">
+    <div class="spotlight-grid flip">
+      <div class="spotlight-copy">
+        <div class="eyebrow"><span class="dash"></span>The verify screen</div>
+        <h2>Verified or Invalid. <em>Nothing in between.</em></h2>
+        <p>The verification is binary on purpose. A maybe is a failure. A pending is a failure. The product reduces a complicated answer to one of two outcomes, every time.</p>
+        <ul class="spotlight-features">
+          <li><span><strong>Two states.</strong> Green check or red X. The colour does the work.</span></li>
+          <li><span><strong>Plain QR.</strong> Near-black on off-white. No brand-coloured codes — they fail in low light.</span></li>
+          <li><span><strong>Audit-grade.</strong> Every scan logged with who, when, and what was returned.</span></li>
+        </ul>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <a href="/verify?result=verified" class="btn btn-primary">Open the verify screen <span class="arrow">→</span></a>
+          <a href="/verify?result=invalid" class="btn btn-ghost">See the invalid state</a>
+        </div>
+      </div>
+
+      <div class="verifyscreen" role="img" aria-label="Verified state — Active member since 2019">
+        <div class="vs-icon">
+          <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><path d="M9 17 L14 22 L23 11" fill="none" stroke="#F5F4F1" stroke-width="3.5" stroke-linecap="square"/></svg>
+        </div>
+        <div class="vs-state">Verified.</div>
+        <div class="vs-meta">Active member since 2019<br>Maya Okonkwo · UH–2026–104873<br>Last sync · 12:04</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ SPOTLIGHT 3 — ROSTER ════════════ -->
+<section class="spotlight" id="roster" style="background: var(--off-white); border-top: 0.5px solid var(--hair);">
+  <div class="wrap">
+    <div class="spotlight-grid">
+      <div class="spotlight-copy">
+        <div class="eyebrow"><span class="dash"></span>The roster</div>
+        <h2>The roster is <em>sovereign.</em></h2>
+        <p>Upload a CSV. Update a status. Export the list. The union owns the data — and we will not be talked into changing that.</p>
+        <ul class="spotlight-features">
+          <li><span><strong>CSV in, CSV out.</strong> No proprietary formats. No vendor lock-in.</span></li>
+          <li><span><strong>Region-pinned.</strong> Canadian-resident infrastructure. Documented in the MSA.</span></li>
+          <li><span><strong>Zero trackers.</strong> No analytics SDKs that resell. No marketing pixels. None.</span></li>
+        </ul>
+        <a href="#pilot" class="btn btn-primary">Start the pilot <span class="arrow">→</span></a>
+      </div>
+
+      <div class="roster" data-live-roster data-stale="0">
+        <div class="roster-head"><span>Roster · Local 79</span><span><span data-live-roster-count>4,218</span> · <span data-live-roster-synced>Synced just now</span></span></div>
+        <div data-live-roster-list>
+          <div class="roster-row">
+            <div><span class="roster-name">Maya Okonkwo</span><div class="roster-id">UH–2026–104873</div></div>
+            <span class="roster-id">Active since 2019</span>
+            <span class="roster-status">Active</span>
+          </div>
+          <div class="roster-row">
+            <div><span class="roster-name">Diego Reyes</span><div class="roster-id">UH–2026–089421</div></div>
+            <span class="roster-id">Active since 2021</span>
+            <span class="roster-status">Active</span>
+          </div>
+          <div class="roster-row">
+            <div><span class="roster-name">Jordan Chen</span><div class="roster-id">UH–2026–065002</div></div>
+            <span class="roster-id">Active since 2017</span>
+            <span class="roster-status">Active</span>
+          </div>
+          <div class="roster-row">
+            <div><span class="roster-name">Priya Anand</span><div class="roster-id">UH–2026–110984</div></div>
+            <span class="roster-id">Lapsed 2025-11</span>
+            <span class="roster-status invalid">Lapsed</span>
+          </div>
+          <div class="roster-row">
+            <div><span class="roster-name">Samuel Park</span><div class="roster-id">UH–2026–112004</div></div>
+            <span class="roster-id">Active since 2024</span>
+            <span class="roster-status">Active</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ WHY UNIONS CHOOSE US (3-col features) ════════════ -->
+<section class="why" id="why">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow"><span class="dash"></span>Why unions choose us</div>
+      <h2>Three reasons. <em>Said plainly.</em></h2>
+      <p>We aren't a CRM. We aren't a campaign tool. We do one thing, for one audience.</p>
+    </div>
+
+    <div class="why-grid">
+      <article class="why-card">
+        <span class="why-num">01</span>
+        <h3>Sovereignty.</h3>
+        <p>The roster is yours. Always. We process — we do not own. Export the full CSV with one click. No retention beyond contract end. No exit fees.</p>
+      </article>
+      <article class="why-card">
+        <span class="why-num">02</span>
+        <h3>Speed.</h3>
+        <p>Twelve seconds at the door, average. No app to download. No password to forget. Camera, scan, screen — and the line moves.</p>
+      </article>
+      <article class="why-card">
+        <span class="why-num">03</span>
+        <h3>Simplicity.</h3>
+        <p>One product. Four screens. No upsells. No add-ons. No surprises in year two. We charge per active member, and that is the entire price page.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ TESTIMONIALS ════════════ -->
+<section id="testis">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow"><span class="dash"></span>What locals are saying</div>
+      <h2>Built with locals, <em>not at them.</em></h2>
+      <p>We co-designed the card with five locals. The voices below are from the rooms where it was first used.</p>
+    </div>
+
+    <div class="testis-grid">
+      <article class="testi">
+        <span class="testi-stars">★ ★ ★ ★ ★</span>
+        <p class="testi-q">"At the door for a strike vote, we cleared 200 people in under an hour. The line never <em>stopped moving.</em>"</p>
+        <span class="testi-attr"><b>Janelle K.</b> · Steward, Healthcare Workers Local 412</span>
+      </article>
+      <article class="testi">
+        <span class="testi-stars">★ ★ ★ ★ ★</span>
+        <p class="testi-q">"The roster is finally <em>ours.</em> One CSV in, one CSV out. No platform games. That is the whole pitch for me."</p>
+        <span class="testi-attr"><b>Marwa S.</b> · President, Transit Workers Local 88</span>
+      </article>
+      <article class="testi">
+        <span class="testi-stars">★ ★ ★ ★ ★</span>
+        <p class="testi-q">"Members didn't have to download anything. They just <em>had a card.</em> That alone changed the meeting."</p>
+        <span class="testi-attr"><b>Daniel B.</b> · Secretary-Treasurer, Building Trades Local 27</span>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ CTA BANNER ════════════ -->
+<section class="cta-banner" id="pilot-cta">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow"><span class="dash"></span>For locals running a pilot</div>
+      <h2>Two weeks. One local. <em>Real members.</em></h2>
+      <p>You bring the roster. We mint the credentials. Your reps verify at the next event. If it doesn't pass the door test, we hear about it Monday.</p>
+    </div>
+    <div class="actions">
+      <a href="#pilot" class="btn btn-on-dark">Start the pilot <span class="arrow">→</span></a>
+      <a href="/brandbook" class="btn btn-ghost-on-dark">Read the brand book</a>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ BLOG TEASER ════════════ -->
+<section id="blog">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow"><span class="dash"></span>From the workbench</div>
+      <h2>Notes from the <em>field.</em></h2>
+      <p>What we are learning on the door, in the hall, and at the print shop. No takes. No threads. Just notes.</p>
+    </div>
+
+    <div class="blog-grid">
+      <article class="post">
+        <div class="post-hero"><span class="tag">Field note</span><span class="num">12</span></div>
+        <div class="post-body">
+          <span class="post-meta">Pilot · 6 min read</span>
+          <h3>What we changed after one strike vote.</h3>
+          <p>Three small UI fixes that came directly from a 200-person line at a healthcare local. We shipped them Monday.</p>
+          <span class="read">Read the note →</span>
+        </div>
+      </article>
+      <article class="post">
+        <div class="post-hero"><span class="tag">Privacy</span><span class="num">04</span></div>
+        <div class="post-body">
+          <span class="post-meta">Sovereignty · 9 min read</span>
+          <h3>Where the roster lives — and where it doesn't.</h3>
+          <p>Region pinning, audit logs, and a plain-language read of our DPA. For executive boards who read in numbers.</p>
+          <span class="read">Read the note →</span>
+        </div>
+      </article>
+      <article class="post">
+        <div class="post-hero"><span class="tag">Brand</span><span class="num">01</span></div>
+        <div class="post-body">
+          <span class="post-meta">Voice · 4 min read</span>
+          <h3>Why our buttons say "Start the pilot."</h3>
+          <p>A short note on why "Learn more" never makes it past review, and what we say instead.</p>
+          <span class="read">Read the note →</span>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ NEWSLETTER ════════════ -->
+<section class="newsletter" id="pilot">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow"><span class="dash"></span>One email a month. Maybe.</div>
+      <h3>Field notes, not <em>marketing.</em></h3>
+      <p>What we shipped. What we changed. What broke at a real local. Unsubscribe is one click, and there is no funnel behind it.</p>
+    </div>
+    <form onsubmit="event.preventDefault(); var b=this.querySelector('button'); b.textContent='You’re on the list. ✓'; b.disabled=true;">
+      <input type="email" required placeholder="you@local79.ca" aria-label="Work email">
+      <button type="submit" class="btn btn-primary">Send me notes</button>
+    </form>
+  </div>
+</section>
+
+<!-- ════════════ FOOTER ════════════ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <svg viewBox="0 0 552.18 532.22" fill="#1D9E75" aria-hidden="true"><path d="M294.51,82.88c-8.68-4.36-16.87-8.05-24.61-12.53-4.49-2.6-7.94-2.22-12.39.04-44.73,22.63-89.64,44.91-134.36,67.56-28.42,14.39-49.35,35.84-59.05,66.69-2.82,8.97-4.65,18.66-4.71,28.04-.41,63.23-.22,126.47-.22,189.7,0,1.1,0,2.2,0,3.54,0,2.11-2.3,3.43-4.12,2.35-6.56-3.88-12.45-7.12-17.77-11.11C13,398.94.06,374.78.08,344.07c.04-53.51.27-107.01-.08-160.52-.26-39.82,18.24-68.14,52.77-85.82,57.38-29.39,115.19-57.95,172.99-86.53C248.92-.24,273.54-2.17,298.87,2.05c19.59,3.26,36.38,13.21,53.72,21.86,64.71,32.29,129.36,64.68,194.02,97.06h0c2,1.01,1.99,3.86-.01,4.86-17.57,8.78-34.26,17.09-50.91,25.46-51.26,25.78-102.49,51.63-153.77,77.38-14.73,7.4-29.69,14.35-41.88,25.86-20.9,19.75-33,43.64-33.1,72.67-.24,66.71-.08,133.42-.11,200.12,0,.77-.05,1.54-.12,2.38-.16,1.92-2.21,3.08-3.94,2.23-4.9-2.41-9.36-4.6-13.81-6.83-18.15-9.09-36.26-18.26-54.46-27.24-3.39-1.67-4.62-3.71-4.62-7.59.12-71.75-.09-143.49.15-215.24.11-31.39,16.62-53.26,43.45-67.08,49.28-25.38,99.07-49.77,148.64-74.59.62-.31,1.22-.64,1.88-1.01,1.82-1.03,1.86-3.63.07-4.72-.4-.24-.79-.46-1.18-.66-6.97-3.52-14.03-6.84-20.92-10.5"/><path d="M295.15,529.05c-.22-2.62-.5-4.44-.5-6.27-.02-64.62-.21-129.25.09-193.87.14-29.23,14.47-50.34,39.77-64.2,9.73-5.33,19.8-10.05,29.73-15.02,1.49-.74,3.08-1.28,5.47-2.25.23,2.55.53,4.34.54,6.13.03,24.84.01,49.68,0,74.52,0,6.51.49,6.81,6.38,3.85,32.07-16.1,64.11-32.29,96.26-48.23,4.62-2.29,6.58-4.94,6.51-10.32-.29-25.71-.05-51.42-.21-77.13-.02-3.99,1.18-6.27,4.86-8.07,20.72-10.14,41.31-20.54,61.96-30.83,1.66-.83,3.39-1.53,5.8-2.62.14,2.42.32,4.24.33,6.06.01,78.17,0,156.35.02,234.52,0,3,.06,5.46-3.49,7.2-22.27,10.89-44.39,22.08-66.57,33.15-.88.44-1.85.7-3.63,1.36v-92.95c-4.07,1.88-7.18,3.18-10.18,4.71-31.18,15.97-62.3,32.05-93.54,47.88-3.84,1.94-4.53,4.54-4.52,8.29.09,26.93-.07,53.85.15,80.78.04,4.9-1.63,7.35-6.03,9.45-21.41,10.26-42.64,20.91-63.94,31.42-1.39.69-2.82,1.29-5.29,2.42Z"/></svg>
+          The Union Hub
+        </div>
+        <span class="foot-tag">Powering the future of union membership.</span>
+        <p class="foot-line">Real-time digital membership for unions. The system of record for who is a member, right now.</p>
+        <div class="foot-social">
+          <a href="#" aria-label="Mastodon">M</a>
+          <a href="#" aria-label="LinkedIn">in</a>
+          <a href="#" aria-label="GitHub">{ }</a>
+        </div>
+      </div>
+
+      <div class="foot-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/card?state=active">The card · live</a></li>
+          <li><a href="/verify?result=verified">The verify screen · live</a></li>
+          <li><a href="#roster">The roster</a></li>
+          <li><a href="/audit-log">The audit log</a></li>
+        </ul>
+      </div>
+
+      <div class="foot-col">
+        <h4>For unions</h4>
+        <ul>
+          <li><a href="#why">Why unions choose us</a></li>
+          <li><a href="#testis">Customer notes</a></li>
+          <li><a href="#pilot-cta">Start the pilot</a></li>
+          <li><a href="#blog">Field notes</a></li>
+        </ul>
+      </div>
+
+      <div class="foot-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="/brandbook">Brand book</a></li>
+          <li><a href="/about">About</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/status">Status</a></li>
+        </ul>
+      </div>
+
+      <div class="foot-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/privacy">Privacy</a></li>
+          <li><a href="/terms">Terms</a></li>
+          <li><a href="/data-processing">Data processing</a></li>
+          <li><a href="/security">Security</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="foot-bar">
+      <span>The Union Hub · v1.0 · 2026</span>
+      <span>Made for organized labour. Not the other way around.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  /* Premium polish — sticky-nav shrink + animated stat counters.
+     No content is ever hidden by JS. If the script fails the page
+     still works exactly as before. */
+  (function () {
+    'use strict';
+
+    var prefersReduce = window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* Sticky nav shrink-on-scroll */
+    var navShell = document.querySelector('.nav-shell');
+    if (navShell) {
+      var onScroll = function () {
+        navShell.classList.toggle('is-scrolled', window.scrollY > 8);
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    }
+
+    /* Animated stat counters */
+    if (!prefersReduce && 'IntersectionObserver' in window) {
+      var counters = document.querySelectorAll('.stat-num');
+      var animate = function (el) {
+        var original = el.textContent.trim();
+        var match = original.match(/^([0-9.]+)(.*)$/);
+        if (!match) return;
+        var target = parseFloat(match[1]);
+        if (target === 0) return;
+        var suffix = match[2];
+        var isInt = match[1].indexOf('.') === -1;
+        var duration = 1100;
+        var start = performance.now();
+        var tick = function (now) {
+          var t = Math.min((now - start) / duration, 1);
+          var eased = 1 - Math.pow(1 - t, 3);
+          var v = target * eased;
+          el.textContent = (isInt ? Math.round(v) : v.toFixed(1)) + suffix;
+          if (t < 1) requestAnimationFrame(tick);
+          else el.textContent = original;
+        };
+        requestAnimationFrame(tick);
+      };
+      var cIo = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) { animate(entry.target); cIo.unobserve(entry.target); }
+        });
+      }, { threshold: 0.5 });
+      Array.prototype.forEach.call(counters, function (el) { cIo.observe(el); });
+    }
+  })();
+</script>
+
+<script defer src="/js/live.js"></script>
+
 </body>
 </html>

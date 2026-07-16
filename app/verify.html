@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Verify · The Union Hub</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Verification result — The Union Hub.">
+<meta name="theme-color" content="#0F6E56" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://theunionhub.ca/verify.html">
+
+<!-- Open Graph / social -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="The Union Hub">
+<meta property="og:title" content="Verify — The Union Hub">
+<meta property="og:description" content="One answer. Verified, not valid, or not found.">
+<meta property="og:url" content="https://theunionhub.ca/verify.html">
+<meta property="og:image" content="https://theunionhub.ca/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Verify — The Union Hub">
+<meta name="twitter:description" content="One answer. Verified, not valid, or not found.">
+<meta name="twitter:image" content="https://theunionhub.ca/og-image.png">
+
+<!-- Hide live verification URLs (?id=...) from search engines for privacy. -->
+<script>
+  if (new URLSearchParams(location.search).get('id')) {
+    var m = document.createElement('meta');
+    m.name = 'robots'; m.content = 'noindex,nofollow';
+    document.head.appendChild(m);
+  }
+</script>
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="alternate icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ──────────────────────────────────────────────────────────────
+     /verify/[id] — Verification result page (demo)
+     Spec: full-screen result. No nav, no footer. One answer.
+       - Verified  → bg #0F6E56, white text, ✓
+       - Invalid   → bg #E24B4A, white text, ✗
+       - NotFound  → bg #111111, white text
+     Optimised for daylight readability on a phone.
+     ────────────────────────────────────────────────────────────── */
+  :root {
+    --forest:        #0F6E56;
+    --active:        #1D9E75;
+    --mint:          #E1F5EE;
+    --deep-forest:   #0D1F1A;
+    --off-white:     #F5F4F1;
+    --alert:         #E24B4A;
+    --collected:     #E8863A;
+    --ink:           #111111;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  body {
+    margin: 0;
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 1.6;
+    background: var(--off-white);
+    color: var(--off-white);
+    overscroll-behavior: none;
+  }
+  ::selection { background: rgba(255,255,255,0.25); color: #fff; }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; cursor: pointer; }
+
+  /* ════════════ DEMO TOOLBAR (kept minimal; hide on print) ════════════ */
+  /* Brand-safe: solid bg, no backdrop-filter blur. */
+  .demo-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 30;
+    background: var(--deep-forest);
+    color: rgba(245,244,241,0.85);
+    padding: 9px clamp(14px, 4vw, 28px);
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    border-bottom: 0.5px solid rgba(245,244,241,0.18);
+  }
+  .demo-bar .demo-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: var(--mint);
+  }
+  .demo-bar .demo-label::before {
+    content: ''; width: 7px; height: 7px; border-radius: 999px; background: var(--active);
+  }
+  .demo-bar .home {
+    color: rgba(245,244,241,0.7);
+    transition: color .15s;
+  }
+  .demo-bar .home:hover { color: var(--mint); }
+  .demo-bar .spacer { flex: 1; }
+  .switcher {
+    display: inline-flex; gap: 4px;
+    background: rgba(245,244,241,0.06);
+    border: 0.5px solid rgba(245,244,241,0.18);
+    padding: 3px;
+    border-radius: 999px;
+  }
+  .switcher button {
+    background: transparent;
+    color: rgba(245,244,241,0.7);
+    border: 0;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: background .15s, color .15s;
+  }
+  .switcher button:hover { color: var(--off-white); }
+  .switcher button.is-active {
+    background: var(--off-white);
+    color: var(--deep-forest);
+  }
+
+  /* ════════════ FULL-SCREEN RESULT ════════════ */
+  .screen {
+    min-height: 100dvh;
+    min-height: 100vh;
+    padding: 88px 22px 36px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center;
+    transition: background-color .25s ease;
+  }
+  .screen.verified  { background: var(--forest); }
+  .screen.invalid   { background: var(--alert); }
+  .screen.collected { background: var(--collected); }
+  .screen.notfound  { background: var(--ink); }
+
+  /* Big icon */
+  .icon-wrap {
+    width: 96px; height: 96px;
+    border-radius: 999px;
+    display: grid; place-items: center;
+    background: rgba(255,255,255,0.16);
+    margin-bottom: 28px;
+  }
+  .icon-wrap svg { width: 56px; height: 56px; }
+
+  .state-word {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-style: italic;
+    font-size: clamp(56px, 12vw, 96px);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin: 0 0 26px;
+    color: #ffffff;
+  }
+  .state-word.invalid-word { font-style: italic; }
+
+  .name {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1.15;
+    letter-spacing: -0.005em;
+    color: #ffffff;
+    margin: 0 0 10px;
+  }
+  .ucol {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    font-size: 16px;
+    color: rgba(255,255,255,0.86);
+    margin: 0 0 6px;
+  }
+  .since {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    font-size: 15px;
+    color: rgba(255,255,255,0.72);
+    margin: 0 0 32px;
+  }
+  .since b { font-weight: 500; color: #ffffff; }
+
+  .checked {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 10px 18px;
+    background: rgba(255,255,255,0.14);
+    border-radius: 999px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.92);
+  }
+  .checked .dot {
+    width: 8px; height: 8px; border-radius: 999px; background: #ffffff;
+    animation: blink 1.6s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
+
+  /* "Mark as paid" button — lives on the verified screen only. */
+  .paid-btn {
+    appearance: none;
+    border: 1px solid rgba(255,255,255,0.6);
+    background: #ffffff;
+    color: var(--forest);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 17px;
+    letter-spacing: 0.01em;
+    padding: 16px 32px;
+    min-height: 56px;
+    min-width: 240px;
+    border-radius: 999px;
+    cursor: pointer;
+    margin: 0 0 14px;
+    transition: background .15s ease, color .15s ease, opacity .15s ease, transform .12s ease, border-color .15s ease;
+  }
+  .paid-btn:hover  { background: var(--off-white); }
+  .paid-btn:active { transform: translateY(1px); transition-duration: .05s; }
+  .paid-btn[data-state="confirm"] {
+    background: transparent;
+    color: #ffffff;
+    border-color: #ffffff;
+  }
+  .paid-btn[data-state="working"] {
+    opacity: 0.75;
+    cursor: default;
+    pointer-events: none;
+  }
+  .paid-btn[data-state="done"] {
+    background: transparent;
+    color: #ffffff;
+    border-color: rgba(255,255,255,0.6);
+    cursor: default;
+    pointer-events: none;
+  }
+  .paid-error {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    color: rgba(255,255,255,0.92);
+    margin: 0 auto 22px;
+    min-height: 18px;
+    max-width: 32ch;
+  }
+  .screen .paid-btn,
+  .screen .paid-error {
+    animation: rise-in .55s cubic-bezier(.2,.7,.2,1) both .44s;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .screen .paid-btn, .screen .paid-error {
+      animation: none !important; opacity: 1 !important; transform: none !important;
+    }
+  }
+
+  .invalid-msg {
+    max-width: 30ch;
+    font-size: 17px;
+    color: rgba(255,255,255,0.92);
+    margin: 0 auto 8px;
+  }
+  .invalid-msg strong { font-weight: 500; }
+  .invalid-status {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.86);
+    display: inline-block;
+    margin-bottom: 26px;
+  }
+  .invalid-action {
+    font-size: 15px;
+    color: rgba(255,255,255,0.85);
+    max-width: 28ch;
+    margin: 0 auto 28px;
+  }
+
+  .powered {
+    margin-top: 36px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 9.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+  }
+  .powered .mark { display: inline-block; vertical-align: -3px; margin-right: 8px; }
+
+  /* Loading spinner — must be visible within ~1s on real load */
+  .spinner-screen {
+    background: var(--forest);
+    min-height: 100dvh; min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.85);
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    gap: 14px;
+  }
+  .spinner {
+    width: 22px; height: 22px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 999px;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Not-found tweaks */
+  .screen.notfound .name        { color: var(--off-white); }
+  .screen.notfound .icon-wrap   { background: rgba(255,255,255,0.10); }
+  .screen.notfound .state-word  { color: var(--off-white); }
+  .screen.notfound .invalid-msg { color: rgba(255,255,255,0.85); }
+
+  :focus-visible { outline: 2px solid #ffffff; outline-offset: 3px; border-radius: 6px; }
+
+  /* ════════════ MOTION & FEEDBACK ════════════ */
+  /* Brand-safe staggered entrance for the result content.            */
+  /* Icon pops; everything else rises in sequence behind it.          */
+
+  .screen .icon-wrap      { animation: pop-in   .55s cubic-bezier(.2,.7,.2,1) both .04s; }
+  .screen .state-word     { animation: rise-in  .55s cubic-bezier(.2,.7,.2,1) both .18s; }
+  .screen .name           { animation: rise-in  .55s cubic-bezier(.2,.7,.2,1) both .26s; }
+  .screen .ucol           { animation: rise-in  .55s cubic-bezier(.2,.7,.2,1) both .32s; }
+  .screen .since          { animation: rise-in  .55s cubic-bezier(.2,.7,.2,1) both .38s; }
+  .screen .invalid-msg    { animation: rise-in  .55s cubic-bezier(.2,.7,.2,1) both .26s; }
+  .screen .invalid-status { animation: rise-in  .55s cubic-bezier(.2,.7,.2,1) both .32s; }
+  .screen .invalid-action { animation: rise-in  .55s cubic-bezier(.2,.7,.2,1) both .38s; }
+  .screen .checked        { animation: rise-in  .55s cubic-bezier(.2,.7,.2,1) both .50s; }
+  .screen .powered        { animation: rise-in  .55s cubic-bezier(.2,.7,.2,1) both .60s; }
+
+  @keyframes pop-in {
+    from { opacity: 0; transform: scale(0.78); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes rise-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* Switcher buttons — press feedback. */
+  .switcher button { transition: background .15s ease, color .15s ease, transform .12s ease; }
+  .switcher button:active { transform: translateY(1px); transition-duration: .05s; }
+
+  /* Reduced-motion: kill every choreographed animation; spinner stops too. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+    .screen .icon-wrap, .screen .state-word, .screen .name, .screen .ucol,
+    .screen .since, .screen .invalid-msg, .screen .invalid-status,
+    .screen .invalid-action, .screen .checked, .screen .powered {
+      opacity: 1 !important; transform: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════ DEMO TOOLBAR ════════════ -->
+<div class="demo-bar" role="region" aria-label="Demo controls">
+  <span class="demo-label">Demo · /verify/[id]</span>
+  <a class="home" href="/">← Back to site</a>
+  <span class="spacer"></span>
+  <div class="switcher" role="tablist" aria-label="Verify result">
+    <button data-result="loading">Loading</button>
+    <button data-result="verified" class="is-active">Verified</button>
+    <button data-result="collected">Already collected</button>
+    <button data-result="invalid">Not valid</button>
+    <button data-result="notfound">Not found</button>
+  </div>
+</div>
+
+<!-- ════════════ SCREEN ════════════ -->
+<main id="screen"></main>
+
+<script>
+  // ─── Supabase ───────────────────────────────────────────
+  const SUPABASE_URL = 'https://frdvhmzbsmczknqtexvx.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_mQ5Y9tjHHQmc9gCZPB_tHA_OwHXTc9P';
+
+  async function fetchMemberById(id) {
+    const url = `${SUPABASE_URL}/rest/v1/members?id=eq.${encodeURIComponent(id)}&select=*`;
+    try {
+      const res = await fetch(url, {
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+      });
+      if (!res.ok) return null;
+      const rows = await res.json();
+      return rows[0] || null;
+    } catch { return null; }
+  }
+
+  // Fire-and-forget. Never block the UI on logging.
+  function recordVerification(memberId, result) {
+    try {
+      fetch(`${SUPABASE_URL}/rest/v1/rpc/record_verification`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ p_member_id: memberId, p_result: result }),
+        keepalive: true
+      }).catch(() => {});
+    } catch {}
+  }
+
+  async function checkAlreadyCollected(memberId) {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/check_already_collected`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ p_member_id: memberId })
+      });
+      if (!res.ok) return { already: false, paid_at: null };
+      const rows = await res.json();
+      const row = Array.isArray(rows) ? rows[0] : rows;
+      return row || { already: false, paid_at: null };
+    } catch { return { already: false, paid_at: null }; }
+  }
+
+  async function markMemberPaid(memberId) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/mark_member_paid`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ p_member_id: memberId })
+    });
+    if (!res.ok) throw new Error('mark_failed');
+    const rows = await res.json();
+    return (Array.isArray(rows) ? rows[0] : rows) || { was_already_paid: false, paid_at: null };
+  }
+
+  // Demo fallback — used when no ?id= is provided. Overwritten on live fetch.
+  let member = {
+    id: '550bc413-53db-4f83-98e4-7c5c44d721d0',
+    full_name: 'Maya Okonkwo',
+    union_name: 'Canadian Union of Public Employees',
+    local_number: '79',
+    member_since: '2019-04-12',
+    status: 'active'
+  };
+
+  function memberSinceYear(d) { return new Date(d).getFullYear(); }
+
+  function timeNow() {
+    return new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  }
+
+  // The Union Hub brand mark — white on dark/colour result backgrounds.
+  const markSvg = `
+    <svg width="14" height="14" viewBox="0 0 552.18 532.22" fill="#FFFFFF" aria-hidden="true" class="mark">
+      <path d="M294.51,82.88c-8.68-4.36-16.87-8.05-24.61-12.53-4.49-2.6-7.94-2.22-12.39.04-44.73,22.63-89.64,44.91-134.36,67.56-28.42,14.39-49.35,35.84-59.05,66.69-2.82,8.97-4.65,18.66-4.71,28.04-.41,63.23-.22,126.47-.22,189.7,0,1.1,0,2.2,0,3.54,0,2.11-2.3,3.43-4.12,2.35-6.56-3.88-12.45-7.12-17.77-11.11C13,398.94.06,374.78.08,344.07c.04-53.51.27-107.01-.08-160.52-.26-39.82,18.24-68.14,52.77-85.82,57.38-29.39,115.19-57.95,172.99-86.53C248.92-.24,273.54-2.17,298.87,2.05c19.59,3.26,36.38,13.21,53.72,21.86,64.71,32.29,129.36,64.68,194.02,97.06h0c2,1.01,1.99,3.86-.01,4.86-17.57,8.78-34.26,17.09-50.91,25.46-51.26,25.78-102.49,51.63-153.77,77.38-14.73,7.4-29.69,14.35-41.88,25.86-20.9,19.75-33,43.64-33.1,72.67-.24,66.71-.08,133.42-.11,200.12,0,.77-.05,1.54-.12,2.38-.16,1.92-2.21,3.08-3.94,2.23-4.9-2.41-9.36-4.6-13.81-6.83-18.15-9.09-36.26-18.26-54.46-27.24-3.39-1.67-4.62-3.71-4.62-7.59.12-71.75-.09-143.49.15-215.24.11-31.39,16.62-53.26,43.45-67.08,49.28-25.38,99.07-49.77,148.64-74.59.62-.31,1.22-.64,1.88-1.01,1.82-1.03,1.86-3.63.07-4.72-.4-.24-.79-.46-1.18-.66-6.97-3.52-14.03-6.84-20.92-10.5"/>
+      <path d="M295.15,529.05c-.22-2.62-.5-4.44-.5-6.27-.02-64.62-.21-129.25.09-193.87.14-29.23,14.47-50.34,39.77-64.2,9.73-5.33,19.8-10.05,29.73-15.02,1.49-.74,3.08-1.28,5.47-2.25.23,2.55.53,4.34.54,6.13.03,24.84.01,49.68,0,74.52,0,6.51.49,6.81,6.38,3.85,32.07-16.1,64.11-32.29,96.26-48.23,4.62-2.29,6.58-4.94,6.51-10.32-.29-25.71-.05-51.42-.21-77.13-.02-3.99,1.18-6.27,4.86-8.07,20.72-10.14,41.31-20.54,61.96-30.83,1.66-.83,3.39-1.53,5.8-2.62.14,2.42.32,4.24.33,6.06.01,78.17,0,156.35.02,234.52,0,3,.06,5.46-3.49,7.2-22.27,10.89-44.39,22.08-66.57,33.15-.88.44-1.85.7-3.63,1.36v-92.95c-4.07,1.88-7.18,3.18-10.18,4.71-31.18,15.97-62.3,32.05-93.54,47.88-3.84,1.94-4.53,4.54-4.52,8.29.09,26.93-.07,53.85.15,80.78.04,4.9-1.63,7.35-6.03,9.45-21.41,10.26-42.64,20.91-63.94,31.42-1.39.69-2.82,1.29-5.29,2.42Z"/>
+    </svg>`;
+
+  const checkSvg = `
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M14 34 L26 46 L50 18" fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="square" stroke-linejoin="miter"/>
+    </svg>`;
+
+  const xSvg = `
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M18 18 L46 46 M46 18 L18 46" stroke="#FFFFFF" stroke-width="7" stroke-linecap="square" stroke-linejoin="miter"/>
+    </svg>`;
+
+  const qSvg = `
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <circle cx="32" cy="32" r="22" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+      <path d="M26 26 a6 6 0 1 1 8 8 v4" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="square"/>
+      <rect x="30" y="44" width="4" height="4" fill="#FFFFFF"/>
+    </svg>`;
+
+  function renderVerified() {
+    const yr = memberSinceYear(member.member_since);
+    return `
+      <section class="screen verified" role="status" aria-live="polite">
+        <div class="icon-wrap">${checkSvg}</div>
+        <h1 class="state-word">Verified.</h1>
+        <p class="name">${member.full_name}</p>
+        <p class="ucol">${member.union_name} · Local ${member.local_number}</p>
+        <p class="since">Active member <b>since ${yr}</b></p>
+        <button class="paid-btn" type="button" data-state="idle" data-paid-btn>Mark as paid</button>
+        <p class="paid-error" data-paid-error></p>
+        <span class="checked"><span class="dot"></span>Checked at ${timeNow()}</span>
+        <div class="powered">${markSvg}Powered by The Union Hub</div>
+      </section>`;
+  }
+
+  function renderInvalid(reason = 'Inactive') {
+    return `
+      <section class="screen invalid" role="alert" aria-live="assertive">
+        <div class="icon-wrap">${xSvg}</div>
+        <h1 class="state-word invalid-word">Not&nbsp;valid.</h1>
+        <p class="invalid-msg"><strong>This membership is not currently active.</strong></p>
+        <p class="invalid-status">Status · ${reason}</p>
+        <p class="invalid-action">Contact your union administrator.</p>
+        <span class="checked"><span class="dot"></span>Checked at ${timeNow()}</span>
+        <div class="powered">${markSvg}Powered by The Union Hub</div>
+      </section>`;
+  }
+
+  function renderNotFound() {
+    return `
+      <section class="screen notfound" role="alert" aria-live="assertive">
+        <div class="icon-wrap">${qSvg}</div>
+        <h1 class="state-word">Not&nbsp;found.</h1>
+        <p class="invalid-msg">This card could not be verified. It may be invalid or expired.</p>
+        <span class="checked" style="margin-top:16px;"><span class="dot"></span>Checked at ${timeNow()}</span>
+        <div class="powered">${markSvg}Powered by The Union Hub</div>
+      </section>`;
+  }
+
+  function renderAlreadyCollected(paidAt) {
+    const t = paidAt
+      ? new Date(paidAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+      : timeNow();
+    return `
+      <section class="screen collected" role="alert" aria-live="assertive">
+        <div class="icon-wrap">${checkSvg}</div>
+        <h1 class="state-word">Already&nbsp;collected.</h1>
+        <p class="name">${member.full_name}</p>
+        <p class="invalid-status">Verified and paid at ${t}</p>
+        <span class="checked"><span class="dot"></span>Checked at ${timeNow()}</span>
+        <div class="powered">${markSvg}Powered by The Union Hub</div>
+      </section>`;
+  }
+
+  function renderLoading() {
+    return `
+      <section class="spinner-screen" role="status" aria-live="polite">
+        <span class="spinner" aria-hidden="true"></span>
+        Checking roster…
+      </section>`;
+  }
+
+  const screen = document.getElementById('screen');
+
+  // Two-tap confirm pattern for the "Mark as paid" button.
+  // Demo mode (no ?id= in URL) skips the RPC and just toggles UI.
+  function bindPaidButton() {
+    const btn = document.querySelector('[data-paid-btn]');
+    const err = document.querySelector('[data-paid-error]');
+    if (!btn) return;
+
+    const isDemo  = !new URLSearchParams(location.search).get('id');
+    const memberId = member && member.id;
+    let confirmTimer = null;
+
+    function resetIdle() {
+      btn.dataset.state = 'idle';
+      btn.textContent = 'Mark as paid';
+    }
+
+    function setDone(paidAt) {
+      const t = paidAt
+        ? new Date(paidAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+        : timeNow();
+      btn.dataset.state = 'done';
+      btn.textContent = `Paid at ${t} ✓`;
+      btn.setAttribute('aria-disabled', 'true');
+    }
+
+    btn.addEventListener('click', async () => {
+      if (btn.dataset.state === 'done' || btn.dataset.state === 'working') return;
+
+      if (btn.dataset.state === 'idle') {
+        btn.dataset.state = 'confirm';
+        btn.textContent = 'Tap again to confirm';
+        try { navigator.vibrate && navigator.vibrate(15); } catch {}
+        clearTimeout(confirmTimer);
+        confirmTimer = setTimeout(resetIdle, 3000);
+        return;
+      }
+
+      // confirm tap
+      clearTimeout(confirmTimer);
+      btn.dataset.state = 'working';
+      btn.textContent = 'Marking…';
+      err.textContent = '';
+
+      if (isDemo || !memberId) {
+        setTimeout(() => setDone(new Date().toISOString()), 350);
+        return;
+      }
+
+      try {
+        const out = await markMemberPaid(memberId);
+        setDone(out && out.paid_at);
+      } catch {
+        err.textContent = "Couldn't mark paid — tap to retry.";
+        resetIdle();
+      }
+    });
+  }
+
+  function setResult(result, reason) {
+    document.querySelectorAll('.switcher button').forEach(btn => {
+      btn.classList.toggle('is-active', btn.dataset.result === result);
+    });
+    const url = new URL(location.href);
+    // Don't pollute the URL with ?result= when this is a real lookup.
+    if (!url.searchParams.get('id')) {
+      url.searchParams.set('result', result);
+      history.replaceState(null, '', url);
+    }
+
+    // Match meta theme-color for nicer mobile chrome bars
+    const theme = { verified: '#0F6E56', invalid: '#E24B4A', collected: '#E8863A', notfound: '#111111', loading: '#0F6E56' }[result] || '#0F6E56';
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme);
+
+    if (result === 'loading')   { screen.innerHTML = renderLoading(); return; }
+    if (result === 'invalid')   { screen.innerHTML = renderInvalid(reason || 'Inactive'); return; }
+    if (result === 'collected') { screen.innerHTML = renderAlreadyCollected(reason); return; }
+    if (result === 'notfound')  { screen.innerHTML = renderNotFound(); return; }
+    screen.innerHTML = renderVerified();
+    bindPaidButton();
+  }
+
+  // Bind switcher
+  document.querySelectorAll('.switcher button').forEach(btn => {
+    btn.addEventListener('click', () => setResult(btn.dataset.result));
+  });
+
+  // Boot.
+  // Live mode:  ?id=<uuid>  → fetch the row and derive verified/invalid/notfound.
+  // Demo mode:  ?result=<x> → switcher / hardcoded fallback.
+  (async () => {
+    const params = new URLSearchParams(location.search);
+    const liveId = params.get('id');
+
+    if (liveId) {
+      document.querySelector('.demo-bar')?.remove();
+      setResult('loading');
+      const row = await fetchMemberById(liveId);
+      if (!row) { setResult('notfound'); return; }
+      member = row;
+
+      if (row.status === 'active') {
+        const check = await checkAlreadyCollected(row.id);
+        if (check && check.already) {
+          recordVerification(row.id, 'already_collected');
+          setResult('collected', check.paid_at);
+        } else {
+          recordVerification(row.id, 'verified');
+          setResult('verified');
+        }
+        return;
+      }
+
+      const reason = row.status.charAt(0).toUpperCase() + row.status.slice(1);
+      recordVerification(row.id, 'invalid');
+      setResult('invalid', reason);
+      return;
+    }
+
+    const initial = params.get('result') || 'verified';
+    const target = ['loading','verified','invalid','collected','notfound'].includes(initial) ? initial : 'verified';
+    if (target === 'loading') {
+      setResult('loading');
+    } else {
+      setResult('loading');
+      // Demo-mode 'collected' uses a mock paid time so the screen renders fully.
+      const reason = target === 'collected' ? new Date(Date.now() - 42 * 60 * 1000).toISOString() : undefined;
+      setTimeout(() => setResult(target, reason), 650);
+    }
+  })();
+</script>
+
+<script defer src="/js/live.js"></script>
+
+</body>
+</html>
