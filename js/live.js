@@ -198,6 +198,9 @@
       var key = el.getAttribute('data-live-stat');
       if (!(key in stats)) return;
       var target = stats[key];
+      // No live data yet (public_stats view not created) → keep the static HTML
+      // number instead of animating to undefined and rendering "NaN".
+      if (target == null || !isFinite(Number(target))) return;
       var prev = parseInt((el.textContent || '').replace(/[^\d-]/g, ''), 10);
       if (!isFinite(prev)) prev = 0;
       animateNumber(el, prev, target, 800);
