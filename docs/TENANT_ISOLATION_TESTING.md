@@ -21,17 +21,35 @@ This must be *proven repeatedly and automatically*, not assumed once.
 The test harness reproduces this precisely: `set_config('request.headers', '{"x-tenant-id":"…"}', true)`, `set_config('request.jwt.claims', '{"sub":"…"}', true)`, and `SET LOCAL ROLE anon|authenticated`, inside a transaction that `ROLLBACK`s.
 
 ## 3 · Coverage matrix
+Setup/cleanup: `00_fixtures.sql` provides `iso_test.make_pair()` (Tenant A + B, one admin each); the runner sets it up first and drops the `iso_test` schema after.
+
 | Area | Vector tested | Test |
 |---|---|---|
 | **Members** | admin-of-A cross-tenant SELECT/DELETE | `01_members_isolation.sql` |
 | **Context** | missing header, invalid header | `02_negative_context.sql` |
 | **Writes** | cross-tenant INSERT / UPDATE(takeover) / DELETE | `02_negative_context.sql` |
+| **Grievances / cases** | admin-of-A cross-tenant read + insert into B's `grievance_cases` | `03_grievance_isolation.sql` |
+| **RPC (all DEFINER)** | every DEFINER fn pins `search_path`; `lookup_member` tenant-scoped | `04_rpc_inventory.sql` |
 | **Credentials** | anon `lookup_member` cross-tenant; direct read denied | `member_verify_isolation_test.sql` |
 | **Steward RPC** | `lookup_steward` tenant-scoped, public fields only | `steward_lookup_isolation_test.sql` |
-| **Documents** | member reads only `published`; cross-tenant denied | `document_pipeline_isolation_test.sql` |
-| **Grievances** | header selects tenant; cross-tenant denied | `grievance_tenant_isolation_test.sql` |
+| **Documents (rows)** | member reads only `published`; cross-tenant denied | `document_pipeline_isolation_test.sql` |
+| **Grievances (RLS)** | header selects tenant; cross-tenant denied | `grievance_tenant_isolation_test.sql` |
 
-**Still to add** (extend the framework, same pattern): dedicated cross-tenant tests for `grievance_cases` assignments, `documents` storage-object access (Supabase Storage RLS, not just row RLS), and a full sweep asserting `tenant_id`-scoping on `public_roster`, `public_stats`, and `workplace_intelligence`. `get_public_site` / `resolve_site_tenant` are **intentionally public** (published site content) and are not isolation targets.
+### RPC inventory (SECURITY DEFINER surface)
+DEFINER functions run as owner and bypass RLS internally, so each must (a) pin `search_path` — enforced generically for ALL of them by `04_rpc_inventory.sql` — and (b) enforce tenant context where it returns tenant data:
+
+| Function | Tenant enforcement |
+|---|---|
+| `lookup_member`, `lookup_steward` | read `get_request_tenant_id()`, filter server-side; column-whitelisted | 
+| `record_verification`, `check_already_collected`, `mark_member_paid` | explicit `tenant_id = get_request_tenant_id()` in WHERE |
+| `is_tenant_admin`, `add_tenant_admin`, `remove_tenant_admin`, `update_tenant_settings` | derive tenant from header + `auth.uid()`; admin-gated |
+| `public_roster`, `public_stats`, `workplace_intelligence` | tenant-scoped by header — **add explicit cross-tenant assertions next** |
+| `get_public_site`, `resolve_site_tenant` | **intentionally public** (published site content) — not isolation targets |
+| `export_site` | admin-gated (content ownership) |
+
+**Storage caveat (honest):** the SQL suite proves **row/metadata** isolation for `documents` / `document_extractions`. Actual object bytes, downloads, and **signed URLs** live in the Supabase **Storage** layer, which SQL RLS tests cannot exercise — that requires a separate integration test (per-tenant bucket/prefix + Storage policies + attempted unauthorized signed-URL fetch). Tracked as a Phase-6 follow-up; do not treat row-isolation as proof of object-isolation.
+
+**Still to add** (same pattern): explicit cross-tenant assertions on `public_roster` / `public_stats` / `workplace_intelligence`; grievance `assigned_to` + `grievance_history` cross-tenant; and the Storage-object integration test above.
 
 ## 4 · ⚠ FINDING — cross-tenant gap in the 0008 admin read/write policies
 Reading migration `0008` directly (confirmed: zero `RESTRICTIVE` policies exist anywhere, and no later migration re-tightens these):
