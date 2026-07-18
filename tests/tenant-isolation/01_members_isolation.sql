@@ -8,12 +8,11 @@
 -- checks anon + authenticated NON-admin). It targets the admin read/delete
 -- policies from 0008.
 --
--- ⚠ EXPECTED TO FAIL against migration 0008 as written. The read/update/delete
---   policies use `USING (public.is_request_tenant_admin())` with NO row-level
---   `tenant_id = public.get_request_tenant_id()` filter. is_request_tenant_admin()
---   is a per-REQUEST boolean, so it is true for EVERY row once the caller is an
---   admin of the header tenant → cross-tenant read/delete. See the FAIL messages
---   and docs/TENANT_ISOLATION_TESTING.md for the fix.
+-- STATUS: FAILS on the 0001-0040 baseline (proves the gap); PASSES with 0041
+--   applied. Root cause: 0008 used `USING (public.is_request_tenant_admin())`
+--   with no `tenant_id = public.get_request_tenant_id()` row filter — a
+--   per-REQUEST boolean, true for every row. Migration 0041 adds the row filter.
+--   See docs/TENANT_ISOLATION_TESTING.md §Remediation history.
 --
 -- Prereq: migrations 0001–0040 applied. Self-contained; rolls back.
 -- Role handling: SET LOCAL ROLE from the migration superuser; request.headers /

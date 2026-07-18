@@ -29,13 +29,17 @@ Each test may also be pasted directly into the Supabase **SQL Editor** (its role
 - **PASS** → each file prints `PASS: …` and the runner exits `0`.
 - **FAIL** → the runner prints the `FAIL:` message (which names the leak and the fix) and exits `1`.
 
-> ⚠ **Known finding (see `docs/TENANT_ISOLATION_TESTING.md`):** against migration `0008` as written, `01_members_isolation.sql` and parts of `02_negative_context.sql` are **expected to FAIL** — the admin read/update/delete policies on `members` (and the read policies on `verifications`/`dues_collections`/`audit_log`) lack a `tenant_id = get_request_tenant_id()` row filter, allowing an authenticated admin of one tenant to reach another's rows. The failing assertions state the one-line fix. Once a corrective migration lands, these turn green — that is the gate.
+> ✅ **Remediated by migration `0041_tenant_scope_admin_policies.sql`.** A full policy audit found 7 policies with a boolean-only admin USING gate: `members_admin_read/update/delete`, `verifications_admin_read`, `dues_admin_read`, `audit_log_admin_read`, and `stewards_admin_delete`. `0041` adds `tenant_id = get_request_tenant_id()` to each. `01`, `02`, and `05` **FAIL on the 0001-0040 baseline (proving the gap) and PASS with 0041 applied** — run the suite against a DB at 0001-0041 to confirm. See `docs/TENANT_ISOLATION_TESTING.md §Remediation history`.
 
 ## What's covered
 | File | Area |
 |---|---|
 | `01_members_isolation.sql` | Members — authenticated-admin cross-tenant read/delete |
 | `02_negative_context.sql` | Missing/invalid tenant context; cross-tenant INSERT/UPDATE/DELETE |
+| `03_grievance_isolation.sql` | Grievance/case confidentiality across tenants |
+| `04_rpc_inventory.sql` | All SECURITY DEFINER fns pin `search_path`; `lookup_member` tenant scope |
+| `05_stewards_isolation.sql` | Stewards cross-tenant delete (audit finding) |
+| `00_fixtures.sql` | Shared A/B fixtures (setup); runner drops `iso_test` after |
 | `../../supabase/tests/member_verify_isolation_test.sql` | Credentials / `lookup_member` RPC (anon verify path) |
 | `../../supabase/tests/steward_lookup_isolation_test.sql` | Steward RPC (`lookup_steward`) |
 | `../../supabase/tests/document_pipeline_isolation_test.sql` | Documents / extractions (verify gate) |

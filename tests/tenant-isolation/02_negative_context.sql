@@ -8,9 +8,9 @@
 --   · missing header      → lookup_member returns 0 (get_request_tenant_id NULL). PASS.
 --   · invalid header      → lookup_member returns 0 (no such tenant).            PASS.
 --   · cross-tenant INSERT → blocked by members_admin_insert WITH CHECK.          PASS.
---   · cross-tenant UPDATE (reassign B's member into A) → ⚠ EXPECTED FAIL: the
---       update USING lacks a row tenant filter, so A's admin can steal B's member.
---   · cross-tenant DELETE → ⚠ EXPECTED FAIL (same root cause as 01).
+--   · cross-tenant UPDATE (reassign B's member into A) → blocked by 0041's row
+--       filter on members_admin_update USING (FAILS on the 0001-0040 baseline).
+--   · cross-tenant DELETE → blocked by 0041 (FAILS on the 0001-0040 baseline).
 --
 -- Prereq: migrations 0001–0040. Self-contained; rolls back.
 -- =============================================================================

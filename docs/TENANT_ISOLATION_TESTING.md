@@ -70,7 +70,7 @@ ALTER POLICY members_admin_read ON public.members
 -- repeat for members_admin_update (USING), members_admin_delete,
 -- verifications_admin_read, dues_admin_read, audit_log_admin_read.
 ```
-Ship this as a corrective migration (proposed `0041_tenant_scope_admin_policies.sql`) **before** the live apply. `01_members_isolation.sql` and `02_negative_context.sql` are written to **fail today and pass once the fix lands** — that is the gate.
+**Shipped** as `0041_tenant_scope_admin_policies.sql` (author-only; not yet applied) — see **§7 Remediation history**. `01`/`02`/`05` are written to **fail on the 0001-0040 baseline and pass with 0041 applied** — that is the gate.
 
 *(This finding was produced by static review; it is confirmed live the moment the suite runs — which is the point of building the suite.)*
 
@@ -94,3 +94,26 @@ Gate on it: **a failing isolation test blocks the merge and the release.** Run i
 > **Every new tenant-scoped table ships with an isolation test in `tests/tenant-isolation/`, and RLS read/update/delete policies MUST include `tenant_id = public.get_request_tenant_id()` in the USING clause — an admin/role check alone is not isolation.**
 
 The 0008 finding above is the cautionary tale: a role check without a row-tenant filter reads as "admin-only" but silently permits cross-tenant access. Copy `01_members_isolation.sql`, prove SELECT/INSERT/UPDATE/DELETE are A-only, and wire it into the runner before merging.
+
+## 7 · Remediation history
+
+### 2026-07-16 — `0041_tenant_scope_admin_policies.sql` (cross-tenant admin gap)
+- **Root cause.** Admin-gated policies gated row visibility on `public.is_request_tenant_admin()` (a per-*request* boolean) with **no `tenant_id = public.get_request_tenant_id()` row filter** in the governing clause. Once a caller is admin of the header tenant, the clause is true for **every** row across **all** tenants.
+- **Scope of audit.** All **77 policies** across migrations `0001–0040` were parsed (USING vs WITH CHECK, balanced-paren aware). **7** matched the boolean-only gate — including one beyond the original finding (`stewards_admin_delete`, 0013):
+
+  | Table | Policy | Command |
+  |---|---|---|
+  | `members` | `members_admin_read` | SELECT |
+  | `members` | `members_admin_update` | UPDATE (USING) |
+  | `members` | `members_admin_delete` | DELETE |
+  | `verifications` | `verifications_admin_read` | SELECT |
+  | `dues_collections` | `dues_admin_read` | SELECT |
+  | `audit_log` | `audit_log_admin_read` | SELECT |
+  | `stewards` | `stewards_admin_delete` | DELETE |
+
+  All other tenant-scoped policies already carried the row filter (`U:BT`). Storage policies (`0011` tenant assets, `0029` union docs) use a different path-based mechanism and are tracked in the Phase-6 storage review, not here.
+- **Corrective action.** `0041` uses `ALTER POLICY … USING (public.is_request_tenant_admin() AND tenant_id = public.get_request_tenant_id())` on all 7 (WITH CHECK clauses already carried the filter). Policy-only change; no data migration.
+- **Verification.**
+  - *Tests updated:* `01_members`, `02_negative_context`, `05_stewards_isolation` assert the corrected behaviour (A cannot read/update/delete/reassign B's rows). They FAIL on the 0001–0040 baseline and PASS with 0041 applied. `03_grievance` / `04_rpc` were already green.
+  - *Run status:* **pending live execution.** There is no database in the authoring environment, so the before/after run happens against a scratch/local (`supabase start`) or staging DB via `tests/tenant-isolation/run_isolation_tests.sh`. Record the before (baseline FAIL) and after (0041 PASS) results in `TENANT_SECURITY_VALIDATION.md` during the driven validation session. **The isolation gate is not "closed" until that run is recorded.**
+- **Enforced model (after 0041):** (1) authentication = who you are; (2) tenant context = which org; (3) RLS = which rows — a tenant admin can never reach another tenant's rows.
