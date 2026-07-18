@@ -90,8 +90,11 @@ jobs:
 ```
 Gate on it: **a failing isolation test blocks the merge and the release.** Run it on every migration change, DB change, PR, and release tag.
 
-## 6 · Rule for future developers (non-negotiable)
-> **Every new tenant-scoped table ships with an isolation test in `tests/tenant-isolation/`, and RLS read/update/delete policies MUST include `tenant_id = public.get_request_tenant_id()` in the USING clause — an admin/role check alone is not isolation.**
+## 6 · Architecture rule (non-negotiable)
+> **Tenant-scoped tables must never rely only on role checks.**
+> **Every tenant-scoped policy = role authorization + tenant row filtering.**
+>
+> Concretely: the `USING` clause (and `WITH CHECK` where applicable) MUST include `tenant_id = public.get_request_tenant_id()` **in addition to** any role check (`is_request_tenant_admin()` / `is_request_tenant_member()`). A role check alone is a per-*request* boolean — true for every row — and is **not** isolation. Every new tenant-scoped table also ships with an isolation test in `tests/tenant-isolation/`. *(This rule is also recorded in the repo-root `CLAUDE.md`.)*
 
 The 0008 finding above is the cautionary tale: a role check without a row-tenant filter reads as "admin-only" but silently permits cross-tenant access. Copy `01_members_isolation.sql`, prove SELECT/INSERT/UPDATE/DELETE are A-only, and wire it into the runner before merging.
 
