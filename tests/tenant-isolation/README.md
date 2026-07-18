@@ -39,6 +39,9 @@ Each test may also be pasted directly into the Supabase **SQL Editor** (its role
 | `03_grievance_isolation.sql` | Grievance/case confidentiality across tenants |
 | `04_rpc_inventory.sql` | All SECURITY DEFINER fns pin `search_path`; `lookup_member` tenant scope |
 | `05_stewards_isolation.sql` | Stewards cross-tenant delete (audit finding) |
+| `06_verifications_isolation.sql` | Verification records — cross-tenant read + no direct write |
+| `07_audit_log_isolation.sql` | Audit history — cross-tenant read + no forged inserts |
+| `08_dues_isolation.sql` | Dues/financial records — cross-tenant read/write denied |
 | `00_fixtures.sql` | Shared A/B fixtures (setup); runner drops `iso_test` after |
 | `../../supabase/tests/member_verify_isolation_test.sql` | Credentials / `lookup_member` RPC (anon verify path) |
 | `../../supabase/tests/steward_lookup_isolation_test.sql` | Steward RPC (`lookup_steward`) |

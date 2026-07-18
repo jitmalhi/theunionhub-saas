@@ -30,6 +30,10 @@ Setup/cleanup: `00_fixtures.sql` provides `iso_test.make_pair()` (Tenant A + B, 
 | **Writes** | cross-tenant INSERT / UPDATE(takeover) / DELETE | `02_negative_context.sql` |
 | **Grievances / cases** | admin-of-A cross-tenant read + insert into B's `grievance_cases` | `03_grievance_isolation.sql` |
 | **RPC (all DEFINER)** | every DEFINER fn pins `search_path`; `lookup_member` tenant-scoped | `04_rpc_inventory.sql` |
+| **Stewards** | admin-of-A cross-tenant delete (0041 finding) | `05_stewards_isolation.sql` |
+| **Verifications** | admin-of-A cross-tenant read + no direct write (0041) | `06_verifications_isolation.sql` |
+| **Audit log** | admin-of-A cross-tenant read + no forged inserts (0041) | `07_audit_log_isolation.sql` |
+| **Dues / financial** | admin-of-A cross-tenant read/write denied (0041) | `08_dues_isolation.sql` |
 | **Credentials** | anon `lookup_member` cross-tenant; direct read denied | `member_verify_isolation_test.sql` |
 | **Steward RPC** | `lookup_steward` tenant-scoped, public fields only | `steward_lookup_isolation_test.sql` |
 | **Documents (rows)** | member reads only `published`; cross-tenant denied | `document_pipeline_isolation_test.sql` |

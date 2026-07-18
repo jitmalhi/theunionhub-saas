@@ -50,8 +50,13 @@ DATABASE_URL='postgres://postgres:postgres@localhost:54322/postgres' \
 ```
 **Expected:** **all tests PASS.** Record in Table 6.1.
 
-## 5 · Coverage note — read before sign-off
-`0041` fixes `verifications_admin_read`, `dues_admin_read`, `audit_log_admin_read`, but the suite does **not yet have dedicated cross-tenant tests** for those three tables (they are fixed-by-code + covered by the shared pattern, but not independently observed). **Before flipping this banner to VALIDATED**, either (a) add `06_verifications_dues_audit_isolation.sql` following the `01_members` pattern so "verification isolation" and "audit isolation" are *observed*, or (b) record an explicit code-review sign-off for those three with the reviewer's name. Do not silently treat "fixed" as "verified."
+## 5 · Coverage note — RESOLVED
+Every table touched by `0041` now has **dedicated automated coverage**:
+- `06_verifications_isolation.sql` — verifications
+- `07_audit_log_isolation.sql` — audit_log
+- `08_dues_isolation.sql` — dues_collections *(exists in the active schema — 0004 + 0010 — so a test is present, not a documented absence)*
+
+There is no longer any "fixed-but-untested" table in the remediation set. All that remains is to **observe** the results by running the suite against a real database (§4).
 
 ## 6 · Observed results (PENDING — fill from the run)
 
@@ -63,6 +68,9 @@ DATABASE_URL='postgres://postgres:postgres@localhost:54322/postgres' \
 | `03_grievance_isolation` | PASS | ⬜ PENDING | PASS | ⬜ PENDING |
 | `04_rpc_inventory` | PASS | ⬜ PENDING | PASS | ⬜ PENDING |
 | `05_stewards_isolation` | FAIL | ⬜ PENDING | PASS | ⬜ PENDING |
+| `06_verifications_isolation` | FAIL | ⬜ PENDING | PASS | ⬜ PENDING |
+| `07_audit_log_isolation` | FAIL | ⬜ PENDING | PASS | ⬜ PENDING |
+| `08_dues_isolation` | FAIL | ⬜ PENDING | PASS | ⬜ PENDING |
 | `member_verify_isolation_test` | PASS | ⬜ PENDING | PASS | ⬜ PENDING |
 | `steward_lookup_isolation_test` | PASS | ⬜ PENDING | PASS | ⬜ PENDING |
 | `document_pipeline_isolation_test` | PASS | ⬜ PENDING | PASS | ⬜ PENDING |
@@ -78,9 +86,9 @@ DATABASE_URL='postgres://postgres:postgres@localhost:54322/postgres' \
 | Document isolation (rows) | `document_pipeline` | ⬜ PENDING |
 | Steward isolation | `05_stewards`, `steward_lookup` | ⬜ PENDING |
 | RPC security | `04_rpc_inventory` | ⬜ PENDING |
-| Verification isolation | ⚠ no dedicated test yet (see §5) | ⬜ PENDING |
-| Audit isolation | ⚠ no dedicated test yet (see §5) | ⬜ PENDING |
-| Dues isolation | ⚠ no dedicated test yet (see §5) | ⬜ PENDING |
+| Verification isolation | `06_verifications_isolation` | ⬜ PENDING |
+| Audit isolation | `07_audit_log_isolation` | ⬜ PENDING |
+| Dues isolation | `08_dues_isolation` | ⬜ PENDING |
 
 ## 7 · Sign-off (fill on completion)
 - Run by: ____________  · Date (UTC): ____________
