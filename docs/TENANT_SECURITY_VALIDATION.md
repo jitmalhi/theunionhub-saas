@@ -90,6 +90,30 @@ There is no longer any "fixed-but-untested" table in the remediation set. All th
 | Audit isolation | `07_audit_log_isolation` | ⬜ PENDING |
 | Dues isolation | `08_dues_isolation` | ⬜ PENDING |
 
+## 6.3 · Environment (fill from the run)
+- Database: ____________________  *(local supabase / scratch / staging — confirm **NOT** production)*
+- Postgres version: ____________  · Supabase CLI: ____________  · OS/runner: ____________
+- Suite commit SHA: ____________
+- Migration state: baseline = `0001–0040`, then remediated = `0001–0041`
+
+## 6.4 · Commands executed (paste EXACTLY what was run, with UTC timestamps)
+```text
+# [UTC ____-__-__ __:__] Step A — provision clean DB
+...
+# [UTC ____-__-__ __:__] Step B — BASELINE (0001–0040) run  → expect 01/02/05/06/07/08 FAIL
+...
+# [UTC ____-__-__ __:__] Step C — apply 0041, FIXED (0001–0041) run  → expect all PASS
+...
+```
+(Also attach/keep `validation-baseline.txt` and `validation-fixed.txt` from the `tee` output.)
+
+## 6.5 · Fixes required (if the run surfaced anything)
+If a test failed **after** `0041` (i.e. the fix was incomplete), or setup errors were hit:
+- **Issue:** ____________________
+- **Correction:** ____________________ *(migration / policy / test change)*
+- **Re-verification:** ____________________ *(command run + observed result)*
+- *(If nothing was required, state: "None — `0041` closed the gap; no post-fix failures.")*
+
 ## 7 · Sign-off (fill on completion)
 - Run by: ____________  · Date (UTC): ____________
 - Test DB: ____________ (confirm NOT production)
