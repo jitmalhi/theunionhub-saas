@@ -1,63 +1,67 @@
 # DEMO SCRIPT — The Union Hub
 
 **Phase 12** · 2026-07-16 · Branch `release/v0.1-production-hardening`
-**Audience:** a salesperson runs it; a union executive understands the value in **≤30 minutes**. Uses the Local 5000 demo tenant (`DEMO_ENVIRONMENT.md`).
-**Thesis (say it, then prove it):** *The Union Hub is the system of record for what your Local knows — so the experience that wins grievances survives every election, retirement, and turnover.* Lead with continuity, not features.
+**Audience:** a salesperson runs it; a union executive gets the value in **≤30 minutes**. Tenant: **Local 5000 · Cedarline Health Workers Union** (`DEMO_ENVIRONMENT.md`; data per `MOCKUP-RULES.md`).
+
+**Core message — say it at the start, prove it throughout, repeat it at the end:**
+> **The Union Hub preserves institutional knowledge, so a Local does not lose decades of experience when officers, stewards, and leadership change.**
+
+This demo shows the *existing* platform value. No feature is invented; anything not built is labelled roadmap or shown as sample.
 
 ---
 
 ## 0 · Before the demo (2 min, off-camera)
-- Run `./reset-demo.sh` → clean Local 5000 state.
-- Have three tabs ready, logged in: **Executive**, **Steward (E. Vance)**, **Member (Jordan Rivera)**.
-- Open on the **public site** (`local5000.demo…`) so they see the Local's own front door first.
-- **Framing line to open with:** "I'm going to show you three views — an officer's, a steward's, and a member's. Watch for one thing: nothing here depends on a particular person still being in the role."
+- `./reset-demo.sh` → clean Local 5000 state.
+- Three tabs logged in: **Executive (L. Marchetti)**, **Steward (C. Adeyemi)**, **Member (M. Thibault)**.
+- Open on the public site (`local5000.demo…`).
+- **Opening line:** "Cedarline Local 5000 has 15,000 members, 120 stewards, eight units, six employers — and turnover every election. Watch one thing today: *nothing you see depends on a particular person still being in the role.*"
 
-## 1 · Act I — Executive view (~10 min) · *"What the Local can see about itself"*
+## 1 · Act I — Executive (~9 min) · *what the Local can see about itself*
 Log in as **Executive**.
-1. **Local dashboard.** Membership overview (15,000 across 8 units, 5 employers), active issues, steward activity. **Say:** "This is the whole Local at a glance — and it's the same view for whoever's elected next."
-2. **Membership overview.** Filter by unit/employer. **Say:** "The roster is the Local's, not a spreadsheet on someone's laptop. It's here after they're gone."
-3. **Active issues + steward activity.** Show open grievances by stage, deadlines approaching, which stewards are carrying load. **Say:** "An incoming Executive inherits *this*, not a mystery."
-4. **The continuity moment.** Point to a closed historical grievance from years ago. **Say:** "The officer who won that has retired. The knowledge didn't leave with them."
+1. **Local dashboard** — membership across 8 units / 6 employers, active issues, steward activity. "This is the whole Local at a glance — and it's the same view for whoever's elected next."
+2. **Membership overview** — filter by unit/employer. "The roster belongs to the Local, not to a spreadsheet on someone's laptop. It's still here after they've gone."
+3. **Active issues + steward activity** — open grievances by stage, deadlines approaching, steward load. "An incoming Executive inherits *this*, not a mystery and a filing cabinet."
 
-*Value landed: organizational visibility that outlives any term.*
+*Value: organizational visibility that outlives any term.*
 
-## 2 · Act II — Steward view (~12 min) · *the heart of the demo*
-Log in as **Steward (E. Vance)**.
-1. **Assigned members / caseload.** Show coverage. **Say:** "A steward sees their people and their cases — and only theirs." *(quietly demonstrates tenant + role isolation.)*
-2. **Grievance workflow.** Open **Marcus Bennett — GRV-2026-0147** (attendance discipline). Walk the lifecycle `INTAKE → STEP_1 → STEP_2 → …`. Advance a stage. **Say:** "Every status change is logged, automatically, forever — an append-only case history."
-3. **Deadlines.** Show the auto-computed SLA clock and an approaching deadline with its notification. **Say:** "The contract's timelines are tracked by the system, not by memory. Missed steps are how good grievances die."
-4. **Documents.** Open the grievance's documents (forms, evidence) from the vault. **Say:** "Everything for this case lives with the case."
-5. **The 'how did we handle this last time?' moment — the money shot.** Search the CBA article at issue → the system surfaces **past grievances on the same article** (precedent) including older, closed cases. **Say:** "This is the institutional memory. A brand-new steward argues from everything the Local has ever learned — on day one."
-6. **Case history.** Show the full immutable trail on a case. **Say:** "If this ever goes to arbitration, the record is complete and tamper-evident."
+## 2 · Act II — Steward (~13 min) · *the heart of the demo*
+Log in as **Steward (C. Adeyemi)**.
+1. **Caseload / assigned members** — "A steward sees their people and their cases — only theirs." *(quietly shows tenant + role isolation.)*
+2. **Grievance workflow** — open **GRV-2026-0231** (M. Thibault, attendance discipline, Long-Term Care @ Northgate, Article 14). Walk `INTAKE → STEP_1 → STEP_2`; advance a stage. "Every status change is logged automatically, forever — an append-only case history."
+3. **Deadlines** — the auto-computed contract clock + an approaching deadline with its notification. "The contract's timelines are tracked by the system, not by memory. Missed steps are how good grievances die."
+4. **Documents** — the case's forms and evidence from the vault. "Everything for the case lives with the case."
+5. **The money shot — institutional memory.** From GRV-2026-0231, search **Article 14** → the system surfaces **GRV-2021-0088**, the same-article case the Local *won five years ago, under a previous Executive and a steward who has since retired.* "This is the whole point. A brand-new steward argues from everything the Local has ever learned — on day one. The experience didn't retire when the person did."
+6. **Case history / audit trail** — the immutable trail. "If this reaches arbitration, the record is complete and tamper-evident."
 
-*Value landed: the Local's hard-won experience is preserved, searchable, and usable by whoever holds the role next.*
+*Value: decades of hard-won experience, preserved and usable by whoever holds the role next.*
 
-## 3 · Act III — Member view (~5 min) · *"What the member gets"*
-Log in as **Member (Jordan Rivera)**.
-1. **Digital member credential.** Open the card on the phone. Show **verify** (Verified / Not valid / Not found) via QR. **Say:** "No app, no password. A rep verifies membership in seconds."
-2. **Profile.** Member's own info; privacy-modelled. **Say:** "Members see their own record — nobody else's."
-3. **Communications & resources.** Local updates, the collective agreement, contacts. **Say:** "The member's link to the Local — the CA, their steward, the latest."
+## 3 · Act III — Member (~5 min) · *what the member gets*
+Log in as **Member (M. Thibault)**.
+1. **Digital credential** — the card on the phone; **verify** (Verified / Not valid / Not found) by QR. "No app, no password. A rep verifies membership in seconds."
+2. **Profile** — the member's own record, privacy-modelled. "Members see their own record — nobody else's."
+3. **Communications & resources** — Local updates, the collective agreement, their steward. "The member's link to the Local."
 
-*Value landed: modern, frictionless membership on top of the same system of record.*
+*Value: modern, frictionless membership on top of the same system of record.*
 
-## 4 · The 30-minute close (1–2 min)
-One line, looking them in the eye: **"Everything you just saw survives your next election. The Union Hub keeps what the Local knows — the grievances, the precedent, the record — so the next Executive builds on your work instead of starting over."**
+## 4 · The close (~2 min)
+Restate the core message, looking them in the eye:
+> **"Everything you saw today survives your next election. The Union Hub keeps what the Local knows — the grievances, the precedent, the record — so the next officers and stewards build on decades of your experience instead of starting from zero."**
 
-Then the honest ask (the pilot motion from the strategy work): *"We'd set this up for one of your units, by hand, and you tell us if it earns its place."*
+Then the honest pilot ask: *"We'd set this up for one of your units, by hand, and you tell us whether it earns its place."*
 
-## 5 · What to emphasize / avoid
-- **Emphasize:** continuity across turnover; precedent search; deadlines never missed; data stays in Canada and belongs to the Local; isolation ("only your Local, only your role").
-- **Avoid / be honest about:** voting is shown as **sample historical records only** — do not imply a live ballot feature ships today; aggregate stats are **labelled demo assumptions**; anything on the roadmap is labelled roadmap. Union people spot overselling instantly — honesty is the differentiator.
+## 5 · Emphasize / avoid
+- **Emphasize:** continuity across turnover; precedent from years ago (GRV-2021-0088); deadlines never missed; data stays in Canada and belongs to the Local; isolation ("only your Local, only your role").
+- **Be honest about:** voting is shown as **sample historical records only** — not a live feature; aggregate stats are **labelled demo assumptions**; roadmap items are labelled roadmap. Union audiences spot overselling instantly — honesty is the differentiator.
 
 ## 6 · Timing
-| Act | Minutes | Anchor |
+| Act | Min | Anchor |
 |---|---|---|
-| Setup | 2 (pre) | reset + tabs |
-| Executive | 10 | visibility that outlives terms |
-| Steward | 12 | precedent + deadlines (the core) |
+| Setup (pre) | 2 | reset + tabs |
+| Executive | 9 | visibility that outlives terms |
+| Steward | 13 | **precedent + deadlines (the core)** |
 | Member | 5 | card + verify |
 | Close | 2 | continuity + pilot ask |
 | **Total** | **~29** | under 30 |
 
 ## 7 · Prerequisite (honest note)
-This script assumes migrations `0022–0040` are applied in the **demo** project and the grievance UI is wired (Phase 4/5). Until then, the Steward act runs on the demo dataset as it becomes available; the Executive and Member acts are demonstrable on the current build. Don't demo a capability that isn't live in the demo project — substitute the roadmap framing instead.
+The Steward act assumes migrations `0022–0040` are applied **in the demo project** and the grievance UI is wired (Phase 4/5). Until then, run the Executive and Member acts (demonstrable on the current build) and present the Steward capabilities with roadmap framing rather than demoing something not live in the demo project.
