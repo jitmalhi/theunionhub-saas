@@ -24,6 +24,8 @@ The confirmed cross-tenant gap (per `TENANT_ISOLATION_TESTING.md §4/§7`) is cl
 
 ## 4 · Procedure
 
+> **Automated option (recommended, secure):** run **`scripts/run-security-validation.sh`** on your machine. It reads `DATABASE_URL` + `PROJECT_REF` from the environment, refuses the production ref, verifies the DB is empty, runs baseline (`0001–0040`) → suite → `0041` → suite, and writes `validation-results/summary.md` — **credential-free**, ready to paste into §6. It never prints or stores the connection string. Then paste `summary.md` back to record it here. The manual steps below are the equivalent by hand.
+
 ### Step A — provision a clean test DB
 ```bash
 cd C:\X\steward-system
