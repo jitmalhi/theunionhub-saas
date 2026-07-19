@@ -1,68 +1,47 @@
-# DEMO & ENVIRONMENTS — The Union Hub
+# DEMO ENVIRONMENT — The Union Hub
 
-**Phase 12** · 2026-07-16 · Branch `release/v0.1-production-hardening`
-**Covers:** development, demo environment, the demo dataset, the reset process, test accounts, and the three role demonstrations. (Staging → `STAGING_ENVIRONMENT.md`; walkthrough → `DEMO_SCRIPT.md`.)
-**Single source of truth for all demo data** (union, members, employers, locations, agreements, grievances, documents): **`UX design/MOCKUP-RULES.md` → "Large enterprise demo tenant (Local 5000)".** This doc does not restate that data; it references it.
-**Hard rule:** demo/dev data is **physically separate** from production — its own Supabase project, its own keys. Nothing here can touch a real member.
+**Updated 2026-07-19 — architectural change:** the demo is now a **first-class tenant**, not a separate environment or mode. *(This supersedes the earlier "physically separate Supabase project" model.)*
+**Data source of truth:** `UX design/MOCKUP-RULES.md` → the demo tenant section.
 
 ---
 
-## 1 · The environment trio (recap + dev)
+## 1 · The decision
+The demo is **just another tenant** in the same database as every customer, isolated by the **same RLS** (the isolation validated in `TENANT_SECURITY_VALIDATION.md`). There is **no demo mode, no demo flag, no demo routing, no demo auth, no conditional logic.** The application cannot tell a demo tenant from a paying customer — **only the data differs.**
 
-| Env | Domain | Supabase project | Data | Who uses it |
-|---|---|---|---|---|
-| **Development** | `localhost` / `*.lvh.me:3000` | local (`supabase start`) or scratch | throwaway | developers |
-| **Staging** | `staging.theunionhub.ca` | separate | synthetic | pre-prod validation |
-| **Demo** | `demo.theunionhub.ca` (tenant `local5000`) | **separate** | fictional **Local 5000 · Cedarline** | sales, training |
-| Production | `theunionhub.ca` | prod | real | customers |
+## 2 · Why this is better
+- **Dogfoods real isolation.** The demo runs on the exact RLS that protects customers, so demoing *is* a live proof the boundary holds.
+- **No drift, no special paths.** Every feature is demonstrated exactly as a customer experiences it — nothing can work in "demo mode" but break for real tenants.
+- **Better testing.** The demo tenant is a permanent integration test of the real multi-tenant architecture.
+- **Simpler.** One code path, one auth model, one navigation.
 
-### Development environment
-- **Run locally, no cloud:** `npx --no-install supabase start` → apply `0001–0040` → seed → serve with `vercel dev` (serve, don't `file://`).
-- `*.lvh.me` resolves to 127.0.0.1, so subdomain→tenant routing works locally (`local5000.lvh.me:3000`).
-- Dev uses **local/scratch** keys only — never prod, never demo.
+## 3 · The demo tenant
+- **Slug:** `demo` *(confirmed NOT a reserved slug)* · **Subdomain:** `demo.theunionhub.ca` — resolves via the normal `subdomain → x-tenant-id → RLS` path, like any tenant.
+- **Display name:** **Demo – Local 79** *(fictional demonstration tenant — NOT CUPE Local 79; see `MOCKUP-RULES.md`. Structure only, no real data.)*
+- **Structure:** a large municipal / public-sector local — Executive Board, Chief Steward, Unit Stewards, multiple bargaining units / departments, grievances, arbitrations, a collective agreement, sample policies, sample members. Realistic in *shape*, entirely fictional in *content*.
 
-## 2 · Demo environment
+## 4 · No special code (architecture requirement)
+- The demo tenant uses the standard tenant resolution + RLS + auth. Nothing in `api/`, `lib/`, or the tenant templates branches on "is this the demo."
+- **Separate concern — the apex marketing showcase:** the public marketing page's "see the live card" (`/card?state=…`), the `.demo-bar` toolbar in `card.html`, and the demo-cast fallback in `lib/member-fetch.js` / `lib/live.js` exist to show a card *on the apex with no tenant*. That is **marketing chrome, not tenant-app code**, and it does not make any tenant special. **Optional follow-up:** repoint the marketing "live demo" links at the real demo tenant (`demo.theunionhub.ca`) and retire the fallback — tracked, not required for this change.
 
-**Requirements met:** completely isolated (own Supabase project + own Vercel/domain) · reset capability (§4) · realistic fictional data (Local 5000 · Cedarline, per MOCKUP-RULES) · multiple roles (§5).
+## 5 · Data (fictional only)
+Populated per `MOCKUP-RULES.md`. **No real member information. No confidential grievances. No real executive discussions.** Members shown as `Member #…` with fictional, varied names; fictional employers, grievances, meetings, documents. Obviously fictional, accurately shaped.
 
-**Provisioning (repeatable):** create Supabase `theunionhub-demo` (ca-central-1) → apply `0001–0040` → run the demo seed (§3/§4) → Vercel demo project → `demo.theunionhub.ca` → set demo Auth Site URL. Same steps as staging; different project + seed.
+## 6 · Reset
+Reset re-runs the **demo seed**, which is **scoped to the demo tenant only** — it deletes and reloads rows *where `tenant_id = <demo tenant id>`* and **never touches another tenant's rows**. (This is safe for exactly the reason the platform is safe: tenant isolation. The seed resolves the demo tenant by slug and filters every statement by that id.)
 
-## 3 · Demo data — Local 5000 · Cedarline Health Workers Union
+## 7 · Future customers
+When a real Local becomes a customer: **create a brand-new tenant** and import *their* real members, grievances, documents, collective agreements, and executive users. The **demo tenant is untouched** and keeps serving demonstrations. **There is never any migration from the demo tenant into a customer tenant.**
 
-**The canonical definition lives in `MOCKUP-RULES.md`.** In brief: a **distinct fictional union** — *Cedarline Health Workers Union (CHWU) · Local 5000*, Port Hadley (fictional), chartered 1961, **~15,000 members · 120 stewards · 8 units · 6 fictional employers**. Its own cast (President L. Marchetti; Chief Steward C. Adeyemi; anchor members M. Thibault, R. Castellanos) — **separate from Local 412's cast**.
+## 8 · Relationship to dev / staging
+- **Development** — local (`supabase start`) or scratch DB; throwaway.
+- **Staging** — a separate pre-prod project for rehearsing migrations (`STAGING_ENVIRONMENT.md`) — unchanged.
+- **Demo** — a **tenant in the same database as customers** (production), isolated by RLS. Safe because tenant isolation is enforced by the database (see `TENANT_ISOLATION_TESTING.md` / `TENANT_SECURITY_VALIDATION.md`) and because it holds only fictional data. There are no real customers yet, and the isolation gate governs go-live.
 
-The seed must populate enough **institutional-memory** content to make the demo land:
-- **Historical grievances across years and employers**, incl. the anchor precedent pair — **GRV-2026-0231** (open, Art. 14 attendance) and **GRV-2021-0088** (the same article, won under a *prior* Executive). This pair is the demo's core "how did we handle this last time?" moment.
-- **Two collective-agreement terms** (2023–2026 current, 2020–2023 prior) with `cba_articles` populated so precedent links resolve.
-- **Documents** (CA PDFs, bylaws, grievance form, H&S minutes, a sample arbitration decision) in the demo Storage bucket.
-- **Voting** as **sample historical records only** — never a live ballot (voting isn't built).
+## 9 · Test accounts (standard tenant auth — no demo auth)
+Sign in to `demo.theunionhub.ca/admin` with a magic link to a demo mailbox, exactly as any customer admin would. Suggested demo roles to provision (as normal tenant users/records, not special accounts): an Executive/officer admin, a Chief Steward, a member. Credentials kept in the demo project's private notes, never in the repo.
 
-**Binding honesty:** aggregate stats are labelled demo assumptions; privacy modelled (`Member #…`); dates consistent to mid-July 2026. See MOCKUP-RULES.
-
-## 4 · Demo reset system
-
-Repeatable, idempotent reset so the platform can be demoed and trained on again and again — `supabase/demo/` (demo-only, never applied to prod):
-- `demo_seed.sql` — truncates the demo tenant's tables (demo project only) and reloads Local 5000 exactly per MOCKUP-RULES: tenant, units, employers, bulk members (deterministically generated), stewards, historical grievances + history, both CA terms + articles, document metadata, sample voting records.
-- `demo_accounts.sql` — (re)creates the role test accounts (§5).
-- `reset-demo.sh` — **guarded** wrapper: aborts unless the target project ref is the demo project (and refuses if `SUPABASE_URL` resolves to prod), then runs the two scripts. The guard is what makes "never touch production" structural, not just policy. Reset is destructive **by design — to demo data only.**
-
-**Usage:** `./reset-demo.sh` before each session → clean, known Local 5000 state in seconds.
-
-## 5 · Test accounts (three roles + auditor preview)
-
-| Role | Account (demo) | Sees |
-|---|---|---|
-| **Executive** | `exec@local5000.demo` (L. Marchetti) | Local dashboard, membership overview, active issues, steward activity, org visibility |
-| **Steward** | `steward@local5000.demo` (C. Adeyemi) | Assigned members, grievance workflow, documents, deadlines, case history + precedent |
-| **Member** | `member@local5000.demo` (M. Thibault) | Digital credential, profile, communications, resources |
-| Read-only auditor | `auditor@local5000.demo` | Read-only org view (previews the Phase-6 role tier) |
-
-Demo Auth: magic-link to a shared demo inbox or pre-provisioned sessions. Credentials kept in the demo project's private notes, never in the repo.
-
-## 6 · Purpose (one line each)
-- **Dev:** break things safely. **Staging:** rehearse production (incl. the migration apply). **Demo:** show the value + train users, repeatably. **Production:** real locals — nothing above ever touches it.
-
-## 7 · v0.1 exit criteria (demo/env)
-- Demo Supabase project live, `0001–0040` applied there, Local 5000 seeded per MOCKUP-RULES.
-- `reset-demo.sh` works and is guarded against prod.
-- Three role accounts demonstrable end-to-end; `DEMO_SCRIPT.md` runnable in ≤30 min.
+## 10 · Deliverables status
+- [x] Architecture decision: demo = first-class tenant (this doc).
+- [ ] Demo tenant seed (`supabase/demo/`) — rich fictional "Demo – Local 79" data, scoped to the demo tenant.
+- [ ] `MOCKUP-RULES.md` updated to the "Demo – Local 79" tenant identity.
+- [ ] Confirm no demo-specific code paths remain in the tenant app (marketing showcase noted separately in §4).
