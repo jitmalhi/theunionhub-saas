@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Case · Admin · The Union Hub</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/admin/admin.css">
+
+<style>
+  .gate-state { text-align: center; padding: clamp(48px, 8vw, 96px) 0; max-width: 52ch; margin: 0 auto; }
+  .gate-state .spinner { width: 24px; height: 24px; margin: 0 auto 18px; border: 2px solid var(--hair); border-top-color: var(--accent-tenant, var(--forest)); border-radius: 999px; animation: uh-gate-spin .9s linear infinite; }
+  @keyframes uh-gate-spin { to { transform: rotate(360deg); } }
+  .gate-state h1 { font-family: var(--font-display); font-weight: var(--fw-bold); font-size: clamp(28px,3.4vw,38px); line-height: var(--lh-headline); letter-spacing: var(--ls-headline); color: var(--deep-forest); margin: 0 0 12px; }
+  .gate-state h1 em { font-style: italic; color: var(--accent-tenant, var(--forest)); }
+  .gate-state p { font-family: var(--font-body); font-size: 14.5px; line-height: var(--lh-snug); color: var(--ink-soft); margin: 0 0 24px; }
+  .gate-state .gate-msg { font-family: var(--font-mono); font-size: 11px; letter-spacing: var(--ls-eyebrow); text-transform: uppercase; color: var(--muted); margin: 0; }
+  .gate-actions { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+  .case-back { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--forest); text-decoration: none; }
+  .case-metagrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px 22px; border: var(--bw-hair) solid var(--hair); border-radius: var(--rad); background: var(--paper); padding: 18px 22px; margin: 6px 0 26px; }
+  .case-metagrid .k { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .case-metagrid .v { font-family: var(--font-body); font-size: 14px; color: var(--deep-forest); margin-top: 3px; }
+  @media (max-width: 720px) { .case-metagrid { grid-template-columns: 1fr 1fr; } }
+
+  .case-sec { margin-bottom: 28px; }
+  .case-sec h2 { font-family: var(--font-display); font-weight: var(--fw-semibold); font-size: 18px; color: var(--deep-forest); margin: 0 0 12px; }
+  .kcard { border: var(--bw-hair) solid var(--hair); border-radius: var(--rad); background: var(--paper); padding: 16px 18px; margin-bottom: 10px; }
+  .kcard .body { font-family: var(--font-body); font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
+  .kcard .lesson { margin-top: 8px; padding-top: 8px; border-top: var(--bw-hair) solid var(--hair); font-size: 13.5px; color: var(--ink); }
+  .kcard .lesson b { font-weight: 600; color: var(--deep-forest); }
+  .kcard .meta { font-family: var(--font-mono); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-top: 8px; }
+  .kcard.link { text-decoration: none; display: block; }
+  .kcard .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .kcard .caseno { font-family: var(--font-mono); font-size: 12.5px; color: var(--forest); font-weight: 500; }
+
+  /* timeline */
+  .tl { position: relative; }
+  .tl .it { display: flex; gap: 14px; padding: 4px 0 14px; }
+  .tl .rail { display: flex; flex-direction: column; align-items: center; }
+  .tl .rail .d { width: 10px; height: 10px; border-radius: 999px; background: var(--forest); margin-top: 4px; }
+  .tl .rail .ln { flex: 1; width: 1px; background: var(--hair); margin-top: 4px; }
+  .tl .it:last-child .rail .ln { display: none; }
+  .tl .c .t { font-family: var(--font-body); font-size: 14px; color: var(--deep-forest); }
+  .tl .c .t b { font-weight: 600; }
+  .tl .c .m { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .status-pill.st-intake { background: #FBF1DC; color: var(--warn); }
+  .status-pill.st-step_1, .status-pill.st-step_2, .status-pill.st-step_3 { background: var(--mint); color: var(--forest); }
+  .status-pill.st-arbitration { background: #EFE3C2; color: #8a6d16; }
+  .status-pill.st-closed { background: #ECEBE7; color: #5C5B57; }
+</style>
+</head>
+
+<body>
+
+<nav class="admin-nav" role="navigation" aria-label="Admin">
+  <div class="admin-nav-brand">
+    <span class="mark" aria-hidden="true" data-tenant-initial>·</span>
+    <div class="admin-nav-brand-stack">
+      <span class="admin-nav-tenant-name" data-tenant-name>—</span>
+      <span class="admin-nav-context">Admin</span>
+    </div>
+  </div>
+  <div class="admin-nav-meta">
+    <span class="admin-nav-email" data-admin-email>…</span>
+    <button class="admin-btn admin-btn-ghost" type="button" data-signout>Sign out</button>
+  </div>
+</nav>
+
+<nav class="admin-subnav" role="navigation" aria-label="Admin sections">
+  <a href="/admin">Dashboard</a>
+  <a href="/admin/members">Members</a>
+  <a href="/admin/grievances">Grievances</a>
+  <a href="/admin/knowledge">Knowledge</a>
+  <a href="/admin/intelligence">Intelligence</a>
+  <a href="/admin/team">Team</a>
+  <a href="/admin/audit">Audit</a>
+  <a href="/admin/site">Website</a>
+  <a href="/admin/settings">Settings</a>
+  <a href="/admin/access/dashboard" class="subnav-access">Access</a>
+</nav>
+
+<main class="admin-main">
+  <div data-gate>
+    <section class="gate-state" role="status" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <p class="gate-msg">Checking access…</p>
+    </section>
+  </div>
+
+  <div data-app hidden>
+    <a class="case-back" href="/admin/knowledge">← Knowledge</a>
+    <header class="admin-page-head" style="margin-top:8px;">
+      <div class="admin-page-head-row">
+        <div>
+          <span class="admin-eyebrow"><span data-tenant-name>—</span> · Casework</span>
+          <h1 class="admin-page-title" data-case-title>Case.</h1>
+          <p class="admin-page-meta" data-case-sub>Loading…</p>
+        </div>
+        <div class="admin-page-head-actions" data-status-slot></div>
+      </div>
+    </header>
+
+    <div data-case-body>
+      <p class="admin-page-meta">Loading case…</p>
+    </div>
+  </div>
+</main>
+
+<footer class="admin-foot">
+  <span>The Union Hub · Admin</span>
+  <span>Signed in as <span data-admin-email-foot>…</span></span>
+</footer>
+
+<script type="module">
+  import { requireAuth, watchAuth, signOut } from '/lib/auth-guard.js';
+  import { getTenant, applyTenantTheme } from '/lib/tenant.js';
+  import { verifyTenantAdmin, getCase, getCaseHistory, getCasePrecedents, getRelatedCases } from '/lib/admin-knowledge.js';
+
+  const gate = document.querySelector('[data-gate]');
+  const app  = document.querySelector('[data-app]');
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const showGate = (html) => { app.hidden = true; gate.hidden = false; gate.innerHTML = html; };
+  const showApp  = () => { gate.hidden = true; app.hidden = false; };
+  const statusSlug = (s) => 'st-' + String(s || '').toLowerCase();
+  const fmtDate = (iso) => { if (!iso) return '—'; const d = new Date(iso); return isNaN(d) ? '—' : d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }); };
+  const fmtDateTime = (iso) => { if (!iso) return '—'; const d = new Date(iso); return isNaN(d) ? '—' : d.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); };
+
+  const gateDenied = (email) => `
+    <section class="gate-state" role="alert"><h1>Access <em>denied</em>.</h1>
+      <p>Your account (${esc(email)}) isn't an administrator of this union.</p>
+      <div class="gate-actions"><a class="admin-btn admin-btn-primary" href="/admin">Back to dashboard</a>
+      <button class="admin-btn admin-btn-ghost" type="button" data-signout-2>Sign out</button></div></section>`;
+  const gateWrongAddress = () => `<section class="gate-state" role="alert"><h1>Wrong <em>address</em>.</h1><p>Open the admin console from your union's web address.</p><div class="gate-actions"><a class="admin-btn admin-btn-ghost" href="/admin">Admin home</a></div></section>`;
+  const gateError = () => `<section class="gate-state" role="alert"><h1>Something went <em>wrong</em>.</h1><p>We couldn't verify your access right now.</p><div class="gate-actions"><button class="admin-btn admin-btn-ghost" type="button" data-reload>Refresh</button></div></section>`;
+
+  (async () => {
+    const session = await requireAuth();
+    if (!session) return;
+    const email = session.user?.email || '—';
+    document.querySelector('[data-admin-email]').textContent = email;
+    document.querySelector('[data-admin-email-foot]').textContent = email;
+    watchAuth();
+    document.querySelector('[data-signout]')?.addEventListener('click', signOut);
+
+    let tenant = null;
+    try { tenant = await getTenant(); } catch (e) { console.warn('[uh/admin/case] tenant resolve failed:', e?.message); }
+    if (!tenant) { showGate(gateWrongAddress()); return; }
+    applyTenantTheme(tenant);
+    document.querySelector('[data-tenant-initial]').textContent = (tenant.slug || '·').charAt(0).toUpperCase();
+
+    try {
+      await verifyTenantAdmin();
+    } catch (err) {
+      const code = err?.message || '';
+      if (code === 'not_authenticated') { location.replace('/admin/signin'); return; }
+      if (code === 'no_tenant_context') { showGate(gateWrongAddress()); return; }
+      if (code === 'not_tenant_admin')  { showGate(gateDenied(email)); gate.querySelector('[data-signout-2]')?.addEventListener('click', signOut); return; }
+      console.error('[uh/admin/case] admin check failed:', err);
+      showGate(gateError());
+      gate.querySelector('[data-reload]')?.addEventListener('click', () => location.reload());
+      return;
+    }
+
+    showApp();
+    await loadCase();
+  })();
+
+  async function loadCase() {
+    const id = new URLSearchParams(location.search).get('id');
+    const body = document.querySelector('[data-case-body]');
+    if (!id) { renderMissing('No case selected.'); return; }
+    try {
+      const c = await getCase(id);
+      if (!c) { renderMissing('That case could not be found (or isn\'t part of this Local).'); return; }
+      const [history, precedents, related] = await Promise.all([
+        getCaseHistory(id).catch(() => []),
+        getCasePrecedents(id).catch(() => []),
+        getRelatedCases(c.contract_article, id).catch(() => []),
+      ]);
+      render(c, history, precedents, related);
+    } catch (err) {
+      console.error('[uh/admin/case] load failed:', err);
+      renderMissing('Couldn\'t load this case right now. Refresh to try again.');
+    }
+  }
+
+  function renderMissing(msg) {
+    document.querySelector('[data-case-title]').textContent = 'Case.';
+    document.querySelector('[data-case-sub]').textContent = '';
+    document.querySelector('[data-case-body]').innerHTML = `<p class="admin-page-meta">${esc(msg)}</p>`;
+  }
+
+  function render(c, history, precedents, related) {
+    const name = c.member?.full_name || '—';
+    document.querySelector('[data-case-title]').textContent = c.case_number || 'Case';
+    document.querySelector('[data-case-sub]').textContent = `${c.contract_article || 'Grievance'} · ${name}`;
+    document.querySelector('[data-status-slot]').innerHTML =
+      `<span class="status-pill ${statusSlug(c.current_status)}"><span class="dot" aria-hidden="true"></span>${esc(c.current_status || '—')}</span>`;
+
+    let html = '';
+
+    // meta
+    html += `<div class="case-metagrid">
+      <div><div class="k">Grievor</div><div class="v">${esc(name)}</div></div>
+      <div><div class="k">Article</div><div class="v">${esc(c.contract_article || '—')}</div></div>
+      <div><div class="k">Incident</div><div class="v">${fmtDate(c.date_incident)}</div></div>
+      <div><div class="k">Filed</div><div class="v">${fmtDate(c.date_filed)}</div></div>
+    </div>`;
+
+    // statement
+    if (c.description) {
+      html += `<section class="case-sec"><h2>Statement</h2><div class="kcard"><div class="body">${esc(c.description)}</div></div></section>`;
+    }
+
+    // timeline
+    if (history.length) {
+      html += `<section class="case-sec"><h2>Step history</h2><div class="tl">` + history.map((h) => `
+        <div class="it"><div class="rail"><span class="d"></span><span class="ln"></span></div>
+          <div class="c"><div class="t"><b>${esc(h.from_status || '—')}</b> → <b>${esc(h.to_status || '—')}</b></div>
+            <div class="m">${fmtDateTime(h.changed_at)}${h.notes ? ' · ' + esc(h.notes) : ''}</div></div></div>`).join('') + `</div></section>`;
+    }
+
+    // precedents
+    if (precedents.length) {
+      html += `<section class="case-sec"><h2>Precedent — how this resolved</h2>` + precedents.map((p) => {
+        const art = p.article ? `${esc(p.article.article_number)} — ${esc(p.article.title)}` : '';
+        return `<div class="kcard"><div class="body">${esc(p.resolution_summary || '')}</div>
+          ${p.lessons_learned ? `<div class="lesson"><b>Lesson:</b> ${esc(p.lessons_learned)}</div>` : ''}
+          ${art ? `<div class="meta">${art}</div>` : ''}</div>`;
+      }).join('') + `</section>`;
+    }
+
+    // related cases on the same article — the institutional memory
+    if (related.length) {
+      html += `<section class="case-sec"><h2>Related cases on ${esc(c.contract_article || 'this article')}</h2>` + related.map((r) => {
+        const rn = r.member?.full_name || '—';
+        return `<a class="kcard link" href="/admin/grievance-case?id=${encodeURIComponent(r.id)}">
+          <div class="top"><span class="caseno">${esc(r.case_number || '—')}</span>
+            <span class="status-pill ${statusSlug(r.current_status)}"><span class="dot" aria-hidden="true"></span>${esc(r.current_status || '—')}</span></div>
+          <div class="body">${esc(r.description || '')}</div>
+          <div class="meta">${esc(rn)} · filed ${fmtDate(r.date_filed)}</div></a>`;
+      }).join('') + `</section>`;
+    }
+
+    // search this theme
+    if (c.contract_article) {
+      html += `<p class="admin-page-meta"><a class="case-back" href="/admin/knowledge?q=${encodeURIComponent(c.contract_article)}">Search “${esc(c.contract_article)}” across the knowledge base →</a></p>`;
+    }
+
+    document.querySelector('[data-case-body]').innerHTML = html;
+  }
+</script>
+
+</body>
+</html>

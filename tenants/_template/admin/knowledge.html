@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Knowledge · Admin · The Union Hub</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0F6E56">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/tenants/_template/tenant.css">
+<link rel="stylesheet" href="/tenants/_template/admin/admin.css">
+
+<style>
+  /* Page-scoped only — everything else reuses admin.css. */
+  .gate-state { text-align: center; padding: clamp(48px, 8vw, 96px) 0; max-width: 52ch; margin: 0 auto; }
+  .gate-state .spinner { width: 24px; height: 24px; margin: 0 auto 18px; border: 2px solid var(--hair); border-top-color: var(--accent-tenant, var(--forest)); border-radius: 999px; animation: uh-gate-spin .9s linear infinite; }
+  @keyframes uh-gate-spin { to { transform: rotate(360deg); } }
+  .gate-state h1 { font-family: var(--font-display); font-weight: var(--fw-bold); font-size: clamp(28px,3.4vw,38px); line-height: var(--lh-headline); letter-spacing: var(--ls-headline); color: var(--deep-forest); margin: 0 0 12px; }
+  .gate-state h1 em { font-style: italic; color: var(--accent-tenant, var(--forest)); }
+  .gate-state p { font-family: var(--font-body); font-size: 14.5px; line-height: var(--lh-snug); color: var(--ink-soft); margin: 0 0 24px; }
+  .gate-state .gate-msg { font-family: var(--font-mono); font-size: 11px; letter-spacing: var(--ls-eyebrow); text-transform: uppercase; color: var(--muted); margin: 0; }
+  .gate-actions { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+  /* search surface */
+  .ks-search { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 4px 0 14px; }
+  .ks-input { flex: 1; min-width: 220px; font-family: var(--font-body); font-size: 15px; padding: 12px 14px; border: var(--bw-hair) solid var(--hair); border-radius: var(--rad); background: var(--paper); color: var(--ink); }
+  .ks-input:focus { outline: 2px solid var(--forest); outline-offset: 1px; border-color: var(--forest); }
+  .ks-themes { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 26px; }
+  .ks-theme { font-family: var(--font-body); font-size: 13px; border: var(--bw-hair) solid var(--hair); background: var(--paper); color: var(--forest); border-radius: 999px; padding: 7px 14px; cursor: pointer; }
+  .ks-theme:hover { background: var(--mint); }
+
+  .ks-hint { font-family: var(--font-body); font-size: 14px; color: var(--muted); }
+  .ks-group { margin-bottom: 30px; }
+  .ks-group-h { display: flex; align-items: baseline; gap: 10px; margin: 0 0 12px; }
+  .ks-group-h h2 { font-family: var(--font-display); font-weight: var(--fw-semibold); font-size: 18px; color: var(--deep-forest); margin: 0; }
+  .ks-group-h .n { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+
+  .ks-card { border: var(--bw-hair) solid var(--hair); border-radius: var(--rad); background: var(--paper); padding: 16px 18px; margin-bottom: 10px; }
+  .ks-card a.ks-caselink { text-decoration: none; }
+  .ks-card .ks-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .ks-card .ks-caseno { font-family: var(--font-mono); font-size: 12.5px; color: var(--forest); font-weight: 500; }
+  .ks-card .ks-body { font-family: var(--font-body); font-size: 14px; color: var(--ink-soft); line-height: 1.55; }
+  .ks-card .ks-meta { font-family: var(--font-mono); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-top: 8px; }
+  .ks-card .ks-lesson { margin-top: 8px; padding-top: 8px; border-top: var(--bw-hair) solid var(--hair); font-size: 13.5px; color: var(--ink); }
+  .ks-card .ks-lesson b { font-weight: 600; color: var(--deep-forest); }
+
+  /* grievance-case status pills (INTAKE…CLOSED) */
+  .status-pill.st-intake      { background: #FBF1DC; color: var(--warn); }
+  .status-pill.st-step_1,
+  .status-pill.st-step_2,
+  .status-pill.st-step_3      { background: var(--mint); color: var(--forest); }
+  .status-pill.st-arbitration { background: #EFE3C2; color: #8a6d16; }
+  .status-pill.st-closed      { background: #ECEBE7; color: #5C5B57; }
+</style>
+</head>
+
+<body>
+
+<nav class="admin-nav" role="navigation" aria-label="Admin">
+  <div class="admin-nav-brand">
+    <span class="mark" aria-hidden="true" data-tenant-initial>·</span>
+    <div class="admin-nav-brand-stack">
+      <span class="admin-nav-tenant-name" data-tenant-name>—</span>
+      <span class="admin-nav-context">Admin</span>
+    </div>
+  </div>
+  <div class="admin-nav-meta">
+    <span class="admin-nav-email" data-admin-email>…</span>
+    <button class="admin-btn admin-btn-ghost" type="button" data-signout>Sign out</button>
+  </div>
+</nav>
+
+<nav class="admin-subnav" role="navigation" aria-label="Admin sections">
+  <a href="/admin">Dashboard</a>
+  <a href="/admin/members">Members</a>
+  <a href="/admin/grievances">Grievances</a>
+  <a href="/admin/knowledge" aria-current="page">Knowledge</a>
+  <a href="/admin/intelligence">Intelligence</a>
+  <a href="/admin/team">Team</a>
+  <a href="/admin/audit">Audit</a>
+  <a href="/admin/site">Website</a>
+  <a href="/admin/settings">Settings</a>
+  <a href="/admin/access/dashboard" class="subnav-access">Access</a>
+</nav>
+
+<main class="admin-main">
+  <div data-gate>
+    <section class="gate-state" role="status" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <p class="gate-msg">Checking access…</p>
+    </section>
+  </div>
+
+  <div data-app hidden>
+    <header class="admin-page-head">
+      <div class="admin-page-head-row">
+        <div>
+          <span class="admin-eyebrow"><span data-tenant-name>—</span> · Institutional knowledge</span>
+          <h1 class="admin-page-title">What the Local knows.</h1>
+          <p class="admin-page-meta">Search decades of casework — past grievances, how they resolved, the precedent, and stewards' notes — so nothing is lost when people move on.</p>
+        </div>
+      </div>
+    </header>
+
+    <div class="ks-search">
+      <input class="ks-input" type="search" data-q placeholder="Search a topic — Attendance, Accommodation, Vacation, Discipline…" autocomplete="off" aria-label="Search institutional knowledge">
+      <button class="admin-btn admin-btn-primary" type="button" data-search>Search</button>
+    </div>
+    <div class="ks-themes" data-themes aria-label="Common topics"></div>
+
+    <div data-results>
+      <p class="ks-hint">Type a topic and press Search — or pick one above. Every result is drawn from this Local's own records.</p>
+    </div>
+  </div>
+</main>
+
+<footer class="admin-foot">
+  <span>The Union Hub · Admin</span>
+  <span>Signed in as <span data-admin-email-foot>…</span></span>
+</footer>
+
+<script type="module">
+  import { requireAuth, watchAuth, signOut } from '/lib/auth-guard.js';
+  import { getTenant, applyTenantTheme } from '/lib/tenant.js';
+  import { verifyTenantAdmin, searchKnowledge, KNOWLEDGE_THEMES } from '/lib/admin-knowledge.js';
+
+  const gate = document.querySelector('[data-gate]');
+  const app  = document.querySelector('[data-app]');
+  const results = () => document.querySelector('[data-results]');
+
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const showGate = (html) => { app.hidden = true; gate.hidden = false; gate.innerHTML = html; };
+  const showApp  = () => { gate.hidden = true; app.hidden = false; };
+
+  const gateDenied = (email) => `
+    <section class="gate-state" role="alert">
+      <h1>Access <em>denied</em>.</h1>
+      <p>Your account (${esc(email)}) isn't an administrator of this union. The knowledge base is restricted to verified tenant admins.</p>
+      <div class="gate-actions">
+        <a class="admin-btn admin-btn-primary" href="/admin">Back to dashboard</a>
+        <button class="admin-btn admin-btn-ghost" type="button" data-signout-2>Sign out</button>
+      </div>
+    </section>`;
+  const gateWrongAddress = () => `
+    <section class="gate-state" role="alert"><h1>Wrong <em>address</em>.</h1>
+      <p>Open the admin console from your union's web address.</p>
+      <div class="gate-actions"><a class="admin-btn admin-btn-ghost" href="/admin">Admin home</a></div></section>`;
+  const gateError = () => `
+    <section class="gate-state" role="alert"><h1>Something went <em>wrong</em>.</h1>
+      <p>We couldn't verify your access right now. Refresh to try again.</p>
+      <div class="gate-actions"><button class="admin-btn admin-btn-ghost" type="button" data-reload>Refresh</button></div></section>`;
+
+  (async () => {
+    const session = await requireAuth();
+    if (!session) return;
+    const email = session.user?.email || '—';
+    document.querySelector('[data-admin-email]').textContent = email;
+    document.querySelector('[data-admin-email-foot]').textContent = email;
+    watchAuth();
+    document.querySelector('[data-signout]')?.addEventListener('click', signOut);
+
+    let tenant = null;
+    try { tenant = await getTenant(); } catch (e) { console.warn('[uh/admin/knowledge] tenant resolve failed:', e?.message); }
+    if (!tenant) { showGate(gateWrongAddress()); return; }
+    applyTenantTheme(tenant);
+    document.querySelector('[data-tenant-initial]').textContent = (tenant.slug || '·').charAt(0).toUpperCase();
+
+    try {
+      await verifyTenantAdmin();
+    } catch (err) {
+      const code = err?.message || '';
+      if (code === 'not_authenticated') { location.replace('/admin/signin'); return; }
+      if (code === 'no_tenant_context') { showGate(gateWrongAddress()); return; }
+      if (code === 'not_tenant_admin')  { showGate(gateDenied(email)); gate.querySelector('[data-signout-2]')?.addEventListener('click', signOut); return; }
+      console.error('[uh/admin/knowledge] admin check failed:', err);
+      showGate(gateError());
+      gate.querySelector('[data-reload]')?.addEventListener('click', () => location.reload());
+      return;
+    }
+
+    showApp();
+    wireApp();
+
+    // Deep-link: /admin/knowledge?q=Attendance runs the search on load.
+    const q0 = new URLSearchParams(location.search).get('q');
+    if (q0) { document.querySelector('[data-q]').value = q0; runSearch(q0); }
+  })();
+
+  function wireApp() {
+    const themesEl = document.querySelector('[data-themes]');
+    themesEl.innerHTML = KNOWLEDGE_THEMES.map((t) => `<button class="ks-theme" type="button" data-theme="${esc(t)}">${esc(t)}</button>`).join('');
+    themesEl.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-theme]'); if (!b) return;
+      const t = b.getAttribute('data-theme');
+      document.querySelector('[data-q]').value = t;
+      runSearch(t);
+    });
+    document.querySelector('[data-search]').addEventListener('click', () => runSearch(document.querySelector('[data-q]').value));
+    document.querySelector('[data-q]').addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(e.currentTarget.value); });
+  }
+
+  function statusSlug(s) { return 'st-' + String(s || '').toLowerCase(); }
+  function fmtDate(iso) { if (!iso) return '—'; const d = new Date(iso); return isNaN(d) ? '—' : d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }); }
+
+  async function runSearch(q) {
+    const term = (q || '').trim();
+    const box = results();
+    if (!term) { box.innerHTML = `<p class="ks-hint">Type a topic and press Search.</p>`; return; }
+    box.innerHTML = `<p class="ks-hint">Searching “${esc(term)}” across the Local's records…</p>`;
+    try {
+      const { cases, precedents, notes, articles } = await searchKnowledge(term);
+      render(term, cases, precedents, notes, articles);
+    } catch (err) {
+      console.error('[uh/admin/knowledge] search failed:', err);
+      box.innerHTML = `<p class="ks-hint">Couldn't run that search right now. Refresh and try again.</p>`;
+    }
+  }
+
+  function caseCard(c) {
+    const name = c.member?.full_name || '—';
+    return `<div class="ks-card"><a class="ks-caselink" href="/admin/grievance-case?id=${encodeURIComponent(c.id)}">
+        <div class="ks-top"><span class="ks-caseno">${esc(c.case_number || '—')}</span>
+          <span class="status-pill ${statusSlug(c.current_status)}"><span class="dot" aria-hidden="true"></span>${esc(c.current_status || '—')}</span></div>
+        <div class="ks-body">${esc(c.description || '')}</div>
+        <div class="ks-meta">${esc(c.contract_article || '')} · ${esc(name)} · filed ${fmtDate(c.date_filed)}</div>
+      </a></div>`;
+  }
+  function precedentCard(p) {
+    const art = p.article ? `${esc(p.article.article_number)} — ${esc(p.article.title)}` : '';
+    return `<div class="ks-card">
+        <div class="ks-body">${esc(p.resolution_summary || '')}</div>
+        ${p.lessons_learned ? `<div class="ks-lesson"><b>Lesson:</b> ${esc(p.lessons_learned)}</div>` : ''}
+        <div class="ks-meta">${art}</div>
+      </div>`;
+  }
+  function noteCard(n) {
+    return `<div class="ks-card">
+        <div class="ks-top"><span class="ks-caseno">${esc(n.title || 'Untitled note')}</span>
+          ${n.issue_type ? `<span class="ks-meta" style="margin:0">${esc(n.issue_type)}</span>` : ''}</div>
+        <div class="ks-body">${esc(n.current_state || '')}</div>
+        ${n.handoff_notes ? `<div class="ks-lesson"><b>Handoff:</b> ${esc(n.handoff_notes)}</div>` : ''}
+      </div>`;
+  }
+  function articleCard(a) {
+    return `<div class="ks-card">
+        <div class="ks-top"><span class="ks-caseno">${esc(a.article_number)}</span></div>
+        <div class="ks-body"><b>${esc(a.title)}</b>${a.body ? ` — ${esc(a.body)}` : ''}</div>
+      </div>`;
+  }
+
+  function group(title, n, inner) {
+    return `<section class="ks-group"><div class="ks-group-h"><h2>${title}</h2><span class="n">${n}</span></div>${inner}</section>`;
+  }
+
+  function render(term, cases, precedents, notes, articles) {
+    const total = cases.length + precedents.length + notes.length + articles.length;
+    const box = results();
+    if (!total) {
+      box.innerHTML = `<p class="ks-hint">No records mention “${esc(term)}” yet. As casework accrues, searches like this fill in.</p>`;
+      return;
+    }
+    let html = `<p class="ks-hint" style="margin-bottom:20px;">${total} record${total === 1 ? '' : 's'} for “${esc(term)}” — drawn entirely from this Local's history.</p>`;
+    if (cases.length)      html += group('Past grievances', cases.length,        cases.map(caseCard).join(''));
+    if (precedents.length) html += group('How we resolved it (precedent)', precedents.length, precedents.map(precedentCard).join(''));
+    if (notes.length)      html += group('Steward knowledge', notes.length,      notes.map(noteCard).join(''));
+    if (articles.length)   html += group('Collective agreement', articles.length, articles.map(articleCard).join(''));
+    box.innerHTML = html;
+  }
+</script>
+
+</body>
+</html>
